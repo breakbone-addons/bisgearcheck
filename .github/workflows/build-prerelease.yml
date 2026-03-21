@@ -1,4 +1,4 @@
-name: Build Release
+name: Build Pre-Release
 
 on:
   workflow_dispatch:
@@ -21,32 +21,36 @@ jobs:
 
       - name: Rename zip and fix timestamps
         run: |
-          # Rename packager output to clean name
+          ZIPNAME="BISGearCheck-Build-${{ github.run_number }}.zip"
+
+          # Rename packager output to clean name with build number
           for f in .release/*.zip; do
-            mv "$f" .release/BISGearCheck.zip
+            mv "$f" ".release/$ZIPNAME"
             break
           done
 
-          # Fix file timestamps inside the zip to local-friendly times
-          # Repack with current runner time (UTC) normalized to avoid future-dated files
+          # Fix file timestamps inside the zip to avoid future-dated files
           cd .release
           mkdir -p _tmp
           cd _tmp
-          unzip -o ../BISGearCheck.zip
+          unzip -o "../$ZIPNAME"
           find . -exec touch -t "$(date +%Y%m%d%H%M.%S)" {} +
-          zip -r ../BISGearCheck.zip .
+          zip -r "../$ZIPNAME" .
           cd ..
           rm -rf _tmp
 
-      - name: Create GitHub Release
+      - name: Create GitHub Pre-Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: build-${{ github.run_number }}
-          name: BISGearCheck Build #${{ github.run_number }}
+          tag_name: pre-${{ github.run_number }}
+          name: BISGearCheck Pre-Release #${{ github.run_number }}
+          prerelease: true
           body: |
-            ## Download
+            ## Pre-Release Build
 
-            Download **BISGearCheck.zip** below. Do not download the "Source code" archives.
+            This is a development build for testing. For the latest stable version, see the [Latest Release](https://github.com/${{ github.repository }}/releases/latest).
+
+            Download **BISGearCheck-Build-${{ github.run_number }}.zip** below. Do not download the "Source code" archives.
 
             Extract the `BISGearCheck` folder into your WoW AddOns directory:
             ```
@@ -54,8 +58,8 @@ jobs:
             ```
 
             Built from `${{ github.ref_name }}` at ${{ github.sha }}.
-          files: .release/BISGearCheck.zip
+          files: .release/BISGearCheck-Build-${{ github.run_number }}.zip
           fail_on_unmatched_files: true
-          make_latest: true
+          make_latest: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
