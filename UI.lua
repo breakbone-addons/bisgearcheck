@@ -113,29 +113,63 @@ function BISGearCheck:CreateUI()
     end
 
     -- ============================================================
-    -- BUTTONS: Compare + Wishlist (only the opposite mode button shows)
+    -- TABS: Compare + Wishlist
     -- ============================================================
 
-    local btnWidth = 70
-    local btnY = -30
+    local TAB_WIDTH = 80
+    local TAB_HEIGHT = 24
 
-    local compBtn = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
-    compBtn:SetSize(btnWidth, 22)
-    compBtn:SetPoint("TOPRIGHT", f, "TOPRIGHT", -10, btnY)
-    compBtn:SetText("Compare")
-    compBtn:SetScript("OnClick", function()
+    local function CreateTab(parent, text, index)
+        local tab = CreateFrame("Button", "BISGearCheckTab" .. index, parent)
+        tab:SetSize(TAB_WIDTH, TAB_HEIGHT)
+
+        local bg = tab:CreateTexture(nil, "BACKGROUND")
+        bg:SetAllPoints()
+        tab.bg = bg
+
+        local label = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        label:SetPoint("CENTER", 0, 0)
+        label:SetText(text)
+        tab.label = label
+
+        return tab
+    end
+
+    local compTab = CreateTab(f, "Compare", 1)
+    compTab:SetPoint("BOTTOMLEFT", f.TitleBg, "BOTTOMLEFT", 5, -TAB_HEIGHT)
+
+    local wlTab = CreateTab(f, "Wishlist", 2)
+    wlTab:SetPoint("LEFT", compTab, "RIGHT", 2, 0)
+
+    local function UpdateTabAppearance()
+        if BISGearCheck.viewMode == "comparison" then
+            compTab.bg:SetColorTexture(0.15, 0.15, 0.15, 1)
+            compTab.label:SetTextColor(1, 0.82, 0)
+            wlTab.bg:SetColorTexture(0.05, 0.05, 0.05, 0.8)
+            wlTab.label:SetTextColor(0.5, 0.5, 0.5)
+        else
+            wlTab.bg:SetColorTexture(0.15, 0.15, 0.15, 1)
+            wlTab.label:SetTextColor(1, 0.82, 0)
+            compTab.bg:SetColorTexture(0.05, 0.05, 0.05, 0.8)
+            compTab.label:SetTextColor(0.5, 0.5, 0.5)
+        end
+    end
+
+    compTab:SetScript("OnClick", function()
         BISGearCheck.viewMode = "comparison"
+        UpdateTabAppearance()
         BISGearCheck:Refresh()
     end)
 
-    local wlBtn = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
-    wlBtn:SetSize(btnWidth, 22)
-    wlBtn:SetPoint("TOPRIGHT", f, "TOPRIGHT", -10, btnY)
-    wlBtn:SetText("Wishlist")
-    wlBtn:SetScript("OnClick", function()
+    wlTab:SetScript("OnClick", function()
         BISGearCheck.viewMode = "wishlist"
+        UpdateTabAppearance()
         BISGearCheck:RefreshView()
     end)
+
+    f.compTab = compTab
+    f.wlTab = wlTab
+    f.UpdateTabAppearance = UpdateTabAppearance
 
     -- ============================================================
     -- Collapse All / Expand All links
@@ -274,8 +308,6 @@ function BISGearCheck:CreateUI()
     f.scrollChild = scrollChild
     f.sourceDropdown = sourceDropdown
     f.specDropdown = specDropdown
-    f.compBtn = compBtn
-    f.wlBtn = wlBtn
 
     self.mainFrame = f
 end
@@ -303,10 +335,9 @@ function BISGearCheck:RenderResults()
     if not f then return end
 
     f.filterBar:Hide()
-    f.compBtn:Hide()
-    f.wlBtn:Show()
     f.collapseAllBtn:Show()
     f.expandAllBtn:Show()
+    f.UpdateTabAppearance()
     f.scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", CONTENT_PADDING, -68)
 
     local scrollChild = f.scrollChild
@@ -530,10 +561,9 @@ function BISGearCheck:RenderWishlist()
     if not f then return end
 
     f.filterBar:Show()
-    f.wlBtn:Hide()
-    f.compBtn:Show()
     f.collapseAllBtn:Hide()
     f.expandAllBtn:Hide()
+    f.UpdateTabAppearance()
     f.scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", CONTENT_PADDING, -82)
 
     if self.wishlistZoneFilter then
