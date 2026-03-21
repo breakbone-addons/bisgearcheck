@@ -80,6 +80,12 @@ No hard addon dependencies. The following libraries are bundled:
 - LibDataBroker-1.1
 - LibDBIcon-1.0
 
+## Limitations
+
+- This addon is built for and tested on the **WoW TBC Anniversary** client only. BiS data sets are specific to this version.
+- All UI text and data is in **English only**. Support for other languages may come in the future.
+- Spec detection is based on talent points and may guess wrong for hybrid specs or characters that haven't spent talent points.
+
 ## Installation
 
 Copy the `BISGearCheck` folder into your WoW AddOns directory:
