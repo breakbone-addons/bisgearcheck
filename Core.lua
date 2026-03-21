@@ -224,12 +224,16 @@ function BISGearCheck:CompareSlot(slotName, bisItems)
     local invSlots = self.SlotToInvSlot[slotName]
     if not invSlots then return nil end
 
+    local isDualSlot = (slotName == "Rings" or slotName == "Trinkets")
+    local maxShow = isDualSlot and 10 or nil
+
     local result = {
         slotName = slotName,
         equipped = {},
         bisItems = bisItems,
         upgrades = {},
         bestEquippedRank = 999,
+        worstEquippedRank = 0,
     }
 
     local equippedIDs = {}
@@ -254,15 +258,26 @@ function BISGearCheck:CompareSlot(slotName, bisItems)
                 if rank < result.bestEquippedRank then
                     result.bestEquippedRank = rank
                 end
+                if rank > result.worstEquippedRank then
+                    result.worstEquippedRank = rank
+                end
                 break
             end
         end
     end
 
-    local cutoff = result.bestEquippedRank
-    if cutoff == 999 then cutoff = #bisItems + 1 end
+    local cutoff
+    if isDualSlot then
+        -- For dual-slot items, show up to 10 items total
+        cutoff = #bisItems + 1
+    else
+        cutoff = result.bestEquippedRank
+        if cutoff == 999 then cutoff = #bisItems + 1 end
+    end
 
+    local shown = 0
     for rank = 1, math.min(cutoff - 1, #bisItems) do
+        if maxShow and shown >= maxShow then break end
         local bisID = bisItems[rank]
         if not equippedIDs[bisID] then
             local name, link, quality, _, _, _, _, _, _, icon = GetItemInfo(bisID)
@@ -283,6 +298,7 @@ function BISGearCheck:CompareSlot(slotName, bisItems)
                 sourceType = sourceInfo and sourceInfo.sourceType or "",
                 slotName = slotName,
             })
+            shown = shown + 1
         end
     end
 

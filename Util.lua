@@ -141,6 +141,31 @@ for src, zone in pairs(BISGearCheck.SourceToZone) do
     BISGearCheck.ZoneToSources[zone][src] = true
 end
 
+-- Categorized zone lists for the dropdown
+BISGearCheck.ZoneCategories = {
+    {
+        label = "TBC Raids",
+        zones = { "Karazhan", "Gruul's Lair", "Magtheridon's Lair" },
+    },
+    {
+        label = "TBC Dungeons",
+        zones = {
+            "Hellfire Ramparts", "The Blood Furnace", "The Shattered Halls",
+            "The Slave Pens", "The Underbog", "The Steamvault",
+            "Mana-Tombs", "Auchenai Crypts", "Sethekk Halls", "Shadow Labyrinth",
+            "The Mechanar", "The Botanica", "The Arcatraz",
+            "Old Hillsbrad Foothills", "The Black Morass",
+        },
+    },
+    {
+        label = "Classic",
+        zones = {
+            "Molten Core", "Blackwing Lair", "Ahn'Qiraj", "Naxxramas",
+            "Blackrock Depths", "Stratholme",
+        },
+    },
+}
+
 -- Get unique zone names (sorted) for filter dropdown
 function BISGearCheck:GetZoneList()
     local zones = {}
@@ -153,6 +178,17 @@ function BISGearCheck:GetZoneList()
     end
     table.sort(zones)
     return zones
+end
+
+-- Check if a zone has any wishlist items
+function BISGearCheck:ZoneHasWishlistItems(zone)
+    if not BISGearCheckSaved or not BISGearCheckSaved.wishlist then return false end
+    for itemID, _ in pairs(BISGearCheckSaved.wishlist) do
+        if self:ItemMatchesZone(itemID, zone) then
+            return true
+        end
+    end
+    return false
 end
 
 -- Check if an item's source matches a zone

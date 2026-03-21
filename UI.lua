@@ -17,6 +17,9 @@ local COLOR_WHITE = { r = 1.0, g = 1.0, b = 1.0 }
 local COLOR_RED = { r = 1.0, g = 0.3, b = 0.3 }
 local COLOR_CYAN = { r = 0.0, g = 0.82, b = 1.0 }
 
+-- Track collapsed state per slot (persists within session)
+BISGearCheck.collapsedSlots = BISGearCheck.collapsedSlots or {}
+
 -- ============================================================
 -- MAIN FRAME
 -- ============================================================
@@ -148,6 +151,7 @@ function BISGearCheck:CreateUI()
     UIDropDownMenu_SetWidth(zoneDropdown, 160)
 
     local function ZoneDropdownInit(self, level)
+        -- "All Zones" option
         local info = UIDropDownMenu_CreateInfo()
         info.text = "All Zones"
         info.value = ""
@@ -160,19 +164,34 @@ function BISGearCheck:CreateUI()
         info.checked = (BISGearCheck.wishlistZoneFilter == nil)
         UIDropDownMenu_AddButton(info, level)
 
-        local zones = BISGearCheck:GetZoneList()
-        for _, zone in ipairs(zones) do
-            local zInfo = UIDropDownMenu_CreateInfo()
-            zInfo.text = zone
-            zInfo.value = zone
-            zInfo.func = function(self)
-                UIDropDownMenu_SetSelectedValue(zoneDropdown, self.value)
-                UIDropDownMenu_SetText(zoneDropdown, self:GetText())
-                BISGearCheck.wishlistZoneFilter = self.value
-                BISGearCheck:RefreshView()
+        -- Categorized zones with dividers
+        for catIdx, category in ipairs(BISGearCheck.ZoneCategories) do
+            -- Section header (non-clickable divider)
+            local hdr = UIDropDownMenu_CreateInfo()
+            hdr.text = category.label
+            hdr.isTitle = true
+            hdr.notCheckable = true
+            UIDropDownMenu_AddButton(hdr, level)
+
+            -- Zone entries in this category
+            for _, zone in ipairs(category.zones) do
+                local hasItems = BISGearCheck:ZoneHasWishlistItems(zone)
+                local zInfo = UIDropDownMenu_CreateInfo()
+                if hasItems then
+                    zInfo.text = "|cff00ff00" .. zone .. "|r"
+                else
+                    zInfo.text = zone
+                end
+                zInfo.value = zone
+                zInfo.func = function(self)
+                    UIDropDownMenu_SetSelectedValue(zoneDropdown, self.value)
+                    UIDropDownMenu_SetText(zoneDropdown, zone)
+                    BISGearCheck.wishlistZoneFilter = self.value
+                    BISGearCheck:RefreshView()
+                end
+                zInfo.checked = (BISGearCheck.wishlistZoneFilter == zone)
+                UIDropDownMenu_AddButton(zInfo, level)
             end
-            zInfo.checked = (BISGearCheck.wishlistZoneFilter == zone)
-            UIDropDownMenu_AddButton(zInfo, level)
         end
     end
     UIDropDownMenu_Initialize(zoneDropdown, ZoneDropdownInit)
@@ -282,52 +301,94 @@ function BISGearCheck:RenderResults()
 end
 
 function BISGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
-    local header = self:CreateRow(parent, yOffset, width)
-    header.text:SetText("|cffffd100" .. slotResult.slotName .. "|r")
-    header.text:SetFont(header.text:GetFont(), 13, "OUTLINE")
-    yOffset = yOffset - SLOT_HEADER_HEIGHT
+    local slotName = slotResult.slotName
+    local isCollapsed = self.collapsedSlots[slotName]
+    local isDualSlot = (slotName == "Rings" or slotName == "Trinkets")
 
-    for _, eq in ipairs(slotResult.equipped) do
-        local row = self:CreateRow(parent, yOffset, width)
-        local displayName = eq.link or ("Item #" .. eq.id)
-
-        local rankText
+    -- Build rank text helper
+    local function rankStr(eq)
         if eq.rank then
             if eq.rank == 1 then
-                rankText = "|cff00ff00BiS! (Rank 1)|r"
+                return "|cff00ff00BiS!|r"
             else
-                rankText = string.format("|cffffffffRank %d|r", eq.rank)
+                return string.format("|cffffffffRank %d|r", eq.rank)
             end
-        else
-            rankText = "|cff999999Not on BiS list|r"
         end
+        return "|cff999999Not on list|r"
+    end
 
-        row.text:SetText(string.format("  Equipped: %s - %s", eq.link or displayName, rankText))
+    local arrow = isCollapsed and "|cffffd100+ |r" or "|cffffd100- |r"
 
+    if not isDualSlot and #slotResult.equipped == 1 then
+        -- Single-slot: combine header + equipped on one line
+        local eq = slotResult.equipped[1]
+        local header = self:CreateRow(parent, yOffset, width)
+        local eqText = eq.link or ("Item #" .. eq.id)
+        header.text:SetText(arrow .. "|cffffd100" .. slotName .. ":|r " .. eqText .. " - " .. rankStr(eq))
+        header.text:SetFont(header.text:GetFont(), 13, "OUTLINE")
+        header:EnableMouse(true)
+        header:SetScript("OnMouseDown", function()
+            BISGearCheck.collapsedSlots[slotName] = not BISGearCheck.collapsedSlots[slotName]
+            BISGearCheck:RefreshView()
+        end)
         if eq.link then
-            row:EnableMouse(true)
-            row:SetScript("OnEnter", function(self)
+            header:SetScript("OnEnter", function(self)
                 GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
                 GameTooltip:SetHyperlink(eq.link)
                 GameTooltip:Show()
             end)
-            row:SetScript("OnLeave", function() GameTooltip:Hide() end)
+            header:SetScript("OnLeave", function() GameTooltip:Hide() end)
         end
-
-        yOffset = yOffset - ITEM_ROW_HEIGHT
-    end
-
-    if #slotResult.equipped == 0 then
-        local row = self:CreateRow(parent, yOffset, width)
-        row.text:SetText("  |cff999999(empty slot)|r")
-        yOffset = yOffset - ITEM_ROW_HEIGHT
-    end
-
-    if #slotResult.upgrades == 0 and slotResult.bestEquippedRank == 1 then
-        local row = self:CreateRow(parent, yOffset, width)
-        row.text:SetText("  |cff00ff00You have the best item!|r")
-        yOffset = yOffset - ITEM_ROW_HEIGHT
+        yOffset = yOffset - SLOT_HEADER_HEIGHT
+    elseif not isDualSlot and #slotResult.equipped == 0 then
+        -- Single-slot empty: combine header + empty
+        local header = self:CreateRow(parent, yOffset, width)
+        header.text:SetText(arrow .. "|cffffd100" .. slotName .. ":|r |cff999999(empty)|r")
+        header.text:SetFont(header.text:GetFont(), 13, "OUTLINE")
+        header:EnableMouse(true)
+        header:SetScript("OnMouseDown", function()
+            BISGearCheck.collapsedSlots[slotName] = not BISGearCheck.collapsedSlots[slotName]
+            BISGearCheck:RefreshView()
+        end)
+        yOffset = yOffset - SLOT_HEADER_HEIGHT
     else
+        -- Dual-slot: header then equipped items
+        local header = self:CreateRow(parent, yOffset, width)
+        header.text:SetText(arrow .. "|cffffd100" .. slotName .. "|r")
+        header.text:SetFont(header.text:GetFont(), 13, "OUTLINE")
+        header:EnableMouse(true)
+        header:SetScript("OnMouseDown", function()
+            BISGearCheck.collapsedSlots[slotName] = not BISGearCheck.collapsedSlots[slotName]
+            BISGearCheck:RefreshView()
+        end)
+        yOffset = yOffset - SLOT_HEADER_HEIGHT
+
+        if not isCollapsed then
+            for _, eq in ipairs(slotResult.equipped) do
+                local row = self:CreateRow(parent, yOffset, width)
+                local eqText = eq.link or ("Item #" .. eq.id)
+                row.text:SetText("  Equipped: " .. eqText .. " - " .. rankStr(eq))
+                if eq.link then
+                    row:EnableMouse(true)
+                    row:SetScript("OnEnter", function(self)
+                        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+                        GameTooltip:SetHyperlink(eq.link)
+                        GameTooltip:Show()
+                    end)
+                    row:SetScript("OnLeave", function() GameTooltip:Hide() end)
+                end
+                yOffset = yOffset - ITEM_ROW_HEIGHT
+            end
+
+            if #slotResult.equipped == 0 then
+                local row = self:CreateRow(parent, yOffset, width)
+                row.text:SetText("  |cff999999(empty slots)|r")
+                yOffset = yOffset - ITEM_ROW_HEIGHT
+            end
+        end
+    end
+
+    if not isCollapsed then
         for _, upgrade in ipairs(slotResult.upgrades) do
             local row = self:CreateRow(parent, yOffset, width)
 
@@ -342,31 +403,37 @@ function BISGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
             end
 
             row.text:SetText(string.format("  |cff00ccff#%d|r %s %s", upgrade.rank, itemName, sourceText))
-            row.text:SetPoint("RIGHT", row, "RIGHT", -25, 0)
+            row.text:SetPoint("RIGHT", row, "RIGHT", -30, 0)
 
-            -- Wishlist + button
+            -- Wishlist + button (enlarged with green background)
             local onWL = self:IsOnWishlist(upgrade.id)
             local addBtn = CreateFrame("Button", nil, row)
-            addBtn:SetSize(16, 16)
-            addBtn:SetPoint("RIGHT", row, "RIGHT", -3, 0)
+            addBtn:SetSize(24, 18)
+            addBtn:SetPoint("RIGHT", row, "RIGHT", -1, 0)
 
-            local btnText = addBtn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-            btnText:SetPoint("CENTER", 0, 0)
+            -- Background texture
+            local btnBg = addBtn:CreateTexture(nil, "BACKGROUND")
+            btnBg:SetAllPoints()
             if onWL then
-                btnText:SetText("|cff00ff00+|r")
+                btnBg:SetColorTexture(0.0, 0.5, 0.0, 0.8)
             else
-                btnText:SetText("|cffffffff+|r")
+                btnBg:SetColorTexture(0.2, 0.2, 0.2, 0.6)
             end
+            addBtn.bg = btnBg
+
+            local btnText = addBtn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            btnText:SetPoint("CENTER", 0, 0)
+            btnText:SetText("|cffffffff+|r")
             addBtn.label = btnText
 
             local capturedUpgrade = upgrade
             addBtn:SetScript("OnClick", function()
                 if BISGearCheck:IsOnWishlist(capturedUpgrade.id) then
                     BISGearCheck:RemoveFromWishlist(capturedUpgrade.id)
-                    btnText:SetText("|cffffffff+|r")
+                    btnBg:SetColorTexture(0.2, 0.2, 0.2, 0.6)
                 else
                     BISGearCheck:AddToWishlist(capturedUpgrade.id, capturedUpgrade.slotName, capturedUpgrade.rank, capturedUpgrade.source, capturedUpgrade.sourceType)
-                    btnText:SetText("|cff00ff00+|r")
+                    btnBg:SetColorTexture(0.0, 0.5, 0.0, 0.8)
                 end
             end)
             addBtn:SetScript("OnEnter", function(self)
@@ -379,7 +446,6 @@ function BISGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
                 GameTooltip:Show()
             end)
             addBtn:SetScript("OnLeave", function() GameTooltip:Hide() end)
-            addBtn:SetHighlightTexture("Interface\\Buttons\\UI-PlusButton-Hilight")
             table.insert(parent.rows, addBtn)
 
             -- Item tooltip on hover
@@ -486,16 +552,20 @@ function BISGearCheck:RenderWishlist()
             end
 
             row.text:SetText(string.format("  %s%s %s", prefix, itemName, sourceText))
-            row.text:SetPoint("RIGHT", row, "RIGHT", -25, 0)
+            row.text:SetPoint("RIGHT", row, "RIGHT", -30, 0)
 
-            -- Remove button (X)
+            -- Remove button (X) - enlarged with red background
             local removeBtn = CreateFrame("Button", nil, row)
-            removeBtn:SetSize(16, 16)
-            removeBtn:SetPoint("RIGHT", row, "RIGHT", -3, 0)
+            removeBtn:SetSize(24, 18)
+            removeBtn:SetPoint("RIGHT", row, "RIGHT", -1, 0)
 
-            local btnText = removeBtn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+            local removeBg = removeBtn:CreateTexture(nil, "BACKGROUND")
+            removeBg:SetAllPoints()
+            removeBg:SetColorTexture(0.5, 0.0, 0.0, 0.8)
+
+            local btnText = removeBtn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
             btnText:SetPoint("CENTER", 0, 0)
-            btnText:SetText("|cffff3333x|r")
+            btnText:SetText("|cffffffffx|r")
 
             local capturedID = item.id
             removeBtn:SetScript("OnClick", function()
