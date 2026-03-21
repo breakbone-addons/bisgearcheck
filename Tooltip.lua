@@ -47,7 +47,7 @@ function BISGearCheck:GetTooltipSetting(key)
 end
 
 function BISGearCheck:SetTooltipSetting(key, value)
-    if not BISGearCheckSaved then BISGearCheckSaved = { wishlist = {} } end
+    if not BISGearCheckSaved then BISGearCheckSaved = { characters = {} } end
     if not BISGearCheckSaved.tooltip then
         BISGearCheckSaved.tooltip = {}
     end
@@ -55,7 +55,7 @@ function BISGearCheck:SetTooltipSetting(key, value)
 end
 
 function BISGearCheck:EnsureTooltipSettings()
-    if not BISGearCheckSaved then BISGearCheckSaved = { wishlist = {} } end
+    if not BISGearCheckSaved then BISGearCheckSaved = { characters = {} } end
     if not BISGearCheckSaved.tooltip then
         BISGearCheckSaved.tooltip = {}
     end

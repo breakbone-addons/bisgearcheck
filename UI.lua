@@ -46,7 +46,7 @@ function BISGearCheck:CreateUI()
     f.title:SetText("BiS Gear Check")
 
     -- ============================================================
-    -- TABS: Compare + Wishlist (right under title bar)
+    -- TABS: Compare + Wishlist + BiS Lists (right under title bar)
     -- ============================================================
 
     local TAB_WIDTH = 80
@@ -71,20 +71,35 @@ function BISGearCheck:CreateUI()
     local compTab = CreateTab(f, "Compare", 1)
     compTab:SetPoint("TOPLEFT", f, "TOPLEFT", 8, -26)
 
-    local wlTab = CreateTab(f, "Wishlist", 2)
+    local wlTab = CreateTab(f, "Wishlists", 2)
     wlTab:SetPoint("LEFT", compTab, "RIGHT", 2, 0)
 
+    local bisTab = CreateTab(f, "BiS Lists", 3)
+    bisTab:SetPoint("LEFT", wlTab, "RIGHT", 2, 0)
+
+    local function SetTabActive(tab)
+        tab.bg:SetColorTexture(0.2, 0.2, 0.2, 1)
+        tab.label:SetTextColor(1, 0.82, 0)
+    end
+    local function SetTabInactive(tab)
+        tab.bg:SetColorTexture(0.08, 0.08, 0.08, 0.8)
+        tab.label:SetTextColor(0.5, 0.5, 0.5)
+    end
+
     local function UpdateTabAppearance()
-        if BISGearCheck.viewMode == "comparison" then
-            compTab.bg:SetColorTexture(0.2, 0.2, 0.2, 1)
-            compTab.label:SetTextColor(1, 0.82, 0)
-            wlTab.bg:SetColorTexture(0.08, 0.08, 0.08, 0.8)
-            wlTab.label:SetTextColor(0.5, 0.5, 0.5)
-        else
-            wlTab.bg:SetColorTexture(0.2, 0.2, 0.2, 1)
-            wlTab.label:SetTextColor(1, 0.82, 0)
-            compTab.bg:SetColorTexture(0.08, 0.08, 0.08, 0.8)
-            compTab.label:SetTextColor(0.5, 0.5, 0.5)
+        local mode = BISGearCheck.viewMode
+        if mode == "comparison" then
+            SetTabActive(compTab)
+            SetTabInactive(wlTab)
+            SetTabInactive(bisTab)
+        elseif mode == "wishlist" then
+            SetTabInactive(compTab)
+            SetTabActive(wlTab)
+            SetTabInactive(bisTab)
+        elseif mode == "bislist" then
+            SetTabInactive(compTab)
+            SetTabInactive(wlTab)
+            SetTabActive(bisTab)
         end
     end
 
@@ -100,9 +115,65 @@ function BISGearCheck:CreateUI()
         BISGearCheck:RefreshView()
     end)
 
+    bisTab:SetScript("OnClick", function()
+        BISGearCheck.viewMode = "bislist"
+        UpdateTabAppearance()
+        BISGearCheck:RefreshView()
+    end)
+
     f.compTab = compTab
     f.wlTab = wlTab
+    f.bisTab = bisTab
     f.UpdateTabAppearance = UpdateTabAppearance
+
+    -- ============================================================
+    -- CHARACTER SELECTOR (top-level, right of tabs)
+    -- ============================================================
+
+    local charDropdown = CreateFrame("Frame", "BISGearCheckCharDropdown", f, "UIDropDownMenuTemplate")
+    charDropdown:SetPoint("TOPRIGHT", f, "TOPRIGHT", 5, -22)
+    UIDropDownMenu_SetWidth(charDropdown, 110)
+    UIDropDownMenu_JustifyText(charDropdown, "RIGHT")
+
+    local function CharDropdownInit(self, level)
+        local charKeys = BISGearCheck:GetCharacterKeys()
+        for _, charKey in ipairs(charKeys) do
+            local charData = BISGearCheck:GetCharacterData(charKey)
+            local info = UIDropDownMenu_CreateInfo()
+            local classColor = charData and RAID_CLASS_COLORS[charData.class]
+            local charName = charKey:match("^([^-]+)") or charKey
+            if classColor then
+                info.text = string.format("|cff%02x%02x%02x%s|r", classColor.r * 255, classColor.g * 255, classColor.b * 255, charName)
+            else
+                info.text = charName
+            end
+            info.value = charKey
+            info.func = function(self)
+                UIDropDownMenu_SetSelectedValue(charDropdown, self.value)
+                BISGearCheck:UpdateCharDropdownText()
+                BISGearCheck:SetViewingCharacter(self.value)
+            end
+            info.checked = (charKey == BISGearCheck:GetViewingCharKey())
+            UIDropDownMenu_AddButton(info, level)
+        end
+    end
+    UIDropDownMenu_Initialize(charDropdown, CharDropdownInit)
+
+    f.charDropdown = charDropdown
+
+    -- Helper to update character dropdown text with class color
+    function BISGearCheck:UpdateCharDropdownText()
+        local ck = self:GetViewingCharKey()
+        local cd = self:GetCharacterData(ck)
+        local cn = ck and ck:match("^([^-]+)") or ck
+        local cc = cd and RAID_CLASS_COLORS[cd.class]
+        if cc and cn then
+            UIDropDownMenu_SetText(f.charDropdown, string.format("|cff%02x%02x%02x%s|r", cc.r * 255, cc.g * 255, cc.b * 255, cn))
+        elseif cn then
+            UIDropDownMenu_SetText(f.charDropdown, cn)
+        end
+    end
+    self:UpdateCharDropdownText()
 
     -- ============================================================
     -- DROPDOWNS ROW: Data Source + Spec (below tabs)
@@ -144,21 +215,24 @@ function BISGearCheck:CreateUI()
     UIDropDownMenu_SetWidth(specDropdown, 120)
 
     local function SpecDropdownInit(self, level)
-        local _, classToken = UnitClass("player")
-        local specs = BISGearCheck.ClassSpecs[classToken]
+        local classToken = BISGearCheck:GetViewingClass()
+        local specs = classToken and BISGearCheck.ClassSpecs[classToken]
         if not specs then return end
 
+        local db = BISGearCheck:GetActiveDB()
         for _, specInfo in ipairs(specs) do
-            local info = UIDropDownMenu_CreateInfo()
-            info.text = specInfo.label
-            info.value = specInfo.key
-            info.func = function(self)
-                UIDropDownMenu_SetSelectedValue(specDropdown, self.value)
-                UIDropDownMenu_SetText(specDropdown, self:GetText())
-                BISGearCheck:SetSpec(self.value)
+            if db and db[specInfo.key] then
+                local info = UIDropDownMenu_CreateInfo()
+                info.text = specInfo.label
+                info.value = specInfo.key
+                info.func = function(self)
+                    UIDropDownMenu_SetSelectedValue(specDropdown, self.value)
+                    UIDropDownMenu_SetText(specDropdown, self:GetText())
+                    BISGearCheck:SetSpec(self.value)
+                end
+                info.checked = (specInfo.key == BISGearCheck.selectedSpec)
+                UIDropDownMenu_AddButton(info, level)
             end
-            info.checked = (specInfo.key == BISGearCheck.selectedSpec)
-            UIDropDownMenu_AddButton(info, level)
         end
     end
     UIDropDownMenu_Initialize(specDropdown, SpecDropdownInit)
@@ -205,8 +279,40 @@ function BISGearCheck:CreateUI()
     expandAllBtn:SetScript("OnEnter", function(self) expandText:SetText("|cffffffffExpand All|r") end)
     expandAllBtn:SetScript("OnLeave", function(self) expandText:SetText("|cff00ccffExpand All|r") end)
 
+    -- Wishlist picker (right-aligned, shown on Compare tab)
+    local compareWLDropdown = CreateFrame("Frame", "BISGearCheckCompareWLDropdown", f, "UIDropDownMenuTemplate")
+    compareWLDropdown:SetPoint("TOPRIGHT", f, "TOPRIGHT", -5, -70)
+    UIDropDownMenu_SetWidth(compareWLDropdown, 90)
+    UIDropDownMenu_JustifyText(compareWLDropdown, "RIGHT")
+
+    local function CompareWLDropdownInit(self, level)
+        local names = BISGearCheck:GetWishlistNames()
+        for _, name in ipairs(names) do
+            local info = UIDropDownMenu_CreateInfo()
+            info.text = name
+            info.value = name
+            info.func = function(self)
+                UIDropDownMenu_SetSelectedValue(compareWLDropdown, self.value)
+                UIDropDownMenu_SetText(compareWLDropdown, self.value)
+                BISGearCheck:SetActiveWishlist(self.value)
+            end
+            info.checked = (name == BISGearCheck.activeWishlist)
+            UIDropDownMenu_AddButton(info, level)
+        end
+    end
+    UIDropDownMenu_Initialize(compareWLDropdown, CompareWLDropdownInit)
+    UIDropDownMenu_SetText(compareWLDropdown, self.activeWishlist)
+    compareWLDropdown:Hide()
+
+    local compareWLLabel = f:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    compareWLLabel:SetPoint("RIGHT", compareWLDropdown, "LEFT", 15, 2)
+    compareWLLabel:SetText("|cffffd100Wishlist:|r")
+    compareWLLabel:Hide()
+
     f.collapseAllBtn = collapseAllBtn
     f.expandAllBtn = expandAllBtn
+    f.compareWLDropdown = compareWLDropdown
+    f.compareWLLabel = compareWLLabel
 
     -- ============================================================
     -- WISHLIST FILTER BAR (shown only in wishlist mode)
@@ -292,6 +398,251 @@ function BISGearCheck:CreateUI()
     f.autoCheck = autoCheck
 
     -- ============================================================
+    -- WISHLIST SELECTOR BAR (dropdown + New / Rename / Delete)
+    -- ============================================================
+
+    local wlSelectorBar = CreateFrame("Frame", nil, f)
+    wlSelectorBar:SetSize(FRAME_WIDTH - 20, 26)
+    wlSelectorBar:SetPoint("TOPLEFT", f, "TOPLEFT", 0, -48)
+    wlSelectorBar:Hide()
+
+    -- Wishlist name dropdown
+    local wlNameDropdown = CreateFrame("Frame", "BISGearCheckWLNameDropdown", wlSelectorBar, "UIDropDownMenuTemplate")
+    wlNameDropdown:SetPoint("TOPLEFT", wlSelectorBar, "TOPLEFT", -5, 2)
+    UIDropDownMenu_SetWidth(wlNameDropdown, 130)
+
+    local function WLNameDropdownInit(self, level)
+        local names = BISGearCheck:GetWishlistNames()
+        for _, name in ipairs(names) do
+            local info = UIDropDownMenu_CreateInfo()
+            info.text = name
+            info.value = name
+            info.func = function(self)
+                UIDropDownMenu_SetSelectedValue(wlNameDropdown, self.value)
+                UIDropDownMenu_SetText(wlNameDropdown, self.value)
+                BISGearCheck:SetActiveWishlist(self.value)
+            end
+            info.checked = (name == BISGearCheck.activeWishlist)
+            UIDropDownMenu_AddButton(info, level)
+        end
+    end
+    UIDropDownMenu_Initialize(wlNameDropdown, WLNameDropdownInit)
+    UIDropDownMenu_SetText(wlNameDropdown, self.activeWishlist)
+
+    -- Helper to get editBox from a static popup frame
+    local function GetPopupEditBox(dialog)
+        return dialog.editBox or _G[dialog:GetName() .. "EditBox"]
+    end
+
+    -- Static popup: New Wishlist
+    StaticPopupDialogs["BISGEARCHECK_NEW_WISHLIST"] = {
+        text = "Enter a name for the new wishlist:",
+        button1 = "Create",
+        button2 = "Cancel",
+        hasEditBox = true,
+        OnAccept = function(self)
+            local eb = GetPopupEditBox(self)
+            local name = eb and eb:GetText():trim() or ""
+            if name ~= "" then
+                if BISGearCheck:CreateWishlist(name) then
+                    BISGearCheck:RefreshView()
+                else
+                    print("|cffff6666BiS Gear Check:|r A wishlist named '" .. name .. "' already exists.")
+                end
+            end
+        end,
+        EditBoxOnEnterPressed = function(self)
+            local parent = self:GetParent()
+            local name = self:GetText():trim()
+            if name ~= "" then
+                if BISGearCheck:CreateWishlist(name) then
+                    BISGearCheck:RefreshView()
+                else
+                    print("|cffff6666BiS Gear Check:|r A wishlist named '" .. name .. "' already exists.")
+                end
+            end
+            parent:Hide()
+        end,
+        EditBoxOnEscapePressed = function(self) self:GetParent():Hide() end,
+        timeout = 0,
+        whileDead = true,
+        preferredIndex = 3,
+    }
+
+    -- Static popup: Rename Wishlist
+    StaticPopupDialogs["BISGEARCHECK_RENAME_WISHLIST"] = {
+        text = "Rename '%s' to:",
+        button1 = "Rename",
+        button2 = "Cancel",
+        hasEditBox = true,
+        OnShow = function(self)
+            local eb = GetPopupEditBox(self)
+            if eb then
+                eb:SetText(BISGearCheck.activeWishlist)
+                eb:HighlightText()
+            end
+        end,
+        OnAccept = function(self)
+            local eb = GetPopupEditBox(self)
+            local name = eb and eb:GetText():trim() or ""
+            if name ~= "" then
+                if BISGearCheck:RenameWishlist(name) then
+                    BISGearCheck:RefreshView()
+                else
+                    print("|cffff6666BiS Gear Check:|r A wishlist named '" .. name .. "' already exists.")
+                end
+            end
+        end,
+        EditBoxOnEnterPressed = function(self)
+            local parent = self:GetParent()
+            local name = self:GetText():trim()
+            if name ~= "" then
+                if BISGearCheck:RenameWishlist(name) then
+                    BISGearCheck:RefreshView()
+                else
+                    print("|cffff6666BiS Gear Check:|r A wishlist named '" .. name .. "' already exists.")
+                end
+            end
+            parent:Hide()
+        end,
+        EditBoxOnEscapePressed = function(self) self:GetParent():Hide() end,
+        timeout = 0,
+        whileDead = true,
+        preferredIndex = 3,
+    }
+
+    -- Static popup: Delete Wishlist
+    StaticPopupDialogs["BISGEARCHECK_DELETE_WISHLIST"] = {
+        text = "Delete wishlist '%s'?\n\nThis cannot be undone.",
+        button1 = "Delete",
+        button2 = "Cancel",
+        OnAccept = function()
+            if BISGearCheck:DeleteWishlist() then
+                BISGearCheck:RefreshView()
+            end
+        end,
+        timeout = 0,
+        whileDead = true,
+        preferredIndex = 3,
+    }
+
+    local wlNewBtn = CreateFrame("Button", nil, wlSelectorBar, "UIPanelButtonTemplate")
+    wlNewBtn:SetSize(50, 22)
+    wlNewBtn:SetPoint("LEFT", wlNameDropdown, "RIGHT", -10, 0)
+    wlNewBtn:SetText("New")
+    wlNewBtn:SetScript("OnClick", function()
+        StaticPopup_Show("BISGEARCHECK_NEW_WISHLIST")
+    end)
+
+    local wlRenameBtn = CreateFrame("Button", nil, wlSelectorBar, "UIPanelButtonTemplate")
+    wlRenameBtn:SetSize(60, 22)
+    wlRenameBtn:SetPoint("LEFT", wlNewBtn, "RIGHT", 2, 0)
+    wlRenameBtn:SetText("Rename")
+    wlRenameBtn:SetScript("OnClick", function()
+        StaticPopupDialogs["BISGEARCHECK_RENAME_WISHLIST"].text = "Rename '" .. BISGearCheck.activeWishlist .. "' to:"
+        StaticPopup_Show("BISGEARCHECK_RENAME_WISHLIST")
+    end)
+
+    local wlDeleteBtn = CreateFrame("Button", nil, wlSelectorBar, "UIPanelButtonTemplate")
+    wlDeleteBtn:SetSize(55, 22)
+    wlDeleteBtn:SetPoint("LEFT", wlRenameBtn, "RIGHT", 2, 0)
+    wlDeleteBtn:SetText("Delete")
+    wlDeleteBtn:SetScript("OnClick", function()
+        StaticPopupDialogs["BISGEARCHECK_DELETE_WISHLIST"].text = "Delete wishlist '" .. BISGearCheck.activeWishlist .. "'?\n\nThis cannot be undone."
+        StaticPopup_Show("BISGEARCHECK_DELETE_WISHLIST")
+    end)
+
+    f.wlSelectorBar = wlSelectorBar
+    f.wlNameDropdown = wlNameDropdown
+
+    -- ============================================================
+    -- BIS LISTS BAR: Data Source + All-Specs dropdown
+    -- ============================================================
+
+    local bislistBar = CreateFrame("Frame", nil, f)
+    bislistBar:SetSize(FRAME_WIDTH - 20, 26)
+    bislistBar:SetPoint("TOPLEFT", f, "TOPLEFT", 0, -48)
+    bislistBar:Hide()
+
+    local bislistSourceDropdown = CreateFrame("Frame", "BISGearCheckBislistSourceDropdown", bislistBar, "UIDropDownMenuTemplate")
+    bislistSourceDropdown:SetPoint("TOPLEFT", bislistBar, "TOPLEFT", -5, 2)
+    UIDropDownMenu_SetWidth(bislistSourceDropdown, 100)
+
+    local function BislistSourceInit(self, level)
+        for _, srcInfo in ipairs(BISGearCheck.DataSources) do
+            local info = UIDropDownMenu_CreateInfo()
+            info.text = srcInfo.label
+            info.value = srcInfo.key
+            info.func = function(self)
+                UIDropDownMenu_SetSelectedValue(bislistSourceDropdown, self.value)
+                UIDropDownMenu_SetText(bislistSourceDropdown, self:GetText())
+                BISGearCheck:SetDataSource(self.value)
+            end
+            info.checked = (srcInfo.key == BISGearCheck.dataSource)
+            UIDropDownMenu_AddButton(info, level)
+        end
+    end
+    UIDropDownMenu_Initialize(bislistSourceDropdown, BislistSourceInit)
+
+    -- Set initial text
+    for _, srcInfo in ipairs(self.DataSources) do
+        if srcInfo.key == self.dataSource then
+            UIDropDownMenu_SetText(bislistSourceDropdown, srcInfo.label)
+            break
+        end
+    end
+
+    local bislistSpecDropdown = CreateFrame("Frame", "BISGearCheckBislistSpecDropdown", bislistBar, "UIDropDownMenuTemplate")
+    bislistSpecDropdown:SetPoint("LEFT", bislistSourceDropdown, "RIGHT", -15, 0)
+    UIDropDownMenu_SetWidth(bislistSpecDropdown, 160)
+
+    local CLASS_ORDER = { "DRUID", "HUNTER", "MAGE", "PALADIN", "PRIEST", "ROGUE", "SHAMAN", "WARLOCK", "WARRIOR" }
+
+    local function BislistSpecInit(self, level)
+        local db = BISGearCheck:GetActiveDB()
+        if not db then return end
+
+        for _, classToken in ipairs(CLASS_ORDER) do
+            local specs = BISGearCheck.ClassSpecs[classToken]
+            if specs then
+                -- Class header
+                local hdr = UIDropDownMenu_CreateInfo()
+                local classColor = RAID_CLASS_COLORS[classToken]
+                if classColor then
+                    hdr.text = string.format("|cff%02x%02x%02x%s|r", classColor.r * 255, classColor.g * 255, classColor.b * 255, classToken:sub(1,1) .. classToken:sub(2):lower())
+                else
+                    hdr.text = classToken:sub(1,1) .. classToken:sub(2):lower()
+                end
+                hdr.isTitle = true
+                hdr.notCheckable = true
+                UIDropDownMenu_AddButton(hdr, level)
+
+                for _, specInfo in ipairs(specs) do
+                    if db[specInfo.key] then
+                        local sInfo = UIDropDownMenu_CreateInfo()
+                        sInfo.text = specInfo.label
+                        sInfo.value = specInfo.key
+                        sInfo.func = function(self)
+                            UIDropDownMenu_SetSelectedValue(bislistSpecDropdown, self.value)
+                            UIDropDownMenu_SetText(bislistSpecDropdown, self:GetText())
+                            BISGearCheck.bislistSpec = self.value
+                            BISGearCheck:RefreshView()
+                        end
+                        sInfo.checked = (specInfo.key == BISGearCheck.bislistSpec)
+                        UIDropDownMenu_AddButton(sInfo, level)
+                    end
+                end
+            end
+        end
+    end
+    UIDropDownMenu_Initialize(bislistSpecDropdown, BislistSpecInit)
+    UIDropDownMenu_SetText(bislistSpecDropdown, "Select Spec")
+
+    f.bislistBar = bislistBar
+    f.bislistSourceDropdown = bislistSourceDropdown
+    f.bislistSpecDropdown = bislistSpecDropdown
+
+    -- ============================================================
     -- SCROLL FRAME
     -- ============================================================
 
@@ -308,6 +659,18 @@ function BISGearCheck:CreateUI()
     f.scrollChild = scrollChild
     f.sourceDropdown = sourceDropdown
     f.specDropdown = specDropdown
+
+    -- Retry refresh when item data has been received
+    f._retryElapsed = 0
+    f:SetScript("OnUpdate", function(self, elapsed)
+        f._retryElapsed = f._retryElapsed + elapsed
+        if f._retryElapsed < 0.5 then return end
+        f._retryElapsed = 0
+        if BISGearCheck.needsRefresh then
+            BISGearCheck.needsRefresh = false
+            BISGearCheck:Refresh()
+        end
+    end)
 
     self.mainFrame = f
 end
@@ -335,19 +698,29 @@ function BISGearCheck:RenderResults()
     if not f then return end
 
     f.filterBar:Hide()
+    f.bislistBar:Hide()
+    f.wlSelectorBar:Hide()
     f.collapseAllBtn:Show()
     f.expandAllBtn:Show()
+    f.compareWLDropdown:Show()
+    f.compareWLLabel:Show()
+    UIDropDownMenu_SetText(f.compareWLDropdown, self.activeWishlist)
+    f.sourceDropdown:Show()
+    f.specDropdown:Show()
     f.UpdateTabAppearance()
     f.scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", CONTENT_PADDING, -90)
 
     local scrollChild = f.scrollChild
     ClearScrollContent(scrollChild)
 
+    -- Update character dropdown
+    self:UpdateCharDropdownText()
+
     if self.selectedSpec then
         local db = self:GetActiveDB()
         if db and db[self.selectedSpec] then
             local specData = db[self.selectedSpec]
-            local _, classToken = UnitClass("player")
+            local classToken = self:GetViewingClass()
             local classColored = self:ClassColor(classToken, specData.spec)
             f.title:SetText("BiS Gear Check - " .. classColored)
             UIDropDownMenu_SetText(f.specDropdown, specData.spec)
@@ -395,7 +768,7 @@ function BISGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
         -- Single-slot: combine header + equipped on one line
         local eq = slotResult.equipped[1]
         local header = self:CreateRow(parent, yOffset, width)
-        local eqText = eq.link or ("Item #" .. eq.id)
+        local eqText = eq.link or GetInventoryItemLink("player", eq.invSlot) or ("Item #" .. eq.id)
         header.text:SetText(arrow .. "|cffffd100" .. slotName .. ":|r " .. eqText .. " - " .. rankStr(eq))
         -- same size as item rows
         header:EnableMouse(true)
@@ -438,13 +811,14 @@ function BISGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
         if not isCollapsed then
             for _, eq in ipairs(slotResult.equipped) do
                 local row = self:CreateRow(parent, yOffset, width)
-                local eqText = eq.link or ("Item #" .. eq.id)
+                local lateLink = eq.link or GetInventoryItemLink("player", eq.invSlot)
+                local eqText = lateLink or ("Item #" .. eq.id)
                 row.text:SetText("  Equipped: " .. eqText .. " - " .. rankStr(eq))
-                if eq.link then
+                if lateLink then
                     row:EnableMouse(true)
                     row:SetScript("OnEnter", function(self)
                         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-                        GameTooltip:SetHyperlink(eq.link)
+                        GameTooltip:SetHyperlink(lateLink)
                         GameTooltip:Show()
                     end)
                     row:SetScript("OnLeave", function() GameTooltip:Hide() end)
@@ -464,7 +838,9 @@ function BISGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
         for _, upgrade in ipairs(slotResult.upgrades) do
             local row = self:CreateRow(parent, yOffset, width)
 
-            local itemName = upgrade.link or upgrade.name or ("Item #" .. upgrade.id)
+            -- Re-query item info at render time in case it loaded since comparison
+            local lateName, lateLink, lateQuality, _, _, _, _, _, _, lateIcon = GetItemInfo(upgrade.id)
+            local itemName = lateLink or upgrade.link or lateName or upgrade.name or ("Item #" .. upgrade.id)
             local sourceText = ""
             if upgrade.source and upgrade.source ~= "" and upgrade.source ~= "Unknown" then
                 if upgrade.sourceType and upgrade.sourceType ~= "" then
@@ -560,11 +936,24 @@ function BISGearCheck:RenderWishlist()
     local f = self.mainFrame
     if not f then return end
 
+    f.wlSelectorBar:Show()
     f.filterBar:Show()
+    f.filterBar:SetPoint("TOPLEFT", f, "TOPLEFT", 10, -74)
+    f.bislistBar:Hide()
+    f.compareWLDropdown:Hide()
+    f.compareWLLabel:Hide()
     f.collapseAllBtn:Hide()
     f.expandAllBtn:Hide()
+    f.sourceDropdown:Hide()
+    f.specDropdown:Hide()
     f.UpdateTabAppearance()
     f.scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", CONTENT_PADDING, -100)
+
+    -- Update character dropdown text
+    self:UpdateCharDropdownText()
+
+    -- Update wishlist name dropdown
+    UIDropDownMenu_SetText(f.wlNameDropdown, self.activeWishlist)
 
     if self.wishlistZoneFilter then
         UIDropDownMenu_SetText(f.zoneDropdown, self.wishlistZoneFilter)
@@ -576,7 +965,19 @@ function BISGearCheck:RenderWishlist()
     local scrollChild = f.scrollChild
     ClearScrollContent(scrollChild)
 
-    f.title:SetText("BiS Gear Check - |cff00ccffWishlist|r")
+    -- Show character name in title if viewing another character's wishlist
+    local titleSuffix = "|cff00ccff" .. self.activeWishlist .. "|r"
+    if self.viewingCharKey and self.viewingCharKey ~= self.playerKey then
+        local vcd = self:GetCharacterData(self.viewingCharKey)
+        local vcc = vcd and RAID_CLASS_COLORS[vcd.class]
+        local charName = self.viewingCharKey:match("^([^-]+)")
+        if vcc then
+            titleSuffix = string.format("|cff%02x%02x%02x%s|r - %s", vcc.r * 255, vcc.g * 255, vcc.b * 255, charName, titleSuffix)
+        else
+            titleSuffix = charName .. " - " .. titleSuffix
+        end
+    end
+    f.title:SetText("BiS Gear Check - " .. titleSuffix)
 
     local items = self:GetWishlistItems()
     local yOffset = -5
@@ -672,6 +1073,150 @@ function BISGearCheck:RenderWishlist()
             row:SetScript("OnLeave", function() GameTooltip:Hide() end)
 
             yOffset = yOffset - ITEM_ROW_HEIGHT
+        end
+    end
+
+    scrollChild:SetHeight(math.abs(yOffset) + 20)
+end
+
+-- ============================================================
+-- RENDER BIS LISTS
+-- ============================================================
+
+function BISGearCheck:RenderBisList()
+    local f = self.mainFrame
+    if not f then return end
+
+    f.filterBar:Hide()
+    f.bislistBar:Show()
+    f.wlSelectorBar:Hide()
+    f.compareWLDropdown:Hide()
+    f.compareWLLabel:Hide()
+    f.collapseAllBtn:Show()
+    f.expandAllBtn:Show()
+    f.sourceDropdown:Hide()
+    f.specDropdown:Hide()
+    f.UpdateTabAppearance()
+    f.scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", CONTENT_PADDING, -90)
+
+    -- Update character dropdown
+    self:UpdateCharDropdownText()
+
+    -- Update bislist source dropdown text
+    for _, srcInfo in ipairs(self.DataSources) do
+        if srcInfo.key == self.dataSource then
+            UIDropDownMenu_SetText(f.bislistSourceDropdown, srcInfo.label)
+            break
+        end
+    end
+
+    -- Update bislist spec dropdown text
+    if self.bislistSpec then
+        local db = self:GetActiveDB()
+        if db and db[self.bislistSpec] then
+            UIDropDownMenu_SetText(f.bislistSpecDropdown, db[self.bislistSpec].spec)
+        end
+    else
+        UIDropDownMenu_SetText(f.bislistSpecDropdown, "Select Spec")
+    end
+
+    local scrollChild = f.scrollChild
+    ClearScrollContent(scrollChild)
+
+    local specKey = self.bislistSpec
+    local db = self:GetActiveDB()
+
+    if not specKey or not db or not db[specKey] then
+        f.title:SetText("BiS Gear Check - |cff00ccffBiS Lists|r")
+        local yOffset = -5
+        local contentWidth = FRAME_WIDTH - 45
+        local row = self:CreateRow(scrollChild, yOffset, contentWidth)
+        row.text:SetText("|cff999999Select a spec from the dropdown above.|r")
+        scrollChild:SetHeight(40)
+        return
+    end
+
+    local specData = db[specKey]
+    local classColor = RAID_CLASS_COLORS[specData.class]
+    if classColor then
+        local colored = string.format("|cff%02x%02x%02x%s|r", classColor.r * 255, classColor.g * 255, classColor.b * 255, specData.spec)
+        f.title:SetText("BiS Gear Check - " .. colored)
+    else
+        f.title:SetText("BiS Gear Check - " .. specData.spec)
+    end
+
+    local yOffset = -5
+    local contentWidth = FRAME_WIDTH - 45
+
+    for _, slotName in ipairs(self.SlotOrder) do
+        local rawItems = specData.slots[slotName]
+        local items = rawItems and self:FilterBisListByFaction(rawItems) or {}
+        if #items > 0 then
+            local isCollapsed = self.collapsedSlots[slotName]
+            local arrow = isCollapsed and "|cffffd100[+]|r " or "|cffffd100[-]|r "
+
+            -- Slot header
+            local header = self:CreateRow(scrollChild, yOffset, contentWidth)
+            header.text:SetText(arrow .. "|cffffd100" .. slotName .. "|r")
+            header:EnableMouse(true)
+            header:SetScript("OnMouseDown", function()
+                BISGearCheck.collapsedSlots[slotName] = not BISGearCheck.collapsedSlots[slotName]
+                BISGearCheck:RefreshView()
+            end)
+            yOffset = yOffset - SLOT_HEADER_HEIGHT
+
+            if not isCollapsed then
+                for rank, itemID in ipairs(items) do
+                    local row = self:CreateRow(scrollChild, yOffset, contentWidth)
+
+                    local name, link, quality, _, _, _, _, _, _, icon = GetItemInfo(itemID)
+                    if not name then
+                        self.pendingItems[itemID] = true
+                        C_Item.RequestLoadItemDataByID(itemID)
+                    end
+
+                    local itemText = link or name or ("Item #" .. itemID)
+                    local sourceInfo = BISGearCheckSources and BISGearCheckSources[itemID]
+                    local sourceText = ""
+                    if sourceInfo and sourceInfo.source and sourceInfo.source ~= "Unknown" then
+                        if sourceInfo.sourceType and sourceInfo.sourceType ~= "" then
+                            sourceText = string.format("|cff888888- %s (%s)|r", sourceInfo.source, sourceInfo.sourceType)
+                        else
+                            sourceText = string.format("|cff888888- %s|r", sourceInfo.source)
+                        end
+                    end
+
+                    row.text:SetText(string.format("  |cff00ccff#%d|r %s %s", rank, itemText, sourceText))
+
+                    -- Item tooltip on hover
+                    row:EnableMouse(true)
+                    local capturedID = itemID
+                    row:SetScript("OnEnter", function(self)
+                        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+                        local _, rLink = GetItemInfo(capturedID)
+                        if rLink then
+                            GameTooltip:SetHyperlink(rLink)
+                        else
+                            GameTooltip:AddLine("Item #" .. capturedID)
+                            GameTooltip:AddLine("Loading...", 0.5, 0.5, 0.5)
+                        end
+                        GameTooltip:Show()
+                    end)
+                    row:SetScript("OnLeave", function() GameTooltip:Hide() end)
+
+                    yOffset = yOffset - ITEM_ROW_HEIGHT
+                end
+            end
+
+            -- Separator
+            local sep = self:CreateRow(scrollChild, yOffset, contentWidth)
+            local line = sep:CreateTexture(nil, "ARTWORK")
+            line:SetHeight(1)
+            line:SetPoint("TOPLEFT", sep, "TOPLEFT", 5, -2)
+            line:SetPoint("TOPRIGHT", sep, "TOPRIGHT", -5, -2)
+            line:SetColorTexture(0.3, 0.3, 0.3, 0.5)
+            yOffset = yOffset - 6
+            yOffset = yOffset - SECTION_SPACING
         end
     end
 

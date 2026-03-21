@@ -182,8 +182,9 @@ end
 
 -- Check if a zone has any wishlist items
 function BISGearCheck:ZoneHasWishlistItems(zone)
-    if not BISGearCheckSaved or not BISGearCheckSaved.wishlist then return false end
-    for itemID, _ in pairs(BISGearCheckSaved.wishlist) do
+    local wl = self:GetActiveWishlistTable()
+    if not wl then return false end
+    for itemID, _ in pairs(wl) do
         if self:ItemMatchesZone(itemID, zone) then
             return true
         end

@@ -2,8 +2,10 @@
 ## Title: BiS Gear Check
 ## Notes: Compare equipped gear against Best in Slot lists with tooltip integration.
 ## Author: Breakbone - Dreamscythe
-## Version: 2.0.0
+## Version: @project-version@
+## X-License: All Rights Reserved
 ## SavedVariables: BISGearCheckSaved
+## SavedVariablesPerCharacter: BISGearCheckChar
 
 libs\LibStub\LibStub.lua
 libs\CallbackHandler-1.0\CallbackHandler-1.0.lua

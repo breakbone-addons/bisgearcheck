@@ -1,0 +1,23 @@
+# Changelog
+
+## v2.1.0
+
+### New Features
+- **Faction Support**: Detects player faction and filters BiS lists to show only faction-appropriate items. Items in SourceDB can be tagged with a `faction` field ("Alliance" or "Horde"); untagged items are available to both.
+- **Multi-Character Management**: Characters on the same WoW account can view and edit each other's wishlists. A character selector dropdown at the top of the addon window lets you switch between characters.
+- **Gear Snapshots**: Each character's equipped gear is saved when they log in or change equipment, allowing other characters to see their gear on the Compare tab.
+- **Per-Character Settings**: Spec selection, data source, and wishlist auto-filter are now saved per-character instead of account-wide.
+
+### Changes
+- SavedVariables restructured: `BISGearCheckSaved` is account-wide (character registry, wishlists, tooltip settings), `BISGearCheckChar` is per-character (spec, data source, filters).
+- Automatic migration from pre-2.1.0 saved data format.
+- Added `.pkgmeta` and GitHub Actions workflow for CurseForge packaging.
+
+## v2.0.0
+
+- Initial release with Compare, Wishlists, and BiS Lists tabs.
+- WowTBC.gg and AtlasLoot data sources.
+- Tooltip integration with BiS rankings.
+- Zone-based wishlist filtering with auto-detect.
+- Multiple named wishlists with create/rename/delete.
+- Minimap button via LibDBIcon.
