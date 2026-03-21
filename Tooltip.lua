@@ -83,6 +83,12 @@ function BISGearCheck:OnTooltipSetItem(tooltip)
     local filterClass = BISGearCheckSaved.tooltip.showOnlyMyClass
     local sourceFilter = BISGearCheckSaved.tooltip.dataSource or "all"
 
+    -- Skip faction-restricted items unavailable to the player
+    local numItemID = tonumber(itemID)
+    if numItemID and not self:IsItemAvailableForFaction(numItemID) then
+        return
+    end
+
     local headerShown = false
 
     for _, entry in ipairs(entries) do

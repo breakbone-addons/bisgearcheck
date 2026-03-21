@@ -784,6 +784,11 @@ function BISGearCheck:GetWishlistItems()
             C_Item.RequestLoadItemDataByID(itemID)
         end
 
+        -- Prefer fresh SourceDB data over stale saved strings
+        local sourceInfo = BISGearCheckSources and BISGearCheckSources[itemID]
+        local source = (sourceInfo and sourceInfo.source) or info.source
+        local sourceType = (sourceInfo and sourceInfo.sourceType) or info.sourceType
+
         table.insert(items, {
             id = itemID,
             name = name or ("Item #" .. itemID),
@@ -792,8 +797,8 @@ function BISGearCheck:GetWishlistItems()
             icon = icon,
             slotName = info.slotName,
             rank = info.rank,
-            source = info.source,
-            sourceType = info.sourceType,
+            source = source,
+            sourceType = sourceType,
             isEquipped = isEquipped,
         })
     end
