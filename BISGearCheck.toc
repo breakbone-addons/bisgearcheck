@@ -1,0 +1,18 @@
+## Interface: 20505
+## Title: BiS Gear Check
+## Notes: Compare your equipped gear against Best in Slot lists. Uses data from AtlasLoot and WoWTBC.gg.
+## Author: Breakbone - Dreamscythe
+## Version: 1.1.0
+## SavedVariables: BISGearCheckSaved
+
+libs\LibStub\LibStub.lua
+libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
+libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+libs\LibDBIcon-1.0\LibDBIcon-1.0.lua
+
+Util.lua
+Data.lua
+Data_AtlasLoot.lua
+SourceDB.lua
+Core.lua
+UI.lua
