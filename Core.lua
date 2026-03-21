@@ -100,6 +100,14 @@ function BISGearCheck:CreateMinimapButton()
         icon = "Interface\\Icons\\INV_Misc_Book_01",
         label = "BiS Gear Check",
         OnClick = function(_, button)
+            if IsAltKeyDown() then
+                if Settings and Settings.OpenToCategory then
+                    Settings.OpenToCategory("BiS Gear Check")
+                elseif InterfaceOptionsFrame_OpenToCategory then
+                    InterfaceOptionsFrame_OpenToCategory("BiS Gear Check")
+                end
+                return
+            end
             if button == "LeftButton" then
                 BISGearCheck.viewMode = "comparison"
                 BISGearCheck:Toggle()
@@ -116,6 +124,7 @@ function BISGearCheck:CreateMinimapButton()
             tt:AddLine("BiS Gear Check", 0, 0.82, 1)
             tt:AddLine("Left-click: Compare gear", 1, 1, 1)
             tt:AddLine("Right-click: Wishlist", 1, 1, 1)
+            tt:AddLine("Alt-click: Settings", 1, 1, 1)
             tt:AddLine("/bisgear or /bgc", 0.5, 0.5, 0.5)
         end,
     })
