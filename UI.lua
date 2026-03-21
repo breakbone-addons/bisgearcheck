@@ -113,7 +113,7 @@ function BISGearCheck:CreateUI()
     end
 
     -- ============================================================
-    -- BUTTONS: Compare + Wishlist
+    -- BUTTONS: Compare + Wishlist (only the opposite mode button shows)
     -- ============================================================
 
     local btnWidth = 70
@@ -121,7 +121,7 @@ function BISGearCheck:CreateUI()
 
     local compBtn = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
     compBtn:SetSize(btnWidth, 22)
-    compBtn:SetPoint("TOPRIGHT", f, "TOPRIGHT", -(btnWidth + 20), btnY)
+    compBtn:SetPoint("TOPRIGHT", f, "TOPRIGHT", -10, btnY)
     compBtn:SetText("Compare")
     compBtn:SetScript("OnClick", function()
         BISGearCheck.viewMode = "comparison"
@@ -138,12 +138,49 @@ function BISGearCheck:CreateUI()
     end)
 
     -- ============================================================
+    -- Collapse All / Expand All links
+    -- ============================================================
+
+    local collapseAllBtn = CreateFrame("Button", nil, f)
+    collapseAllBtn:SetSize(70, 16)
+    collapseAllBtn:SetPoint("TOPLEFT", f, "TOPLEFT", 10, -52)
+    local collapseText = collapseAllBtn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    collapseText:SetPoint("LEFT")
+    collapseText:SetText("|cff00ccffCollapse All|r")
+    collapseAllBtn:SetScript("OnClick", function()
+        for _, slotName in ipairs(BISGearCheck.SlotOrder) do
+            BISGearCheck.collapsedSlots[slotName] = true
+        end
+        BISGearCheck:RefreshView()
+    end)
+    collapseAllBtn:SetScript("OnEnter", function(self) collapseText:SetText("|cffffffffCollapse All|r") end)
+    collapseAllBtn:SetScript("OnLeave", function(self) collapseText:SetText("|cff00ccffCollapse All|r") end)
+
+    local expandAllBtn = CreateFrame("Button", nil, f)
+    expandAllBtn:SetSize(65, 16)
+    expandAllBtn:SetPoint("LEFT", collapseAllBtn, "RIGHT", 5, 0)
+    local expandText = expandAllBtn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    expandText:SetPoint("LEFT")
+    expandText:SetText("|cff00ccffExpand All|r")
+    expandAllBtn:SetScript("OnClick", function()
+        for _, slotName in ipairs(BISGearCheck.SlotOrder) do
+            BISGearCheck.collapsedSlots[slotName] = false
+        end
+        BISGearCheck:RefreshView()
+    end)
+    expandAllBtn:SetScript("OnEnter", function(self) expandText:SetText("|cffffffffExpand All|r") end)
+    expandAllBtn:SetScript("OnLeave", function(self) expandText:SetText("|cff00ccffExpand All|r") end)
+
+    f.collapseAllBtn = collapseAllBtn
+    f.expandAllBtn = expandAllBtn
+
+    -- ============================================================
     -- WISHLIST FILTER BAR (shown only in wishlist mode)
     -- ============================================================
 
     local filterBar = CreateFrame("Frame", nil, f)
     filterBar:SetSize(FRAME_WIDTH - 20, 26)
-    filterBar:SetPoint("TOPLEFT", f, "TOPLEFT", 10, -55)
+    filterBar:SetPoint("TOPLEFT", f, "TOPLEFT", 10, -52)
     filterBar:Hide()
 
     local zoneDropdown = CreateFrame("Frame", "BISGearCheckZoneDropdown", filterBar, "UIDropDownMenuTemplate")
@@ -225,7 +262,7 @@ function BISGearCheck:CreateUI()
     -- ============================================================
 
     local scrollFrame = CreateFrame("ScrollFrame", "BISGearCheckScrollFrame", f, "UIPanelScrollFrameTemplate")
-    scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", CONTENT_PADDING, -58)
+    scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", CONTENT_PADDING, -68)
     scrollFrame:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -28, 8)
 
     local scrollChild = CreateFrame("Frame", "BISGearCheckScrollChild")
@@ -266,7 +303,11 @@ function BISGearCheck:RenderResults()
     if not f then return end
 
     f.filterBar:Hide()
-    f.scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", CONTENT_PADDING, -58)
+    f.compBtn:Hide()
+    f.wlBtn:Show()
+    f.collapseAllBtn:Show()
+    f.expandAllBtn:Show()
+    f.scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", CONTENT_PADDING, -68)
 
     local scrollChild = f.scrollChild
     ClearScrollContent(scrollChild)
@@ -317,7 +358,7 @@ function BISGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
         return "|cff999999Not on list|r"
     end
 
-    local arrow = isCollapsed and "|cffffd100+ |r" or "|cffffd100- |r"
+    local arrow = isCollapsed and "|cffffd100[+]|r " or "|cffffd100[-]|r "
 
     if not isDualSlot and #slotResult.equipped == 1 then
         -- Single-slot: combine header + equipped on one line
@@ -325,7 +366,7 @@ function BISGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
         local header = self:CreateRow(parent, yOffset, width)
         local eqText = eq.link or ("Item #" .. eq.id)
         header.text:SetText(arrow .. "|cffffd100" .. slotName .. ":|r " .. eqText .. " - " .. rankStr(eq))
-        header.text:SetFont(header.text:GetFont(), 13, "OUTLINE")
+        -- same size as item rows
         header:EnableMouse(true)
         header:SetScript("OnMouseDown", function()
             BISGearCheck.collapsedSlots[slotName] = not BISGearCheck.collapsedSlots[slotName]
@@ -344,7 +385,7 @@ function BISGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
         -- Single-slot empty: combine header + empty
         local header = self:CreateRow(parent, yOffset, width)
         header.text:SetText(arrow .. "|cffffd100" .. slotName .. ":|r |cff999999(empty)|r")
-        header.text:SetFont(header.text:GetFont(), 13, "OUTLINE")
+        -- same size as item rows
         header:EnableMouse(true)
         header:SetScript("OnMouseDown", function()
             BISGearCheck.collapsedSlots[slotName] = not BISGearCheck.collapsedSlots[slotName]
@@ -355,7 +396,7 @@ function BISGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
         -- Dual-slot: header then equipped items
         local header = self:CreateRow(parent, yOffset, width)
         header.text:SetText(arrow .. "|cffffd100" .. slotName .. "|r")
-        header.text:SetFont(header.text:GetFont(), 13, "OUTLINE")
+        -- same size as item rows
         header:EnableMouse(true)
         header:SetScript("OnMouseDown", function()
             BISGearCheck.collapsedSlots[slotName] = not BISGearCheck.collapsedSlots[slotName]
@@ -489,6 +530,10 @@ function BISGearCheck:RenderWishlist()
     if not f then return end
 
     f.filterBar:Show()
+    f.wlBtn:Hide()
+    f.compBtn:Show()
+    f.collapseAllBtn:Hide()
+    f.expandAllBtn:Hide()
     f.scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", CONTENT_PADDING, -82)
 
     if self.wishlistZoneFilter then
@@ -530,7 +575,7 @@ function BISGearCheck:RenderWishlist()
                 currentSlot = item.slotName
                 local header = self:CreateRow(scrollChild, yOffset, contentWidth)
                 header.text:SetText("|cffffd100" .. (currentSlot or "Unknown") .. "|r")
-                header.text:SetFont(header.text:GetFont(), 13, "OUTLINE")
+                -- same size as item rows
                 yOffset = yOffset - SLOT_HEADER_HEIGHT
             end
 
