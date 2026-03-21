@@ -1,68 +1,75 @@
-# BiS Gear Check
+<p align="center">
+  <img src="art/logo.png" alt="BiS Gear Check" width="200"/>
+</p>
 
-A World of Warcraft TBC Classic addon that compares your equipped gear against Best in Slot lists, with tooltip integration, a wishlist system, and full BiS list browsing. Supports both Alliance and Horde characters with cross-character wishlist management.
+<h1 align="center">BiS Gear Check</h1>
 
-**Author:** Breakbone - Dreamscythe
-**Interface:** 20505 (TBC Anniversary)
+<p align="center">
+  A World of Warcraft TBC Anniversary addon that compares your equipped gear against ranked Best in Slot lists.<br/>
+  Tooltip integration, wishlists, full BiS list browsing, and multi-character support.
+</p>
 
-## Features
+<p align="center">
+  <strong>Author:</strong> Breakbone - Dreamscythe&nbsp;&nbsp;|&nbsp;&nbsp;<strong>Interface:</strong> 20505 (TBC Anniversary)
+</p>
 
-### Gear Comparison
-- Compares your currently equipped items against ranked BiS lists for your spec
+---
+
+## Compare
+
+See every upgrade available for your spec, ranked by slot. Your equipped item is shown with its BiS rank, and every item ranked higher is listed with its drop source.
+
+<img src="art/screenshot-compare.png" alt="Compare Tab" width="600"/>
+
 - Auto-detects your spec from talent points
-- Shows upgrade rank for each slot with items ranked higher than what you have equipped
-- Collapsible slot sections with Collapse All / Expand All controls
-- Displays item source and drop location (boss, zone, quest, etc.)
-- Automatically refreshes when you change gear
+- Collapsible slot sections with Collapse All / Expand All
+- Add upgrades directly to your wishlist with the **+** button
+- Automatically refreshes when you swap gear
 - Faction-aware: filters out items not available to your faction
 
-### Multi-Character Support
-- **Character selector** at the top of the addon lets you switch between all characters on the account
-- View and edit any character's wishlists from any other character
-- Gear snapshots are saved automatically so you can see another character's equipped items on the Compare tab
-- Each character's spec, data source, and filter settings are saved independently
+## BiS Lists
 
-### Wishlist
-- **Multiple wishlists** per character — create, rename, delete, and switch between them
-- Add upgrade items to the active wishlist from the comparison view
-- Filter wishlist by dungeon/raid zone
-- Auto-filter mode automatically filters by your current zone when entering a dungeon or raid
-- Zones with wishlist items are highlighted green in the dropdown
-- Tracks whether wishlist items are currently equipped
+Browse the full BiS list for any spec across all classes. Switch between data sources to compare rankings.
 
-### BiS Lists Browser
-- Browse the full BiS list for any spec across all classes
+<img src="art/screenshot-bis-lists.png" alt="BiS Lists Tab" width="600"/>
+
 - Class-colored headers in the spec dropdown
-- Switch between data sources to compare rankings
+- WowTBC.gg and AtlasLoot data sources
 
-### Tooltip Integration
-- Injects BiS ranking info into item tooltips (GameTooltip, ItemRefTooltip, ShoppingTooltip)
-- Shows which specs rank the item and at what position
-- Class-colored spec names
-- Configurable via Interface Options:
-  - Toggle tooltip injection on/off
-  - Filter to show only your class
-  - Select tooltip data source (Both, WowTBC.gg, AtlasLoot)
+## Wishlists
 
-### Conflict Detection
-- Detects when AtlasBIS Tooltips is also loaded
-- Presents a dialog to choose: BiS Gear Check only, Keep Both, or AtlasBIS only
-- Remembers your choice across sessions
+Track the items you're chasing across dungeons and raids. Create multiple named wishlists and filter by zone.
 
-### Minimap Button
-- Left-click: Open gear comparison
-- Right-click: Open wishlist
-- Alt-click: Open addon settings in Interface Options
-- Powered by LibDataBroker + LibDBIcon
+<img src="art/screenshot-wishlist.png" alt="Wishlist Tab" width="600"/>
 
-## Slash Commands
+- Multiple wishlists per character with create, rename, and delete
+- Filter by dungeon or raid zone
+- Auto-filter mode shows items for your current zone when you enter an instance
+- Zones with wishlist items are highlighted green in the dropdown
 
-- `/bisgear` or `/bgc` — Toggle the comparison view
-- `/bisgear wishlist` or `/bgc wl` — Toggle the wishlist view
+## Tooltip Integration
+
+BiS rankings appear directly in item tooltips. Hover over any item to see which specs rank it.
+
+<img src="art/screenshot-settings.png" alt="Settings" width="400"/>
+
+- Works in bags, chat links, vendor windows, and the auction house
+- Filter to your class only, choose your data source, or disable entirely
+- Detects conflicts with AtlasBIS Tooltips and lets you choose which to use
+
+## Multi-Character Support
+
+Switch between all characters on your account from the character selector dropdown. View another character's gear on the Compare tab, edit their wishlists, and plan upgrades across your roster. Gear snapshots are saved automatically.
+
+## Usage
+
+| Action | How |
+|--------|-----|
+| Open Compare | Left-click minimap button, or `/bisgear` |
+| Open Wishlists | Right-click minimap button, or `/bgc wl` |
+| Open Settings | Alt-click minimap button |
 
 ## Data Sources
-
-BiS Gear Check supports two independent data sources:
 
 | Source | Database | Description |
 |--------|----------|-------------|
