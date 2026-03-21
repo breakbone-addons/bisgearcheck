@@ -1,5 +1,19 @@
 # Changelog
 
+Versioning: **MAJOR.MINOR.PATCH**
+- **MAJOR** — Breaking changes (saved variable resets, incompatible data format changes)
+- **MINOR** — New features or significant improvements
+- **PATCH** — Bug fixes, data corrections, small tweaks
+
+## v2.2.0
+
+### Changes
+- Refactored Core.lua and UI.lua into smaller, focused files: Character.lua, Wishlist.lua, Comparison.lua, UIControls.lua, UIWishlistControls.lua, UIRenderComparison.lua, UIRenderLists.lua.
+- Added GitHub Actions workflows for manual release and pre-release builds.
+- Fixed dropdown indentation inconsistency across all dropdown menus.
+- Added Limitations section to README.
+- TOC version is now maintained manually instead of using @project-version@ token.
+
 ## v2.1.0
 
 ### New Features
