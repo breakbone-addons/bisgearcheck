@@ -46,12 +46,71 @@ function BISGearCheck:CreateUI()
     f.title:SetText("BiS Gear Check")
 
     -- ============================================================
-    -- TOP ROW: Data Source + Spec dropdowns
+    -- TABS: Compare + Wishlist (right under title bar)
+    -- ============================================================
+
+    local TAB_WIDTH = 80
+    local TAB_HEIGHT = 22
+
+    local function CreateTab(parent, text, index)
+        local tab = CreateFrame("Button", "BISGearCheckTab" .. index, parent)
+        tab:SetSize(TAB_WIDTH, TAB_HEIGHT)
+
+        local bg = tab:CreateTexture(nil, "BACKGROUND")
+        bg:SetAllPoints()
+        tab.bg = bg
+
+        local label = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        label:SetPoint("CENTER", 0, 0)
+        label:SetText(text)
+        tab.label = label
+
+        return tab
+    end
+
+    local compTab = CreateTab(f, "Compare", 1)
+    compTab:SetPoint("TOPLEFT", f, "TOPLEFT", 8, -26)
+
+    local wlTab = CreateTab(f, "Wishlist", 2)
+    wlTab:SetPoint("LEFT", compTab, "RIGHT", 2, 0)
+
+    local function UpdateTabAppearance()
+        if BISGearCheck.viewMode == "comparison" then
+            compTab.bg:SetColorTexture(0.2, 0.2, 0.2, 1)
+            compTab.label:SetTextColor(1, 0.82, 0)
+            wlTab.bg:SetColorTexture(0.08, 0.08, 0.08, 0.8)
+            wlTab.label:SetTextColor(0.5, 0.5, 0.5)
+        else
+            wlTab.bg:SetColorTexture(0.2, 0.2, 0.2, 1)
+            wlTab.label:SetTextColor(1, 0.82, 0)
+            compTab.bg:SetColorTexture(0.08, 0.08, 0.08, 0.8)
+            compTab.label:SetTextColor(0.5, 0.5, 0.5)
+        end
+    end
+
+    compTab:SetScript("OnClick", function()
+        BISGearCheck.viewMode = "comparison"
+        UpdateTabAppearance()
+        BISGearCheck:Refresh()
+    end)
+
+    wlTab:SetScript("OnClick", function()
+        BISGearCheck.viewMode = "wishlist"
+        UpdateTabAppearance()
+        BISGearCheck:RefreshView()
+    end)
+
+    f.compTab = compTab
+    f.wlTab = wlTab
+    f.UpdateTabAppearance = UpdateTabAppearance
+
+    -- ============================================================
+    -- DROPDOWNS ROW: Data Source + Spec (below tabs)
     -- ============================================================
 
     -- Data source dropdown
     local sourceDropdown = CreateFrame("Frame", "BISGearCheckSourceDropdown", f, "UIDropDownMenuTemplate")
-    sourceDropdown:SetPoint("TOPLEFT", f, "TOPLEFT", -5, -28)
+    sourceDropdown:SetPoint("TOPLEFT", f, "TOPLEFT", -5, -48)
     UIDropDownMenu_SetWidth(sourceDropdown, 100)
 
     local function SourceDropdownInit(self, level)
@@ -113,71 +172,12 @@ function BISGearCheck:CreateUI()
     end
 
     -- ============================================================
-    -- TABS: Compare + Wishlist
-    -- ============================================================
-
-    local TAB_WIDTH = 80
-    local TAB_HEIGHT = 24
-
-    local function CreateTab(parent, text, index)
-        local tab = CreateFrame("Button", "BISGearCheckTab" .. index, parent)
-        tab:SetSize(TAB_WIDTH, TAB_HEIGHT)
-
-        local bg = tab:CreateTexture(nil, "BACKGROUND")
-        bg:SetAllPoints()
-        tab.bg = bg
-
-        local label = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-        label:SetPoint("CENTER", 0, 0)
-        label:SetText(text)
-        tab.label = label
-
-        return tab
-    end
-
-    local compTab = CreateTab(f, "Compare", 1)
-    compTab:SetPoint("BOTTOMLEFT", f.TitleBg, "BOTTOMLEFT", 5, -TAB_HEIGHT)
-
-    local wlTab = CreateTab(f, "Wishlist", 2)
-    wlTab:SetPoint("LEFT", compTab, "RIGHT", 2, 0)
-
-    local function UpdateTabAppearance()
-        if BISGearCheck.viewMode == "comparison" then
-            compTab.bg:SetColorTexture(0.15, 0.15, 0.15, 1)
-            compTab.label:SetTextColor(1, 0.82, 0)
-            wlTab.bg:SetColorTexture(0.05, 0.05, 0.05, 0.8)
-            wlTab.label:SetTextColor(0.5, 0.5, 0.5)
-        else
-            wlTab.bg:SetColorTexture(0.15, 0.15, 0.15, 1)
-            wlTab.label:SetTextColor(1, 0.82, 0)
-            compTab.bg:SetColorTexture(0.05, 0.05, 0.05, 0.8)
-            compTab.label:SetTextColor(0.5, 0.5, 0.5)
-        end
-    end
-
-    compTab:SetScript("OnClick", function()
-        BISGearCheck.viewMode = "comparison"
-        UpdateTabAppearance()
-        BISGearCheck:Refresh()
-    end)
-
-    wlTab:SetScript("OnClick", function()
-        BISGearCheck.viewMode = "wishlist"
-        UpdateTabAppearance()
-        BISGearCheck:RefreshView()
-    end)
-
-    f.compTab = compTab
-    f.wlTab = wlTab
-    f.UpdateTabAppearance = UpdateTabAppearance
-
-    -- ============================================================
-    -- Collapse All / Expand All links
+    -- Collapse All / Expand All links (below dropdowns)
     -- ============================================================
 
     local collapseAllBtn = CreateFrame("Button", nil, f)
     collapseAllBtn:SetSize(70, 16)
-    collapseAllBtn:SetPoint("TOPLEFT", f, "TOPLEFT", 10, -52)
+    collapseAllBtn:SetPoint("TOPLEFT", f, "TOPLEFT", 10, -74)
     local collapseText = collapseAllBtn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     collapseText:SetPoint("LEFT")
     collapseText:SetText("|cff00ccffCollapse All|r")
@@ -214,7 +214,7 @@ function BISGearCheck:CreateUI()
 
     local filterBar = CreateFrame("Frame", nil, f)
     filterBar:SetSize(FRAME_WIDTH - 20, 26)
-    filterBar:SetPoint("TOPLEFT", f, "TOPLEFT", 10, -52)
+    filterBar:SetPoint("TOPLEFT", f, "TOPLEFT", 10, -74)
     filterBar:Hide()
 
     local zoneDropdown = CreateFrame("Frame", "BISGearCheckZoneDropdown", filterBar, "UIDropDownMenuTemplate")
@@ -296,7 +296,7 @@ function BISGearCheck:CreateUI()
     -- ============================================================
 
     local scrollFrame = CreateFrame("ScrollFrame", "BISGearCheckScrollFrame", f, "UIPanelScrollFrameTemplate")
-    scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", CONTENT_PADDING, -68)
+    scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", CONTENT_PADDING, -90)
     scrollFrame:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -28, 8)
 
     local scrollChild = CreateFrame("Frame", "BISGearCheckScrollChild")
@@ -338,7 +338,7 @@ function BISGearCheck:RenderResults()
     f.collapseAllBtn:Show()
     f.expandAllBtn:Show()
     f.UpdateTabAppearance()
-    f.scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", CONTENT_PADDING, -68)
+    f.scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", CONTENT_PADDING, -90)
 
     local scrollChild = f.scrollChild
     ClearScrollContent(scrollChild)
@@ -564,7 +564,7 @@ function BISGearCheck:RenderWishlist()
     f.collapseAllBtn:Hide()
     f.expandAllBtn:Hide()
     f.UpdateTabAppearance()
-    f.scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", CONTENT_PADDING, -82)
+    f.scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", CONTENT_PADDING, -100)
 
     if self.wishlistZoneFilter then
         UIDropDownMenu_SetText(f.zoneDropdown, self.wishlistZoneFilter)
