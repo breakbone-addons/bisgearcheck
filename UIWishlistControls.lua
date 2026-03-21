@@ -126,7 +126,7 @@ function BISGearCheck:SetupWishlistFilterBar(f)
             BISGearCheck.wishlistZoneFilter = nil
             BISGearCheck:RefreshView()
         end
-        info.checked = (BISGearCheck.wishlistZoneFilter == nil)
+        info.notCheckable = true
         UIDropDownMenu_AddButton(info, level)
 
         -- Categorized zones with dividers
@@ -154,7 +154,7 @@ function BISGearCheck:SetupWishlistFilterBar(f)
                     BISGearCheck.wishlistZoneFilter = self.value
                     BISGearCheck:RefreshView()
                 end
-                zInfo.checked = (BISGearCheck.wishlistZoneFilter == zone)
+                zInfo.notCheckable = true
                 UIDropDownMenu_AddButton(zInfo, level)
             end
         end
@@ -193,7 +193,7 @@ end
 function BISGearCheck:SetupWishlistSelectorBar(f)
     local wlSelectorBar = CreateFrame("Frame", nil, f)
     wlSelectorBar:SetSize(self.FRAME_WIDTH - 20, 26)
-    wlSelectorBar:SetPoint("TOPLEFT", f, "TOPLEFT", 0, -48)
+    wlSelectorBar:SetPoint("TOPLEFT", f, "TOPLEFT", 0, -52)
     wlSelectorBar:Hide()
 
     -- Wishlist name dropdown
@@ -212,7 +212,7 @@ function BISGearCheck:SetupWishlistSelectorBar(f)
                 UIDropDownMenu_SetText(wlNameDropdown, self.value)
                 BISGearCheck:SetActiveWishlist(self.value)
             end
-            info.checked = (name == BISGearCheck.activeWishlist)
+            info.notCheckable = true
             UIDropDownMenu_AddButton(info, level)
         end
     end

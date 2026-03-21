@@ -114,7 +114,7 @@ function BISGearCheck:SetupCharacterSelector(f)
                 BISGearCheck:UpdateCharDropdownText()
                 BISGearCheck:SetViewingCharacter(self.value)
             end
-            info.checked = (charKey == BISGearCheck:GetViewingCharKey())
+            info.notCheckable = true
             UIDropDownMenu_AddButton(info, level)
         end
     end
@@ -157,7 +157,7 @@ function BISGearCheck:SetupSourceSpecDropdowns(f)
                 UIDropDownMenu_SetText(sourceDropdown, self:GetText())
                 BISGearCheck:SetDataSource(self.value)
             end
-            info.checked = (srcInfo.key == BISGearCheck.dataSource)
+            info.notCheckable = true
             UIDropDownMenu_AddButton(info, level)
         end
     end
@@ -193,7 +193,7 @@ function BISGearCheck:SetupSourceSpecDropdowns(f)
                     UIDropDownMenu_SetText(specDropdown, self:GetText())
                     BISGearCheck:SetSpec(self.value)
                 end
-                info.checked = (specInfo.key == BISGearCheck.selectedSpec)
+                info.notCheckable = true
                 UIDropDownMenu_AddButton(info, level)
             end
         end
@@ -249,7 +249,7 @@ function BISGearCheck:SetupCollapseControls(f)
 
     -- Wishlist picker (right-aligned, shown on Compare tab)
     local compareWLDropdown = CreateFrame("Frame", "BISGearCheckCompareWLDropdown", f, "UIDropDownMenuTemplate")
-    compareWLDropdown:SetPoint("TOPRIGHT", f, "TOPRIGHT", -5, -70)
+    compareWLDropdown:SetPoint("TOPRIGHT", f, "TOPRIGHT", -5, -74)
     UIDropDownMenu_SetWidth(compareWLDropdown, 90)
     UIDropDownMenu_JustifyText(compareWLDropdown, "RIGHT")
 
@@ -264,7 +264,7 @@ function BISGearCheck:SetupCollapseControls(f)
                 UIDropDownMenu_SetText(compareWLDropdown, self.value)
                 BISGearCheck:SetActiveWishlist(self.value)
             end
-            info.checked = (name == BISGearCheck.activeWishlist)
+            info.notCheckable = true
             UIDropDownMenu_AddButton(info, level)
         end
     end
@@ -307,7 +307,7 @@ function BISGearCheck:SetupBisListBar(f)
                 UIDropDownMenu_SetText(bislistSourceDropdown, self:GetText())
                 BISGearCheck:SetDataSource(self.value)
             end
-            info.checked = (srcInfo.key == BISGearCheck.dataSource)
+            info.notCheckable = true
             UIDropDownMenu_AddButton(info, level)
         end
     end
@@ -357,7 +357,7 @@ function BISGearCheck:SetupBisListBar(f)
                             BISGearCheck.bislistSpec = self.value
                             BISGearCheck:RefreshView()
                         end
-                        sInfo.checked = (specInfo.key == BISGearCheck.bislistSpec)
+                        sInfo.notCheckable = true
                         UIDropDownMenu_AddButton(sInfo, level)
                     end
                 end
