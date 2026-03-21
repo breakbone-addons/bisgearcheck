@@ -15,7 +15,7 @@ jobs:
 
       - uses: BigWigsMods/packager@v2
         with:
-          args: -d -z
+          args: -d
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
