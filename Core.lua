@@ -72,6 +72,11 @@ function BISGearCheck:Initialize()
     -- Track current zone
     self.currentZone = GetRealZoneText() or ""
 
+    -- Initialize tooltip system
+    self:EnsureTooltipSettings()
+    self:BuildTooltipIndex()
+    self:InstallTooltipHooks()
+
     -- Register slash commands
     SLASH_BISGEARCHECK1 = "/bisgear"
     SLASH_BISGEARCHECK2 = "/bgc"
