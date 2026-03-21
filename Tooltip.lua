@@ -129,6 +129,9 @@ end
 
 -- Hook tooltips
 function BISGearCheck:InstallTooltipHooks()
+    if self.tooltipHooked then return end
+    self.tooltipHooked = true
+
     local tooltips = {
         "GameTooltip",
         "ItemRefTooltip",
@@ -145,5 +148,98 @@ function BISGearCheck:InstallTooltipHooks()
                 end)
             end)
         end
+    end
+end
+
+-- ============================================================
+-- CONFLICT DETECTION
+-- ============================================================
+
+-- Conflicting addons that also inject BiS data into tooltips
+local CONFLICTING_ADDONS = {
+    {
+        name = "AtlasBIStooltips",
+        label = "AtlasBIS Tooltips",
+    },
+}
+
+-- Static popup dialog definition
+StaticPopupDialogs["BISGEARCHECK_TOOLTIP_CONFLICT"] = {
+    text = "BiS Gear Check has detected that |cff00ccff%s|r is also adding BiS rankings to item tooltips.\n\nWhich would you like to use?",
+    button1 = "BiS Gear Check",
+    button2 = "Keep Both",
+    button3 = "%s",
+    OnAccept = function()
+        -- Use BiS Gear Check only — disable the conflicting addon's tooltips
+        BISGearCheck:EnsureTooltipSettings()
+        BISGearCheckSaved.tooltip.showBiS = true
+        BISGearCheckSaved.tooltip.conflictResolved = BISGearCheck._conflictAddon
+        BISGearCheckSaved.tooltip.conflictChoice = "bisgearcheck"
+        -- Disable the other addon's tooltip output
+        BISGearCheck:DisableConflictingTooltips()
+        BISGearCheck:InstallTooltipHooks()
+    end,
+    OnCancel = function()
+        -- Keep both
+        BISGearCheck:EnsureTooltipSettings()
+        BISGearCheckSaved.tooltip.conflictResolved = BISGearCheck._conflictAddon
+        BISGearCheckSaved.tooltip.conflictChoice = "both"
+        BISGearCheck:InstallTooltipHooks()
+    end,
+    OnAlt = function()
+        -- Use the other addon only — disable BiS Gear Check tooltips
+        BISGearCheck:EnsureTooltipSettings()
+        BISGearCheckSaved.tooltip.showBiS = false
+        BISGearCheckSaved.tooltip.conflictResolved = BISGearCheck._conflictAddon
+        BISGearCheckSaved.tooltip.conflictChoice = "other"
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = false,
+    preferredIndex = 3,
+}
+
+function BISGearCheck:CheckTooltipConflict()
+    for _, conflict in ipairs(CONFLICTING_ADDONS) do
+        local loaded = IsAddOnLoaded(conflict.name)
+        if loaded then
+            -- Check if we already resolved this conflict
+            local resolved = BISGearCheckSaved and BISGearCheckSaved.tooltip
+                and BISGearCheckSaved.tooltip.conflictResolved == conflict.name
+
+            if resolved then
+                -- Apply the previous choice silently
+                local choice = BISGearCheckSaved.tooltip.conflictChoice
+                if choice == "bisgearcheck" then
+                    self:DisableConflictingTooltips()
+                    self:InstallTooltipHooks()
+                elseif choice == "both" then
+                    self:InstallTooltipHooks()
+                elseif choice == "other" then
+                    -- Don't install our hooks
+                end
+            else
+                -- Show the dialog
+                self._conflictAddon = conflict.name
+                -- Set button3 text dynamically
+                StaticPopupDialogs["BISGEARCHECK_TOOLTIP_CONFLICT"].button3 = conflict.label
+                StaticPopupDialogs["BISGEARCHECK_TOOLTIP_CONFLICT"].text =
+                    "BiS Gear Check has detected that |cff00ccff" .. conflict.label ..
+                    "|r is also adding BiS rankings to item tooltips.\n\nWhich would you like to use?"
+                StaticPopup_Show("BISGEARCHECK_TOOLTIP_CONFLICT")
+            end
+            return
+        end
+    end
+
+    -- No conflict — just install hooks
+    self:InstallTooltipHooks()
+end
+
+-- Disable the conflicting addon's tooltip injection
+function BISGearCheck:DisableConflictingTooltips()
+    -- AtlasBIStooltips uses slcDB.showBiS to control its tooltip output
+    if _G.slcDB then
+        _G.slcDB.showBiS = 0
     end
 end

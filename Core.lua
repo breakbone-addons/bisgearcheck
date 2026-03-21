@@ -75,7 +75,7 @@ function BISGearCheck:Initialize()
     -- Initialize tooltip system
     self:EnsureTooltipSettings()
     self:BuildTooltipIndex()
-    self:InstallTooltipHooks()
+    self:CheckTooltipConflict()
 
     -- Register slash commands
     SLASH_BISGEARCHECK1 = "/bisgear"
