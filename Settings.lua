@@ -112,6 +112,7 @@ end)
 if Settings and Settings.RegisterCanvasLayoutCategory then
     local category = Settings.RegisterCanvasLayoutCategory(panel, panel.name)
     Settings.RegisterAddOnCategory(category)
+    BISGearCheck.settingsCategoryID = category:GetID()
 elseif InterfaceOptions_AddCategory then
     InterfaceOptions_AddCategory(panel)
 end

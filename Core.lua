@@ -101,9 +101,10 @@ function BISGearCheck:CreateMinimapButton()
         label = "BiS Gear Check",
         OnClick = function(_, button)
             if IsAltKeyDown() then
-                if Settings and Settings.OpenToCategory then
-                    Settings.OpenToCategory("BiS Gear Check")
+                if Settings and Settings.OpenToCategory and BISGearCheck.settingsCategoryID then
+                    Settings.OpenToCategory(BISGearCheck.settingsCategoryID)
                 elseif InterfaceOptionsFrame_OpenToCategory then
+                    InterfaceOptionsFrame_OpenToCategory("BiS Gear Check")
                     InterfaceOptionsFrame_OpenToCategory("BiS Gear Check")
                 end
                 return
