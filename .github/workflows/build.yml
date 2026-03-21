@@ -19,16 +19,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Get version string
-        id: version
-        run: echo "tag=$(git describe --tags --always)" >> "$GITHUB_OUTPUT"
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: build-${{ steps.version.outputs.tag }}
-          name: Build ${{ steps.version.outputs.tag }}
-          body: Manually triggered build from commit ${{ github.sha }}.
+          tag_name: build-${{ github.run_number }}
+          name: Build #${{ github.run_number }} (${{ github.ref_name }})
+          body: Manually triggered build from ${{ github.ref_name }} at ${{ github.sha }}.
           files: .release/*.zip
           prerelease: true
         env:
