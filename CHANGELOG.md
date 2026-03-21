@@ -5,7 +5,10 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
-## v2.2.0
+## v3.0.0
+
+### Breaking Changes
+- Renamed addon from BISGearCheck to BiSGearCheck. Addon folder, TOC file, SavedVariables, and all Lua identifiers updated. Existing users must rename their addon folder and saved variable files.
 
 ### Changes
 - Refactored Core.lua and UI.lua into smaller, focused files: Character.lua, Wishlist.lua, Comparison.lua, UIControls.lua, UIWishlistControls.lua, UIRenderComparison.lua, UIRenderLists.lua.
@@ -13,6 +16,7 @@ Versioning: **MAJOR.MINOR.PATCH**
 - Fixed dropdown indentation inconsistency across all dropdown menus.
 - Added Limitations section to README.
 - TOC version is now maintained manually instead of using @project-version@ token.
+- GitHub repository permissions locked down (branch protection, Actions visibility, fork workflow restrictions).
 
 ## v2.1.0
 
