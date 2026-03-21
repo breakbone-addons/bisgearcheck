@@ -32,6 +32,9 @@ showBiSCheck.Text:SetText("Show BiS rankings in tooltips")
 showBiSCheck:SetScript("OnClick", function(self)
     BISGearCheck:EnsureTooltipSettings()
     BISGearCheckSaved.tooltip.showBiS = self:GetChecked() and true or false
+    -- Clear conflict resolution so the dialog reappears on next reload
+    BISGearCheckSaved.tooltip.conflictResolved = nil
+    BISGearCheckSaved.tooltip.conflictChoice = nil
 end)
 
 -- ============================================================
