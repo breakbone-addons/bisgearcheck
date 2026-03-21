@@ -201,7 +201,7 @@ StaticPopupDialogs["BISGEARCHECK_TOOLTIP_CONFLICT"] = {
 
 function BISGearCheck:CheckTooltipConflict()
     for _, conflict in ipairs(CONFLICTING_ADDONS) do
-        local loaded = IsAddOnLoaded(conflict.name)
+        local loaded = (C_AddOns and C_AddOns.IsAddOnLoaded or IsAddOnLoaded)(conflict.name)
         if loaded then
             -- Check if we already resolved this conflict
             local resolved = BISGearCheckSaved and BISGearCheckSaved.tooltip
