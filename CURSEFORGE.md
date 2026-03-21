@@ -22,9 +22,9 @@ Track the items you're chasing. Create multiple named wishlists, add upgrades di
 
 ### Tooltip Integration
 
-BiS rankings are injected directly into item tooltips. Hover over any item in your bags, in chat, or on a vendor and see which specs rank it and at what position. Configurable in the settings — filter to your class only, choose your data source, or turn it off entirely.
+BiS rankings are injected directly into item tooltips. Hover over any item in your bags, in chat, or on a vendor and see which specs rank it and at what position, with class-colored spec names. Configurable in the settings — filter to your class only, choose your data source, or turn it off entirely.
 
-![Settings](https://raw.githubusercontent.com/breakbone-addons/bisgearcheck/main/art/screenshot-settings.png)
+![Tooltip Integration](https://raw.githubusercontent.com/breakbone-addons/bisgearcheck/main/art/screenshot-tooltip.png)
 
 ### Multi-Character Support
 

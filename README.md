@@ -49,11 +49,12 @@ Track the items you're chasing across dungeons and raids. Create multiple named 
 
 ## Tooltip Integration
 
-BiS rankings appear directly in item tooltips. Hover over any item to see which specs rank it.
+BiS rankings appear directly in item tooltips. Hover over any item to see which specs rank it and at what position, with class-colored spec names.
 
-<img src="art/screenshot-settings.png" alt="Settings" width="400"/>
+<img src="art/screenshot-tooltip.png" alt="Tooltip Integration" width="380"/>
 
 - Works in bags, chat links, vendor windows, and the auction house
+- Shows all specs that rank the item, with their BiS position
 - Filter to your class only, choose your data source, or disable entirely
 - Detects conflicts with AtlasBIS Tooltips and lets you choose which to use
 
