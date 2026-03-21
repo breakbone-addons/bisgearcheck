@@ -71,35 +71,6 @@ BiS Gear Check supports two independent data sources:
 
 Item drop sources (boss names, zones, quest names) are stored in `SourceDB.lua`. Items can be tagged with a `faction` field ("Alliance" or "Horde") for faction-specific filtering; untagged items are available to both factions.
 
-## File Structure
-
-| File | Purpose |
-|------|---------|
-| `BISGearCheck.toc` | Addon manifest |
-| `Util.lua` | Slot mappings, class/spec tables, zone mappings, helpers |
-| `Data.lua` | WowTBC.gg BiS database |
-| `Data_AtlasLoot.lua` | AtlasLoot BiS database |
-| `SourceDB.lua` | Item source/drop location database (with optional faction tags) |
-| `Tooltip.lua` | Tooltip injection, conflict detection |
-| `Settings.lua` | Interface Options panel |
-| `Core.lua` | Initialization, slash commands, event handling, comparison logic, wishlist management, character registry |
-| `UI.lua` | Main frame, tabs, dropdowns, character selector, scroll content rendering |
-| `libs/` | LibStub, CallbackHandler, LibDataBroker, LibDBIcon |
-
-## Packaging & Release
-
-This addon uses the [BigWigs Packager](https://github.com/BigWigsMods/packager) for automated releases:
-
-1. Tag a release: `git tag -a v2.1.0 -m "Release 2.1.0"`
-2. Push the tag: `git push origin v2.1.0`
-3. GitHub Actions automatically packages and uploads to CurseForge
-
-The `## Version:` field in the TOC uses `@project-version@` which is replaced by the git tag at build time.
-
-### Secrets Required
-
-- `CF_API_KEY` — CurseForge API token (set in GitHub repo settings)
-
 ## Dependencies
 
 No hard addon dependencies. The following libraries are bundled:
