@@ -1,24 +1,24 @@
--- BISGearCheck Core.lua
+-- BiSGearCheck Core.lua
 -- State variables, event handling, initialization, minimap button, refresh, spec/source management
 
-BISGearCheck = BISGearCheck or {}
-BISGearCheck.selectedSpec = nil
-BISGearCheck.dataSource = "wowtbcgg"
-BISGearCheck.comparisonResults = {}
-BISGearCheck.itemCache = {}
-BISGearCheck.pendingItems = {}
-BISGearCheck.viewMode = "comparison" -- "comparison", "wishlist", or "bislist"
-BISGearCheck.bislistSpec = nil -- selected spec on BiS Lists tab (any class)
-BISGearCheck.wishlistZoneFilter = nil -- nil = no filter, string = zone name
-BISGearCheck.wishlistAutoFilter = false
-BISGearCheck.activeWishlist = "Default" -- name of current wishlist
-BISGearCheck.currentZone = ""
-BISGearCheck.playerFaction = "Alliance" -- detected at init
-BISGearCheck.playerKey = nil -- "Name-Realm" key for character registry
-BISGearCheck.viewingCharKey = nil -- which character the UI is operating as (nil = current)
+BiSGearCheck = BiSGearCheck or {}
+BiSGearCheck.selectedSpec = nil
+BiSGearCheck.dataSource = "wowtbcgg"
+BiSGearCheck.comparisonResults = {}
+BiSGearCheck.itemCache = {}
+BiSGearCheck.pendingItems = {}
+BiSGearCheck.viewMode = "comparison" -- "comparison", "wishlist", or "bislist"
+BiSGearCheck.bislistSpec = nil -- selected spec on BiS Lists tab (any class)
+BiSGearCheck.wishlistZoneFilter = nil -- nil = no filter, string = zone name
+BiSGearCheck.wishlistAutoFilter = false
+BiSGearCheck.activeWishlist = "Default" -- name of current wishlist
+BiSGearCheck.currentZone = ""
+BiSGearCheck.playerFaction = "Alliance" -- detected at init
+BiSGearCheck.playerKey = nil -- "Name-Realm" key for character registry
+BiSGearCheck.viewingCharKey = nil -- which character the UI is operating as (nil = current)
 
 -- Event frame
-local eventFrame = CreateFrame("Frame", "BISGearCheckEventFrame")
+local eventFrame = CreateFrame("Frame", "BiSGearCheckEventFrame")
 eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 eventFrame:RegisterEvent("GET_ITEM_INFO_RECEIVED")
 eventFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
@@ -29,23 +29,23 @@ eventFrame:RegisterEvent("ZONE_CHANGED_INDOORS")
 eventFrame:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_ENTERING_WORLD" then
         self:UnregisterEvent("PLAYER_ENTERING_WORLD")
-        BISGearCheck:Initialize()
+        BiSGearCheck:Initialize()
     elseif event == "GET_ITEM_INFO_RECEIVED" then
         local itemID = ...
-        if itemID and BISGearCheck.pendingItems[itemID] then
-            BISGearCheck.pendingItems[itemID] = nil
-            BISGearCheck.needsRefresh = true
+        if itemID and BiSGearCheck.pendingItems[itemID] then
+            BiSGearCheck.pendingItems[itemID] = nil
+            BiSGearCheck.needsRefresh = true
         end
     elseif event == "PLAYER_EQUIPMENT_CHANGED" then
         -- Update gear snapshot for cross-character viewing
-        if BISGearCheck.playerKey then
-            BISGearCheck:SnapshotEquippedGear()
+        if BiSGearCheck.playerKey then
+            BiSGearCheck:SnapshotEquippedGear()
         end
-        if BISGearCheck.mainFrame and BISGearCheck.mainFrame:IsShown() then
-            BISGearCheck:Refresh()
+        if BiSGearCheck.mainFrame and BiSGearCheck.mainFrame:IsShown() then
+            BiSGearCheck:Refresh()
         end
     elseif event == "ZONE_CHANGED_NEW_AREA" or event == "ZONE_CHANGED" or event == "ZONE_CHANGED_INDOORS" then
-        BISGearCheck:OnZoneChanged()
+        BiSGearCheck:OnZoneChanged()
     end
 end)
 
@@ -53,7 +53,7 @@ end)
 -- INITIALIZE
 -- ============================================================
 
-function BISGearCheck:Initialize()
+function BiSGearCheck:Initialize()
     -- Detect faction
     self.playerFaction = UnitFactionGroup("player") or "Alliance"
 
@@ -65,12 +65,12 @@ function BISGearCheck:Initialize()
     self:RegisterCharacter()
 
     -- Restore per-character settings
-    if BISGearCheckChar then
-        self.selectedSpec = BISGearCheckChar.selectedSpec
-        self.dataSource = BISGearCheckChar.dataSource or "wowtbcgg"
-        self.wishlistAutoFilter = BISGearCheckChar.wishlistAutoFilter or false
+    if BiSGearCheckChar then
+        self.selectedSpec = BiSGearCheckChar.selectedSpec
+        self.dataSource = BiSGearCheckChar.dataSource or "wowtbcgg"
+        self.wishlistAutoFilter = BiSGearCheckChar.wishlistAutoFilter or false
     else
-        BISGearCheckChar = {}
+        BiSGearCheckChar = {}
     end
 
     -- Restore active wishlist for this character
@@ -90,8 +90,8 @@ function BISGearCheck:Initialize()
     end
 
     -- Ensure minimap saved vars
-    if not BISGearCheckSaved.minimap then
-        BISGearCheckSaved.minimap = { hide = false }
+    if not BiSGearCheckSaved.minimap then
+        BiSGearCheckSaved.minimap = { hide = false }
     end
 
     -- Create minimap button via LibDBIcon
@@ -110,11 +110,11 @@ function BISGearCheck:Initialize()
     SLASH_BISGEARCHECK2 = "/bgc"
     SlashCmdList["BISGEARCHECK"] = function(msg)
         if msg == "wishlist" or msg == "wl" then
-            BISGearCheck.viewMode = "wishlist"
+            BiSGearCheck.viewMode = "wishlist"
         else
-            BISGearCheck.viewMode = "comparison"
+            BiSGearCheck.viewMode = "comparison"
         end
-        BISGearCheck:Toggle()
+        BiSGearCheck:Toggle()
     end
 end
 
@@ -122,19 +122,19 @@ end
 -- MINIMAP BUTTON
 -- ============================================================
 
-function BISGearCheck:CreateMinimapButton()
+function BiSGearCheck:CreateMinimapButton()
     local ldb = LibStub("LibDataBroker-1.1", true)
     if not ldb then return end
 
-    local dataObj = ldb:NewDataObject("BISGearCheck", {
+    local dataObj = ldb:NewDataObject("BiSGearCheck", {
         type = "launcher",
         text = "BiS Gear Check",
         icon = "Interface\\Icons\\INV_Misc_Book_01",
         label = "BiS Gear Check",
         OnClick = function(_, button)
             if IsAltKeyDown() then
-                if Settings and Settings.OpenToCategory and BISGearCheck.settingsCategoryID then
-                    Settings.OpenToCategory(BISGearCheck.settingsCategoryID)
+                if Settings and Settings.OpenToCategory and BiSGearCheck.settingsCategoryID then
+                    Settings.OpenToCategory(BiSGearCheck.settingsCategoryID)
                 elseif InterfaceOptionsFrame_OpenToCategory then
                     InterfaceOptionsFrame_OpenToCategory("BiS Gear Check")
                     InterfaceOptionsFrame_OpenToCategory("BiS Gear Check")
@@ -142,15 +142,15 @@ function BISGearCheck:CreateMinimapButton()
                 return
             end
             if button == "LeftButton" then
-                BISGearCheck.viewMode = "comparison"
-                BISGearCheck:Toggle()
+                BiSGearCheck.viewMode = "comparison"
+                BiSGearCheck:Toggle()
             elseif button == "RightButton" then
-                BISGearCheck.viewMode = "wishlist"
-                if not BISGearCheck.mainFrame then
-                    BISGearCheck:CreateUI()
+                BiSGearCheck.viewMode = "wishlist"
+                if not BiSGearCheck.mainFrame then
+                    BiSGearCheck:CreateUI()
                 end
-                BISGearCheck:Refresh()
-                BISGearCheck.mainFrame:Show()
+                BiSGearCheck:Refresh()
+                BiSGearCheck.mainFrame:Show()
             end
         end,
         OnTooltipShow = function(tt)
@@ -164,7 +164,7 @@ function BISGearCheck:CreateMinimapButton()
 
     local icon = LibStub("LibDBIcon-1.0", true)
     if icon then
-        icon:Register("BISGearCheck", dataObj, BISGearCheckSaved.minimap)
+        icon:Register("BiSGearCheck", dataObj, BiSGearCheckSaved.minimap)
     end
 end
 
@@ -172,7 +172,7 @@ end
 -- TOGGLE / REFRESH
 -- ============================================================
 
-function BISGearCheck:Toggle()
+function BiSGearCheck:Toggle()
     if not self.mainFrame then
         self:CreateUI()
     end
@@ -184,7 +184,7 @@ function BISGearCheck:Toggle()
     end
 end
 
-function BISGearCheck:Refresh()
+function BiSGearCheck:Refresh()
     if not self.selectedSpec then
         self.selectedSpec = self:GuessSpec()
     end
@@ -192,7 +192,7 @@ function BISGearCheck:Refresh()
     self:RefreshView()
 end
 
-function BISGearCheck:RefreshView()
+function BiSGearCheck:RefreshView()
     if not self.mainFrame then return end
     if self.viewMode == "wishlist" then
         self:RenderWishlist()
@@ -207,9 +207,9 @@ end
 -- SPEC / DATA SOURCE MANAGEMENT
 -- ============================================================
 
-function BISGearCheck:SetSpec(specKey)
+function BiSGearCheck:SetSpec(specKey)
     self.selectedSpec = specKey
-    BISGearCheckChar.selectedSpec = specKey
+    BiSGearCheckChar.selectedSpec = specKey
     -- Update snapshot so other characters see the correct spec
     if self:IsViewingOwnCharacter() then
         local charData = self:GetCharacterData(self.playerKey)
@@ -218,9 +218,9 @@ function BISGearCheck:SetSpec(specKey)
     self:Refresh()
 end
 
-function BISGearCheck:SetDataSource(sourceKey)
+function BiSGearCheck:SetDataSource(sourceKey)
     self.dataSource = sourceKey
-    BISGearCheckChar.dataSource = sourceKey
+    BiSGearCheckChar.dataSource = sourceKey
 
     -- If current spec doesn't exist in new data source, pick first available
     local db = self:GetActiveDB()
@@ -231,7 +231,7 @@ function BISGearCheck:SetDataSource(sourceKey)
             for _, specInfo in ipairs(specs) do
                 if db[specInfo.key] then
                     self.selectedSpec = specInfo.key
-                    BISGearCheckChar.selectedSpec = specInfo.key
+                    BiSGearCheckChar.selectedSpec = specInfo.key
                     break
                 end
             end
@@ -242,20 +242,20 @@ function BISGearCheck:SetDataSource(sourceKey)
 end
 
 -- Get the active BiS database based on selected data source
-function BISGearCheck:GetActiveDB()
+function BiSGearCheck:GetActiveDB()
     for _, src in ipairs(self.DataSources) do
         if src.key == self.dataSource then
             return _G[src.db]
         end
     end
-    return BISGearCheckDB
+    return BiSGearCheckDB
 end
 
 -- ============================================================
 -- ZONE CHANGE HANDLER
 -- ============================================================
 
-function BISGearCheck:OnZoneChanged()
+function BiSGearCheck:OnZoneChanged()
     local newZone = GetRealZoneText() or ""
     if newZone ~= self.currentZone then
         self.currentZone = newZone

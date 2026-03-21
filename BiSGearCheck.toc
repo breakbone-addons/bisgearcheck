@@ -4,8 +4,8 @@
 ## Author: Breakbone - Dreamscythe
 ## Version: 2.2.0
 ## X-License: All Rights Reserved
-## SavedVariables: BISGearCheckSaved
-## SavedVariablesPerCharacter: BISGearCheckChar
+## SavedVariables: BiSGearCheckSaved
+## SavedVariablesPerCharacter: BiSGearCheckChar
 
 libs\LibStub\LibStub.lua
 libs\CallbackHandler-1.0\CallbackHandler-1.0.lua

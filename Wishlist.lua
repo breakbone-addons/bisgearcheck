@@ -1,20 +1,20 @@
--- BISGearCheck Wishlist.lua
+-- BiSGearCheck Wishlist.lua
 -- Wishlist CRUD operations, item retrieval, zone filtering, auto-filter
 
-BISGearCheck = BISGearCheck or {}
+BiSGearCheck = BiSGearCheck or {}
 
 -- ============================================================
 -- WISHLIST DATA ACCESS
 -- ============================================================
 
 -- Get wishlist data for the character we're currently viewing
-function BISGearCheck:GetViewingCharData()
+function BiSGearCheck:GetViewingCharData()
     local charKey = self:GetViewingCharKey()
     return self:GetCharacterData(charKey)
 end
 
 -- Get the active wishlist table for the character we're viewing
-function BISGearCheck:GetActiveWishlistTable()
+function BiSGearCheck:GetActiveWishlistTable()
     local charData = self:GetViewingCharData()
     if not charData or not charData.wishlists then return {} end
     return charData.wishlists[self.activeWishlist] or {}
@@ -25,7 +25,7 @@ end
 -- ============================================================
 
 -- Switch to a named wishlist
-function BISGearCheck:SetActiveWishlist(name)
+function BiSGearCheck:SetActiveWishlist(name)
     local charData = self:GetViewingCharData()
     if not charData or not charData.wishlists or not charData.wishlists[name] then return end
     self.activeWishlist = name
@@ -39,7 +39,7 @@ function BISGearCheck:SetActiveWishlist(name)
 end
 
 -- Create a new wishlist for the character we're viewing
-function BISGearCheck:CreateWishlist(name)
+function BiSGearCheck:CreateWishlist(name)
     if not name or name == "" then return false end
     local charData = self:GetViewingCharData()
     if not charData then return false end
@@ -52,7 +52,7 @@ function BISGearCheck:CreateWishlist(name)
 end
 
 -- Rename the active wishlist
-function BISGearCheck:RenameWishlist(newName)
+function BiSGearCheck:RenameWishlist(newName)
     if not newName or newName == "" then return false end
     local charData = self:GetViewingCharData()
     if not charData or not charData.wishlists then return false end
@@ -66,7 +66,7 @@ function BISGearCheck:RenameWishlist(newName)
 end
 
 -- Delete the active wishlist (cannot delete the last one)
-function BISGearCheck:DeleteWishlist()
+function BiSGearCheck:DeleteWishlist()
     local charData = self:GetViewingCharData()
     if not charData or not charData.wishlists then return false end
     local count = 0
@@ -84,7 +84,7 @@ function BISGearCheck:DeleteWishlist()
 end
 
 -- Get sorted list of wishlist names for the character we're viewing
-function BISGearCheck:GetWishlistNames()
+function BiSGearCheck:GetWishlistNames()
     local names = {}
     local charData = self:GetViewingCharData()
     if charData and charData.wishlists then
@@ -100,7 +100,7 @@ end
 -- WISHLIST ITEM MANAGEMENT
 -- ============================================================
 
-function BISGearCheck:AddToWishlist(itemID, slotName, rank, source, sourceType)
+function BiSGearCheck:AddToWishlist(itemID, slotName, rank, source, sourceType)
     local charData = self:GetViewingCharData()
     if not charData then return end
     if not charData.wishlists then charData.wishlists = {} end
@@ -118,19 +118,19 @@ function BISGearCheck:AddToWishlist(itemID, slotName, rank, source, sourceType)
     }
 end
 
-function BISGearCheck:RemoveFromWishlist(itemID)
+function BiSGearCheck:RemoveFromWishlist(itemID)
     local wl = self:GetActiveWishlistTable()
     if wl then
         wl[itemID] = nil
     end
 end
 
-function BISGearCheck:IsOnWishlist(itemID)
+function BiSGearCheck:IsOnWishlist(itemID)
     local wl = self:GetActiveWishlistTable()
     return wl and wl[itemID] ~= nil
 end
 
-function BISGearCheck:GetWishlistItems()
+function BiSGearCheck:GetWishlistItems()
     local wl = self:GetActiveWishlistTable()
     if not wl then return {} end
 
@@ -160,7 +160,7 @@ function BISGearCheck:GetWishlistItems()
         end
 
         -- Prefer fresh SourceDB data over stale saved strings
-        local sourceInfo = BISGearCheckSources and BISGearCheckSources[itemID]
+        local sourceInfo = BiSGearCheckSources and BiSGearCheckSources[itemID]
         local source = (sourceInfo and sourceInfo.source) or info.source
         local sourceType = (sourceInfo and sourceInfo.sourceType) or info.sourceType
 
@@ -194,9 +194,9 @@ end
 -- WISHLIST AUTO-FILTER
 -- ============================================================
 
-function BISGearCheck:SetWishlistAutoFilter(enabled)
+function BiSGearCheck:SetWishlistAutoFilter(enabled)
     self.wishlistAutoFilter = enabled
-    BISGearCheckChar.wishlistAutoFilter = enabled
+    BiSGearCheckChar.wishlistAutoFilter = enabled
 
     if enabled then
         local isKnownZone = false

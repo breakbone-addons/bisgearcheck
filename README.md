@@ -66,8 +66,8 @@ BiS Gear Check supports two independent data sources:
 
 | Source | Database | Description |
 |--------|----------|-------------|
-| WowTBC.gg | `Data.lua` (`BISGearCheckDB`) | BiS rankings sourced from wowtbc.gg |
-| AtlasLoot | `Data_AtlasLoot.lua` (`BISGearCheckDB_AtlasLoot`) | BiS rankings from AtlasLoot data |
+| WowTBC.gg | `Data.lua` (`BiSGearCheckDB`) | BiS rankings sourced from wowtbc.gg |
+| AtlasLoot | `Data_AtlasLoot.lua` (`BiSGearCheckDB_AtlasLoot`) | BiS rankings from AtlasLoot data |
 
 Item drop sources (boss names, zones, quest names) are stored in `SourceDB.lua`. Items can be tagged with a `faction` field ("Alliance" or "Horde") for faction-specific filtering; untagged items are available to both factions.
 
@@ -88,8 +88,8 @@ No hard addon dependencies. The following libraries are bundled:
 
 ## Installation
 
-Copy the `BISGearCheck` folder into your WoW AddOns directory:
+Copy the `BiSGearCheck` folder into your WoW AddOns directory:
 
 ```
-World of Warcraft/_anniversary_/Interface/AddOns/BISGearCheck/
+World of Warcraft/_anniversary_/Interface/AddOns/BiSGearCheck/
 ```

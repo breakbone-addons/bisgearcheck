@@ -35,7 +35,7 @@ jobs:
           mkdir -p _tmp
           cd _tmp
           unzip -o "../$ZIPNAME"
-          VERSION=$(grep '## Version:' BISGearCheck/BISGearCheck.toc | sed 's/## Version: *//')
+          VERSION=$(grep '## Version:' BiSGearCheck/BiSGearCheck.toc | sed 's/## Version: *//')
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
           # Fix file timestamps inside the zip to avoid future-dated files
@@ -57,9 +57,9 @@ jobs:
 
             Download **BiSGearCheck-Build-${{ github.run_number }}.zip** below. Do not download the "Source code" archives.
 
-            Extract the `BISGearCheck` folder into your WoW AddOns directory:
+            Extract the `BiSGearCheck` folder into your WoW AddOns directory:
             ```
-            World of Warcraft/_anniversary_/Interface/AddOns/BISGearCheck/
+            World of Warcraft/_anniversary_/Interface/AddOns/BiSGearCheck/
             ```
 
             Built from `${{ github.ref_name }}` at ${{ github.sha }}.

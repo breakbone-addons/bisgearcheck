@@ -1,7 +1,7 @@
--- BISGearCheck Comparison.lua
+-- BiSGearCheck Comparison.lua
 -- Faction filtering, gear comparison engine
 
-BISGearCheck = BISGearCheck or {}
+BiSGearCheck = BiSGearCheck or {}
 
 -- ============================================================
 -- FACTION FILTERING
@@ -9,8 +9,8 @@ BISGearCheck = BISGearCheck or {}
 
 -- Check if an item is available to the player's faction.
 -- Items with a "faction" field in SourceDB are restricted; items without it are available to both.
-function BISGearCheck:IsItemAvailableForFaction(itemID)
-    local sourceInfo = BISGearCheckSources and BISGearCheckSources[itemID]
+function BiSGearCheck:IsItemAvailableForFaction(itemID)
+    local sourceInfo = BiSGearCheckSources and BiSGearCheckSources[itemID]
     if not sourceInfo or not sourceInfo.faction then
         return true -- no faction tag = available to both
     end
@@ -18,7 +18,7 @@ function BISGearCheck:IsItemAvailableForFaction(itemID)
 end
 
 -- Filter a BiS item list to only include items available to the player's faction.
-function BISGearCheck:FilterBisListByFaction(bisItems)
+function BiSGearCheck:FilterBisListByFaction(bisItems)
     local filtered = {}
     for _, itemID in ipairs(bisItems) do
         if self:IsItemAvailableForFaction(itemID) then
@@ -32,7 +32,7 @@ end
 -- CORE COMPARISON
 -- ============================================================
 
-function BISGearCheck:RunComparison()
+function BiSGearCheck:RunComparison()
     local specKey = self.selectedSpec
     local db = self:GetActiveDB()
     if not specKey or not db or not db[specKey] then
@@ -64,7 +64,7 @@ function BISGearCheck:RunComparison()
     end
 end
 
-function BISGearCheck:CompareSlot(slotName, bisItems)
+function BiSGearCheck:CompareSlot(slotName, bisItems)
     local invSlots = self.SlotToInvSlot[slotName]
     if not invSlots then return nil end
 
@@ -146,7 +146,7 @@ function BISGearCheck:CompareSlot(slotName, bisItems)
                 C_Item.RequestLoadItemDataByID(bisID)
             end
 
-            local sourceInfo = BISGearCheckSources and BISGearCheckSources[bisID]
+            local sourceInfo = BiSGearCheckSources and BiSGearCheckSources[bisID]
             table.insert(result.upgrades, {
                 id = bisID,
                 rank = rank,

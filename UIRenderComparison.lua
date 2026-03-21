@@ -1,13 +1,13 @@
--- BISGearCheck UIRenderComparison.lua
+-- BiSGearCheck UIRenderComparison.lua
 -- RenderResults and RenderSlotSection for the Compare tab
 
-BISGearCheck = BISGearCheck or {}
+BiSGearCheck = BiSGearCheck or {}
 
 -- ============================================================
 -- RENDER COMPARISON RESULTS
 -- ============================================================
 
-function BISGearCheck:RenderResults()
+function BiSGearCheck:RenderResults()
     local f = self.mainFrame
     if not f then return end
 
@@ -63,7 +63,7 @@ end
 -- RENDER SLOT SECTION
 -- ============================================================
 
-function BISGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
+function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
     local slotName = slotResult.slotName
     local isCollapsed = self.collapsedSlots[slotName]
     local isDualSlot = (slotName == "Rings" or slotName == "Trinkets")
@@ -90,8 +90,8 @@ function BISGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
         header.text:SetText(arrow .. "|cffffd100" .. slotName .. ":|r " .. eqText .. " - " .. rankStr(eq))
         header:EnableMouse(true)
         header:SetScript("OnMouseDown", function()
-            BISGearCheck.collapsedSlots[slotName] = not BISGearCheck.collapsedSlots[slotName]
-            BISGearCheck:RefreshView()
+            BiSGearCheck.collapsedSlots[slotName] = not BiSGearCheck.collapsedSlots[slotName]
+            BiSGearCheck:RefreshView()
         end)
         if eq.link then
             header:SetScript("OnEnter", function(self)
@@ -108,8 +108,8 @@ function BISGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
         header.text:SetText(arrow .. "|cffffd100" .. slotName .. ":|r |cff999999(empty)|r")
         header:EnableMouse(true)
         header:SetScript("OnMouseDown", function()
-            BISGearCheck.collapsedSlots[slotName] = not BISGearCheck.collapsedSlots[slotName]
-            BISGearCheck:RefreshView()
+            BiSGearCheck.collapsedSlots[slotName] = not BiSGearCheck.collapsedSlots[slotName]
+            BiSGearCheck:RefreshView()
         end)
         yOffset = yOffset - self.SLOT_HEADER_HEIGHT
     else
@@ -118,8 +118,8 @@ function BISGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
         header.text:SetText(arrow .. "|cffffd100" .. slotName .. "|r")
         header:EnableMouse(true)
         header:SetScript("OnMouseDown", function()
-            BISGearCheck.collapsedSlots[slotName] = not BISGearCheck.collapsedSlots[slotName]
-            BISGearCheck:RefreshView()
+            BiSGearCheck.collapsedSlots[slotName] = not BiSGearCheck.collapsedSlots[slotName]
+            BiSGearCheck:RefreshView()
         end)
         yOffset = yOffset - self.SLOT_HEADER_HEIGHT
 
@@ -191,17 +191,17 @@ function BISGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
 
             local capturedUpgrade = upgrade
             addBtn:SetScript("OnClick", function()
-                if BISGearCheck:IsOnWishlist(capturedUpgrade.id) then
-                    BISGearCheck:RemoveFromWishlist(capturedUpgrade.id)
+                if BiSGearCheck:IsOnWishlist(capturedUpgrade.id) then
+                    BiSGearCheck:RemoveFromWishlist(capturedUpgrade.id)
                     btnBg:SetColorTexture(0.2, 0.2, 0.2, 0.6)
                 else
-                    BISGearCheck:AddToWishlist(capturedUpgrade.id, capturedUpgrade.slotName, capturedUpgrade.rank, capturedUpgrade.source, capturedUpgrade.sourceType)
+                    BiSGearCheck:AddToWishlist(capturedUpgrade.id, capturedUpgrade.slotName, capturedUpgrade.rank, capturedUpgrade.source, capturedUpgrade.sourceType)
                     btnBg:SetColorTexture(0.0, 0.5, 0.0, 0.8)
                 end
             end)
             addBtn:SetScript("OnEnter", function(self)
                 GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-                if BISGearCheck:IsOnWishlist(capturedUpgrade.id) then
+                if BiSGearCheck:IsOnWishlist(capturedUpgrade.id) then
                     GameTooltip:AddLine("Click to remove from Wishlist", 1, 0.3, 0.3)
                 else
                     GameTooltip:AddLine("Click to add to Wishlist", 0, 1, 0)

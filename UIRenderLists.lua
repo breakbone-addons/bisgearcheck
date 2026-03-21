@@ -1,13 +1,13 @@
--- BISGearCheck UIRenderLists.lua
+-- BiSGearCheck UIRenderLists.lua
 -- RenderWishlist and RenderBisList for the Wishlists and BiS Lists tabs
 
-BISGearCheck = BISGearCheck or {}
+BiSGearCheck = BiSGearCheck or {}
 
 -- ============================================================
 -- RENDER WISHLIST
 -- ============================================================
 
-function BISGearCheck:RenderWishlist()
+function BiSGearCheck:RenderWishlist()
     local f = self.mainFrame
     if not f then return end
 
@@ -119,8 +119,8 @@ function BISGearCheck:RenderWishlist()
 
             local capturedID = item.id
             removeBtn:SetScript("OnClick", function()
-                BISGearCheck:RemoveFromWishlist(capturedID)
-                BISGearCheck:RefreshView()
+                BiSGearCheck:RemoveFromWishlist(capturedID)
+                BiSGearCheck:RefreshView()
             end)
             removeBtn:SetScript("OnEnter", function(self)
                 GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
@@ -157,7 +157,7 @@ end
 -- RENDER BIS LISTS
 -- ============================================================
 
-function BISGearCheck:RenderBisList()
+function BiSGearCheck:RenderBisList()
     local f = self.mainFrame
     if not f then return end
 
@@ -234,8 +234,8 @@ function BISGearCheck:RenderBisList()
             header.text:SetText(arrow .. "|cffffd100" .. slotName .. "|r")
             header:EnableMouse(true)
             header:SetScript("OnMouseDown", function()
-                BISGearCheck.collapsedSlots[slotName] = not BISGearCheck.collapsedSlots[slotName]
-                BISGearCheck:RefreshView()
+                BiSGearCheck.collapsedSlots[slotName] = not BiSGearCheck.collapsedSlots[slotName]
+                BiSGearCheck:RefreshView()
             end)
             yOffset = yOffset - self.SLOT_HEADER_HEIGHT
 
@@ -250,7 +250,7 @@ function BISGearCheck:RenderBisList()
                     end
 
                     local itemText = link or name or ("Item #" .. itemID)
-                    local sourceInfo = BISGearCheckSources and BISGearCheckSources[itemID]
+                    local sourceInfo = BiSGearCheckSources and BiSGearCheckSources[itemID]
                     local sourceText = ""
                     if sourceInfo and sourceInfo.source and sourceInfo.source ~= "Unknown" then
                         if sourceInfo.sourceType and sourceInfo.sourceType ~= "" then

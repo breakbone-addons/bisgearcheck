@@ -1,10 +1,10 @@
--- BISGearCheck Util.lua
+-- BiSGearCheck Util.lua
 -- Slot mappings, class/spec tables, zone mappings, helpers
 
-BISGearCheck = BISGearCheck or {}
+BiSGearCheck = BiSGearCheck or {}
 
 -- Map our slot names to WoW inventory slot IDs
-BISGearCheck.SlotToInvSlot = {
+BiSGearCheck.SlotToInvSlot = {
     ["Head"]      = { 1 },
     ["Neck"]      = { 2 },
     ["Shoulders"] = { 3 },
@@ -24,14 +24,14 @@ BISGearCheck.SlotToInvSlot = {
 }
 
 -- Display order for slots
-BISGearCheck.SlotOrder = {
+BiSGearCheck.SlotOrder = {
     "Head", "Neck", "Shoulders", "Back", "Chest", "Wrist", "Hands",
     "Waist", "Legs", "Feet", "Rings", "Trinkets",
     "Main Hand", "Offhand", "Twohand", "Ranged"
 }
 
 -- Map class token -> list of spec keys
-BISGearCheck.ClassSpecs = {
+BiSGearCheck.ClassSpecs = {
     ["DRUID"]   = {
         { key = "DruidBalance",       label = "Balance" },
         { key = "DruidFeralDPS",      label = "Feral DPS" },
@@ -80,14 +80,14 @@ BISGearCheck.ClassSpecs = {
 }
 
 -- Data source definitions
-BISGearCheck.DataSources = {
-    { key = "wowtbcgg",   label = "WowTBC.gg",  db = "BISGearCheckDB" },
-    { key = "atlasloot",  label = "AtlasLoot",   db = "BISGearCheckDB_AtlasLoot" },
+BiSGearCheck.DataSources = {
+    { key = "wowtbcgg",   label = "WowTBC.gg",  db = "BiSGearCheckDB" },
+    { key = "atlasloot",  label = "AtlasLoot",   db = "BiSGearCheckDB_AtlasLoot" },
 }
 
 -- Map SourceDB source strings to zone names returned by GetRealZoneText()
 -- Multiple source strings can map to the same zone
-BISGearCheck.SourceToZone = {
+BiSGearCheck.SourceToZone = {
     -- Raids
     ["Karazhan"]            = "Karazhan",
     ["Gruul's Lair"]        = "Gruul's Lair",
@@ -133,16 +133,16 @@ BISGearCheck.SourceToZone = {
 }
 
 -- Reverse map: zone name -> list of source strings that drop items there
-BISGearCheck.ZoneToSources = {}
-for src, zone in pairs(BISGearCheck.SourceToZone) do
-    if not BISGearCheck.ZoneToSources[zone] then
-        BISGearCheck.ZoneToSources[zone] = {}
+BiSGearCheck.ZoneToSources = {}
+for src, zone in pairs(BiSGearCheck.SourceToZone) do
+    if not BiSGearCheck.ZoneToSources[zone] then
+        BiSGearCheck.ZoneToSources[zone] = {}
     end
-    BISGearCheck.ZoneToSources[zone][src] = true
+    BiSGearCheck.ZoneToSources[zone][src] = true
 end
 
 -- Categorized zone lists for the dropdown
-BISGearCheck.ZoneCategories = {
+BiSGearCheck.ZoneCategories = {
     {
         label = "TBC Raids",
         zones = { "Karazhan", "Gruul's Lair", "Magtheridon's Lair" },
@@ -167,7 +167,7 @@ BISGearCheck.ZoneCategories = {
 }
 
 -- Get unique zone names (sorted) for filter dropdown
-function BISGearCheck:GetZoneList()
+function BiSGearCheck:GetZoneList()
     local zones = {}
     local seen = {}
     for _, zone in pairs(self.SourceToZone) do
@@ -181,7 +181,7 @@ function BISGearCheck:GetZoneList()
 end
 
 -- Check if a zone has any wishlist items
-function BISGearCheck:ZoneHasWishlistItems(zone)
+function BiSGearCheck:ZoneHasWishlistItems(zone)
     local wl = self:GetActiveWishlistTable()
     if not wl then return false end
     for itemID, _ in pairs(wl) do
@@ -193,15 +193,15 @@ function BISGearCheck:ZoneHasWishlistItems(zone)
 end
 
 -- Check if an item's source matches a zone
-function BISGearCheck:ItemMatchesZone(itemID, zone)
-    local sourceInfo = BISGearCheckSources and BISGearCheckSources[itemID]
+function BiSGearCheck:ItemMatchesZone(itemID, zone)
+    local sourceInfo = BiSGearCheckSources and BiSGearCheckSources[itemID]
     if not sourceInfo or not sourceInfo.source then return false end
     local itemZone = self.SourceToZone[sourceInfo.source]
     return itemZone == zone
 end
 
 -- Try to auto-detect spec from talent points
-function BISGearCheck:GuessSpec()
+function BiSGearCheck:GuessSpec()
     local _, classToken = UnitClass("player")
     local specs = self.ClassSpecs[classToken]
     if not specs then return nil end
@@ -232,7 +232,7 @@ function BISGearCheck:GuessSpec()
 end
 
 -- Get class-colored text
-function BISGearCheck:ClassColor(classToken, text)
+function BiSGearCheck:ClassColor(classToken, text)
     local color = RAID_CLASS_COLORS[classToken]
     if color then
         return string.format("|cff%02x%02x%02x%s|r", color.r * 255, color.g * 255, color.b * 255, text)
@@ -250,6 +250,6 @@ local QUALITY_COLORS = {
     [5] = "ff8000", -- Legendary
 }
 
-function BISGearCheck:QualityColor(quality)
+function BiSGearCheck:QualityColor(quality)
     return QUALITY_COLORS[quality] or "ffffff"
 end

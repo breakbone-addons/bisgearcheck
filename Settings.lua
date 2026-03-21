@@ -1,9 +1,9 @@
--- BISGearCheck Settings.lua
+-- BiSGearCheck Settings.lua
 -- Interface Options panel for tooltip preferences
 
-BISGearCheck = BISGearCheck or {}
+BiSGearCheck = BiSGearCheck or {}
 
-local panel = CreateFrame("Frame", "BISGearCheckSettingsPanel", UIParent)
+local panel = CreateFrame("Frame", "BiSGearCheckSettingsPanel", UIParent)
 panel.name = "BiS Gear Check"
 
 local SOURCE_OPTIONS = {
@@ -24,17 +24,17 @@ title:SetText("BiS Gear Check Settings")
 -- Checkbox: Show BiS rankings in tooltips
 -- ============================================================
 
-local showBiSCheck = CreateFrame("CheckButton", "BISGearCheckSettingsShowBiS", panel, "InterfaceOptionsCheckButtonTemplate")
+local showBiSCheck = CreateFrame("CheckButton", "BiSGearCheckSettingsShowBiS", panel, "InterfaceOptionsCheckButtonTemplate")
 showBiSCheck:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -16)
-showBiSCheck.Text = _G["BISGearCheckSettingsShowBiSText"] or showBiSCheck:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+showBiSCheck.Text = _G["BiSGearCheckSettingsShowBiSText"] or showBiSCheck:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 showBiSCheck.Text:SetPoint("LEFT", showBiSCheck, "RIGHT", 4, 0)
 showBiSCheck.Text:SetText("Show BiS rankings in tooltips")
 showBiSCheck:SetScript("OnClick", function(self)
-    BISGearCheck:EnsureTooltipSettings()
-    BISGearCheckSaved.tooltip.showBiS = self:GetChecked() and true or false
+    BiSGearCheck:EnsureTooltipSettings()
+    BiSGearCheckSaved.tooltip.showBiS = self:GetChecked() and true or false
     -- Clear conflict resolution so the dialog reappears on next reload
-    BISGearCheckSaved.tooltip.conflictResolved = nil
-    BISGearCheckSaved.tooltip.conflictChoice = nil
+    BiSGearCheckSaved.tooltip.conflictResolved = nil
+    BiSGearCheckSaved.tooltip.conflictChoice = nil
 end)
 
 local reloadBtn = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
@@ -47,14 +47,14 @@ reloadBtn:SetScript("OnClick", function() ReloadUI() end)
 -- Checkbox: Show only my class
 -- ============================================================
 
-local classCheck = CreateFrame("CheckButton", "BISGearCheckSettingsClassFilter", panel, "InterfaceOptionsCheckButtonTemplate")
+local classCheck = CreateFrame("CheckButton", "BiSGearCheckSettingsClassFilter", panel, "InterfaceOptionsCheckButtonTemplate")
 classCheck:SetPoint("TOPLEFT", showBiSCheck, "BOTTOMLEFT", 0, -8)
-classCheck.Text = _G["BISGearCheckSettingsClassFilterText"] or classCheck:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+classCheck.Text = _G["BiSGearCheckSettingsClassFilterText"] or classCheck:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 classCheck.Text:SetPoint("LEFT", classCheck, "RIGHT", 4, 0)
 classCheck.Text:SetText("Show only my class")
 classCheck:SetScript("OnClick", function(self)
-    BISGearCheck:EnsureTooltipSettings()
-    BISGearCheckSaved.tooltip.showOnlyMyClass = self:GetChecked() and true or false
+    BiSGearCheck:EnsureTooltipSettings()
+    BiSGearCheckSaved.tooltip.showOnlyMyClass = self:GetChecked() and true or false
 end)
 
 -- ============================================================
@@ -65,12 +65,12 @@ local sourceLabel = panel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
 sourceLabel:SetPoint("TOPLEFT", classCheck, "BOTTOMLEFT", 4, -20)
 sourceLabel:SetText("Tooltip Data Source:")
 
-local sourceDropdown = CreateFrame("Frame", "BISGearCheckSettingsSourceDropdown", panel, "UIDropDownMenuTemplate")
+local sourceDropdown = CreateFrame("Frame", "BiSGearCheckSettingsSourceDropdown", panel, "UIDropDownMenuTemplate")
 sourceDropdown:SetPoint("TOPLEFT", sourceLabel, "BOTTOMLEFT", -16, -4)
 UIDropDownMenu_SetWidth(sourceDropdown, 180)
 
 local function SourceDropdownInit(self, level)
-    BISGearCheck:EnsureTooltipSettings()
+    BiSGearCheck:EnsureTooltipSettings()
     for _, src in ipairs(SOURCE_OPTIONS) do
         local info = UIDropDownMenu_CreateInfo()
         info.text = src.label
@@ -78,9 +78,9 @@ local function SourceDropdownInit(self, level)
         info.func = function(self)
             UIDropDownMenu_SetSelectedValue(sourceDropdown, self.value)
             UIDropDownMenu_SetText(sourceDropdown, self:GetText())
-            BISGearCheckSaved.tooltip.dataSource = self.value
+            BiSGearCheckSaved.tooltip.dataSource = self.value
         end
-        info.checked = (src.key == (BISGearCheckSaved and BISGearCheckSaved.tooltip and BISGearCheckSaved.tooltip.dataSource or "all"))
+        info.checked = (src.key == (BiSGearCheckSaved and BiSGearCheckSaved.tooltip and BiSGearCheckSaved.tooltip.dataSource or "all"))
         UIDropDownMenu_AddButton(info, level)
     end
 end
@@ -91,11 +91,11 @@ UIDropDownMenu_Initialize(sourceDropdown, SourceDropdownInit)
 -- ============================================================
 
 panel:SetScript("OnShow", function(self)
-    BISGearCheck:EnsureTooltipSettings()
-    showBiSCheck:SetChecked(BISGearCheckSaved.tooltip.showBiS)
-    classCheck:SetChecked(BISGearCheckSaved.tooltip.showOnlyMyClass)
+    BiSGearCheck:EnsureTooltipSettings()
+    showBiSCheck:SetChecked(BiSGearCheckSaved.tooltip.showBiS)
+    classCheck:SetChecked(BiSGearCheckSaved.tooltip.showOnlyMyClass)
 
-    local currentSource = BISGearCheckSaved.tooltip.dataSource or "all"
+    local currentSource = BiSGearCheckSaved.tooltip.dataSource or "all"
     for _, src in ipairs(SOURCE_OPTIONS) do
         if src.key == currentSource then
             UIDropDownMenu_SetText(sourceDropdown, src.label)
@@ -112,7 +112,7 @@ end)
 if Settings and Settings.RegisterCanvasLayoutCategory then
     local category = Settings.RegisterCanvasLayoutCategory(panel, panel.name)
     Settings.RegisterAddOnCategory(category)
-    BISGearCheck.settingsCategoryID = category:GetID()
+    BiSGearCheck.settingsCategoryID = category:GetID()
 elseif InterfaceOptions_AddCategory then
     InterfaceOptions_AddCategory(panel)
 end

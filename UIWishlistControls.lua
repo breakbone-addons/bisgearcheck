@@ -1,7 +1,7 @@
--- BISGearCheck UIWishlistControls.lua
+-- BiSGearCheck UIWishlistControls.lua
 -- Wishlist filter bar (zone dropdown, auto-filter), wishlist selector bar, static popup dialogs
 
-BISGearCheck = BISGearCheck or {}
+BiSGearCheck = BiSGearCheck or {}
 
 -- ============================================================
 -- STATIC POPUP DIALOGS (defined at file scope)
@@ -21,8 +21,8 @@ StaticPopupDialogs["BISGEARCHECK_NEW_WISHLIST"] = {
         local eb = GetPopupEditBox(self)
         local name = eb and eb:GetText():trim() or ""
         if name ~= "" then
-            if BISGearCheck:CreateWishlist(name) then
-                BISGearCheck:RefreshView()
+            if BiSGearCheck:CreateWishlist(name) then
+                BiSGearCheck:RefreshView()
             else
                 print("|cffff6666BiS Gear Check:|r A wishlist named '" .. name .. "' already exists.")
             end
@@ -32,8 +32,8 @@ StaticPopupDialogs["BISGEARCHECK_NEW_WISHLIST"] = {
         local parent = self:GetParent()
         local name = self:GetText():trim()
         if name ~= "" then
-            if BISGearCheck:CreateWishlist(name) then
-                BISGearCheck:RefreshView()
+            if BiSGearCheck:CreateWishlist(name) then
+                BiSGearCheck:RefreshView()
             else
                 print("|cffff6666BiS Gear Check:|r A wishlist named '" .. name .. "' already exists.")
             end
@@ -54,7 +54,7 @@ StaticPopupDialogs["BISGEARCHECK_RENAME_WISHLIST"] = {
     OnShow = function(self)
         local eb = GetPopupEditBox(self)
         if eb then
-            eb:SetText(BISGearCheck.activeWishlist)
+            eb:SetText(BiSGearCheck.activeWishlist)
             eb:HighlightText()
         end
     end,
@@ -62,8 +62,8 @@ StaticPopupDialogs["BISGEARCHECK_RENAME_WISHLIST"] = {
         local eb = GetPopupEditBox(self)
         local name = eb and eb:GetText():trim() or ""
         if name ~= "" then
-            if BISGearCheck:RenameWishlist(name) then
-                BISGearCheck:RefreshView()
+            if BiSGearCheck:RenameWishlist(name) then
+                BiSGearCheck:RefreshView()
             else
                 print("|cffff6666BiS Gear Check:|r A wishlist named '" .. name .. "' already exists.")
             end
@@ -73,8 +73,8 @@ StaticPopupDialogs["BISGEARCHECK_RENAME_WISHLIST"] = {
         local parent = self:GetParent()
         local name = self:GetText():trim()
         if name ~= "" then
-            if BISGearCheck:RenameWishlist(name) then
-                BISGearCheck:RefreshView()
+            if BiSGearCheck:RenameWishlist(name) then
+                BiSGearCheck:RefreshView()
             else
                 print("|cffff6666BiS Gear Check:|r A wishlist named '" .. name .. "' already exists.")
             end
@@ -92,8 +92,8 @@ StaticPopupDialogs["BISGEARCHECK_DELETE_WISHLIST"] = {
     button1 = "Delete",
     button2 = "Cancel",
     OnAccept = function()
-        if BISGearCheck:DeleteWishlist() then
-            BISGearCheck:RefreshView()
+        if BiSGearCheck:DeleteWishlist() then
+            BiSGearCheck:RefreshView()
         end
     end,
     timeout = 0,
@@ -105,13 +105,13 @@ StaticPopupDialogs["BISGEARCHECK_DELETE_WISHLIST"] = {
 -- WISHLIST FILTER BAR (zone dropdown + auto-filter checkbox)
 -- ============================================================
 
-function BISGearCheck:SetupWishlistFilterBar(f)
+function BiSGearCheck:SetupWishlistFilterBar(f)
     local filterBar = CreateFrame("Frame", nil, f)
     filterBar:SetSize(self.FRAME_WIDTH - 20, 26)
     filterBar:SetPoint("TOPLEFT", f, "TOPLEFT", 10, -74)
     filterBar:Hide()
 
-    local zoneDropdown = CreateFrame("Frame", "BISGearCheckZoneDropdown", filterBar, "UIDropDownMenuTemplate")
+    local zoneDropdown = CreateFrame("Frame", "BiSGearCheckZoneDropdown", filterBar, "UIDropDownMenuTemplate")
     zoneDropdown:SetPoint("TOPLEFT", filterBar, "TOPLEFT", -15, 2)
     UIDropDownMenu_SetWidth(zoneDropdown, 160)
 
@@ -123,14 +123,14 @@ function BISGearCheck:SetupWishlistFilterBar(f)
         info.func = function(self)
             UIDropDownMenu_SetSelectedValue(zoneDropdown, "")
             UIDropDownMenu_SetText(zoneDropdown, "All Zones")
-            BISGearCheck.wishlistZoneFilter = nil
-            BISGearCheck:RefreshView()
+            BiSGearCheck.wishlistZoneFilter = nil
+            BiSGearCheck:RefreshView()
         end
         info.notCheckable = true
         UIDropDownMenu_AddButton(info, level)
 
         -- Categorized zones with dividers
-        for catIdx, category in ipairs(BISGearCheck.ZoneCategories) do
+        for catIdx, category in ipairs(BiSGearCheck.ZoneCategories) do
             -- Section header (non-clickable divider)
             local hdr = UIDropDownMenu_CreateInfo()
             hdr.text = category.label
@@ -140,7 +140,7 @@ function BISGearCheck:SetupWishlistFilterBar(f)
 
             -- Zone entries in this category
             for _, zone in ipairs(category.zones) do
-                local hasItems = BISGearCheck:ZoneHasWishlistItems(zone)
+                local hasItems = BiSGearCheck:ZoneHasWishlistItems(zone)
                 local zInfo = UIDropDownMenu_CreateInfo()
                 if hasItems then
                     zInfo.text = "|cff00ff00" .. zone .. "|r"
@@ -151,8 +151,8 @@ function BISGearCheck:SetupWishlistFilterBar(f)
                 zInfo.func = function(self)
                     UIDropDownMenu_SetSelectedValue(zoneDropdown, self.value)
                     UIDropDownMenu_SetText(zoneDropdown, zone)
-                    BISGearCheck.wishlistZoneFilter = self.value
-                    BISGearCheck:RefreshView()
+                    BiSGearCheck.wishlistZoneFilter = self.value
+                    BiSGearCheck:RefreshView()
                 end
                 zInfo.notCheckable = true
                 UIDropDownMenu_AddButton(zInfo, level)
@@ -162,7 +162,7 @@ function BISGearCheck:SetupWishlistFilterBar(f)
     UIDropDownMenu_Initialize(zoneDropdown, ZoneDropdownInit)
     UIDropDownMenu_SetText(zoneDropdown, "All Zones")
 
-    local autoCheck = CreateFrame("CheckButton", "BISGearCheckAutoFilter", filterBar, "UICheckButtonTemplate")
+    local autoCheck = CreateFrame("CheckButton", "BiSGearCheckAutoFilter", filterBar, "UICheckButtonTemplate")
     autoCheck:SetSize(24, 24)
     autoCheck:SetPoint("LEFT", zoneDropdown, "RIGHT", -5, 0)
     autoCheck:SetChecked(self.wishlistAutoFilter)
@@ -170,8 +170,8 @@ function BISGearCheck:SetupWishlistFilterBar(f)
     autoCheck.text:SetPoint("LEFT", autoCheck, "RIGHT", 2, 0)
     autoCheck.text:SetText("Auto")
     autoCheck:SetScript("OnClick", function(self)
-        BISGearCheck:SetWishlistAutoFilter(self:GetChecked())
-        BISGearCheck:RefreshView()
+        BiSGearCheck:SetWishlistAutoFilter(self:GetChecked())
+        BiSGearCheck:RefreshView()
     end)
     autoCheck:SetScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
@@ -190,19 +190,19 @@ end
 -- WISHLIST SELECTOR BAR (dropdown + New / Rename / Delete)
 -- ============================================================
 
-function BISGearCheck:SetupWishlistSelectorBar(f)
+function BiSGearCheck:SetupWishlistSelectorBar(f)
     local wlSelectorBar = CreateFrame("Frame", nil, f)
     wlSelectorBar:SetSize(self.FRAME_WIDTH - 20, 26)
     wlSelectorBar:SetPoint("TOPLEFT", f, "TOPLEFT", 0, -52)
     wlSelectorBar:Hide()
 
     -- Wishlist name dropdown
-    local wlNameDropdown = CreateFrame("Frame", "BISGearCheckWLNameDropdown", wlSelectorBar, "UIDropDownMenuTemplate")
+    local wlNameDropdown = CreateFrame("Frame", "BiSGearCheckWLNameDropdown", wlSelectorBar, "UIDropDownMenuTemplate")
     wlNameDropdown:SetPoint("TOPLEFT", wlSelectorBar, "TOPLEFT", -5, 2)
     UIDropDownMenu_SetWidth(wlNameDropdown, 130)
 
     local function WLNameDropdownInit(self, level)
-        local names = BISGearCheck:GetWishlistNames()
+        local names = BiSGearCheck:GetWishlistNames()
         for _, name in ipairs(names) do
             local info = UIDropDownMenu_CreateInfo()
             info.text = name
@@ -210,7 +210,7 @@ function BISGearCheck:SetupWishlistSelectorBar(f)
             info.func = function(self)
                 UIDropDownMenu_SetSelectedValue(wlNameDropdown, self.value)
                 UIDropDownMenu_SetText(wlNameDropdown, self.value)
-                BISGearCheck:SetActiveWishlist(self.value)
+                BiSGearCheck:SetActiveWishlist(self.value)
             end
             info.notCheckable = true
             UIDropDownMenu_AddButton(info, level)
@@ -232,7 +232,7 @@ function BISGearCheck:SetupWishlistSelectorBar(f)
     wlRenameBtn:SetPoint("LEFT", wlNewBtn, "RIGHT", 2, 0)
     wlRenameBtn:SetText("Rename")
     wlRenameBtn:SetScript("OnClick", function()
-        StaticPopupDialogs["BISGEARCHECK_RENAME_WISHLIST"].text = "Rename '" .. BISGearCheck.activeWishlist .. "' to:"
+        StaticPopupDialogs["BISGEARCHECK_RENAME_WISHLIST"].text = "Rename '" .. BiSGearCheck.activeWishlist .. "' to:"
         StaticPopup_Show("BISGEARCHECK_RENAME_WISHLIST")
     end)
 
@@ -241,7 +241,7 @@ function BISGearCheck:SetupWishlistSelectorBar(f)
     wlDeleteBtn:SetPoint("LEFT", wlRenameBtn, "RIGHT", 2, 0)
     wlDeleteBtn:SetText("Delete")
     wlDeleteBtn:SetScript("OnClick", function()
-        StaticPopupDialogs["BISGEARCHECK_DELETE_WISHLIST"].text = "Delete wishlist '" .. BISGearCheck.activeWishlist .. "'?\n\nThis cannot be undone."
+        StaticPopupDialogs["BISGEARCHECK_DELETE_WISHLIST"].text = "Delete wishlist '" .. BiSGearCheck.activeWishlist .. "'?\n\nThis cannot be undone."
         StaticPopup_Show("BISGEARCHECK_DELETE_WISHLIST")
     end)
 

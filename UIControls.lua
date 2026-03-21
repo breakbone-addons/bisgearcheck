@@ -1,18 +1,18 @@
--- BISGearCheck UIControls.lua
+-- BiSGearCheck UIControls.lua
 -- Tabs, character selector, data source/spec dropdowns, collapse controls, BiS Lists bar
 
-BISGearCheck = BISGearCheck or {}
+BiSGearCheck = BiSGearCheck or {}
 
 -- ============================================================
 -- TABS: Compare + Wishlist + BiS Lists
 -- ============================================================
 
-function BISGearCheck:SetupTabs(f)
+function BiSGearCheck:SetupTabs(f)
     local TAB_WIDTH = 80
     local TAB_HEIGHT = 22
 
     local function CreateTab(parent, text, index)
-        local tab = CreateFrame("Button", "BISGearCheckTab" .. index, parent)
+        local tab = CreateFrame("Button", "BiSGearCheckTab" .. index, parent)
         tab:SetSize(TAB_WIDTH, TAB_HEIGHT)
 
         local bg = tab:CreateTexture(nil, "BACKGROUND")
@@ -46,7 +46,7 @@ function BISGearCheck:SetupTabs(f)
     end
 
     local function UpdateTabAppearance()
-        local mode = BISGearCheck.viewMode
+        local mode = BiSGearCheck.viewMode
         if mode == "comparison" then
             SetTabActive(compTab)
             SetTabInactive(wlTab)
@@ -63,21 +63,21 @@ function BISGearCheck:SetupTabs(f)
     end
 
     compTab:SetScript("OnClick", function()
-        BISGearCheck.viewMode = "comparison"
+        BiSGearCheck.viewMode = "comparison"
         UpdateTabAppearance()
-        BISGearCheck:Refresh()
+        BiSGearCheck:Refresh()
     end)
 
     wlTab:SetScript("OnClick", function()
-        BISGearCheck.viewMode = "wishlist"
+        BiSGearCheck.viewMode = "wishlist"
         UpdateTabAppearance()
-        BISGearCheck:RefreshView()
+        BiSGearCheck:RefreshView()
     end)
 
     bisTab:SetScript("OnClick", function()
-        BISGearCheck.viewMode = "bislist"
+        BiSGearCheck.viewMode = "bislist"
         UpdateTabAppearance()
-        BISGearCheck:RefreshView()
+        BiSGearCheck:RefreshView()
     end)
 
     f.compTab = compTab
@@ -90,16 +90,16 @@ end
 -- CHARACTER SELECTOR (top-level, right of tabs)
 -- ============================================================
 
-function BISGearCheck:SetupCharacterSelector(f)
-    local charDropdown = CreateFrame("Frame", "BISGearCheckCharDropdown", f, "UIDropDownMenuTemplate")
+function BiSGearCheck:SetupCharacterSelector(f)
+    local charDropdown = CreateFrame("Frame", "BiSGearCheckCharDropdown", f, "UIDropDownMenuTemplate")
     charDropdown:SetPoint("TOPRIGHT", f, "TOPRIGHT", 5, -22)
     UIDropDownMenu_SetWidth(charDropdown, 110)
     UIDropDownMenu_JustifyText(charDropdown, "RIGHT")
 
     local function CharDropdownInit(self, level)
-        local charKeys = BISGearCheck:GetCharacterKeys()
+        local charKeys = BiSGearCheck:GetCharacterKeys()
         for _, charKey in ipairs(charKeys) do
-            local charData = BISGearCheck:GetCharacterData(charKey)
+            local charData = BiSGearCheck:GetCharacterData(charKey)
             local info = UIDropDownMenu_CreateInfo()
             local classColor = charData and RAID_CLASS_COLORS[charData.class]
             local charName = charKey:match("^([^-]+)") or charKey
@@ -111,8 +111,8 @@ function BISGearCheck:SetupCharacterSelector(f)
             info.value = charKey
             info.func = function(self)
                 UIDropDownMenu_SetSelectedValue(charDropdown, self.value)
-                BISGearCheck:UpdateCharDropdownText()
-                BISGearCheck:SetViewingCharacter(self.value)
+                BiSGearCheck:UpdateCharDropdownText()
+                BiSGearCheck:SetViewingCharacter(self.value)
             end
             info.notCheckable = true
             UIDropDownMenu_AddButton(info, level)
@@ -123,7 +123,7 @@ function BISGearCheck:SetupCharacterSelector(f)
     f.charDropdown = charDropdown
 
     -- Helper to update character dropdown text with class color
-    function BISGearCheck:UpdateCharDropdownText()
+    function BiSGearCheck:UpdateCharDropdownText()
         local ck = self:GetViewingCharKey()
         local cd = self:GetCharacterData(ck)
         local cn = ck and ck:match("^([^-]+)") or ck
@@ -141,21 +141,21 @@ end
 -- DATA SOURCE + SPEC DROPDOWNS (below tabs)
 -- ============================================================
 
-function BISGearCheck:SetupSourceSpecDropdowns(f)
+function BiSGearCheck:SetupSourceSpecDropdowns(f)
     -- Data source dropdown
-    local sourceDropdown = CreateFrame("Frame", "BISGearCheckSourceDropdown", f, "UIDropDownMenuTemplate")
+    local sourceDropdown = CreateFrame("Frame", "BiSGearCheckSourceDropdown", f, "UIDropDownMenuTemplate")
     sourceDropdown:SetPoint("TOPLEFT", f, "TOPLEFT", -5, -48)
     UIDropDownMenu_SetWidth(sourceDropdown, 100)
 
     local function SourceDropdownInit(self, level)
-        for _, srcInfo in ipairs(BISGearCheck.DataSources) do
+        for _, srcInfo in ipairs(BiSGearCheck.DataSources) do
             local info = UIDropDownMenu_CreateInfo()
             info.text = srcInfo.label
             info.value = srcInfo.key
             info.func = function(self)
                 UIDropDownMenu_SetSelectedValue(sourceDropdown, self.value)
                 UIDropDownMenu_SetText(sourceDropdown, self:GetText())
-                BISGearCheck:SetDataSource(self.value)
+                BiSGearCheck:SetDataSource(self.value)
             end
             info.notCheckable = true
             UIDropDownMenu_AddButton(info, level)
@@ -173,16 +173,16 @@ function BISGearCheck:SetupSourceSpecDropdowns(f)
     end
 
     -- Spec dropdown
-    local specDropdown = CreateFrame("Frame", "BISGearCheckSpecDropdown", f, "UIDropDownMenuTemplate")
+    local specDropdown = CreateFrame("Frame", "BiSGearCheckSpecDropdown", f, "UIDropDownMenuTemplate")
     specDropdown:SetPoint("LEFT", sourceDropdown, "RIGHT", -15, 0)
     UIDropDownMenu_SetWidth(specDropdown, 120)
 
     local function SpecDropdownInit(self, level)
-        local classToken = BISGearCheck:GetViewingClass()
-        local specs = classToken and BISGearCheck.ClassSpecs[classToken]
+        local classToken = BiSGearCheck:GetViewingClass()
+        local specs = classToken and BiSGearCheck.ClassSpecs[classToken]
         if not specs then return end
 
-        local db = BISGearCheck:GetActiveDB()
+        local db = BiSGearCheck:GetActiveDB()
         for _, specInfo in ipairs(specs) do
             if db and db[specInfo.key] then
                 local info = UIDropDownMenu_CreateInfo()
@@ -191,7 +191,7 @@ function BISGearCheck:SetupSourceSpecDropdowns(f)
                 info.func = function(self)
                     UIDropDownMenu_SetSelectedValue(specDropdown, self.value)
                     UIDropDownMenu_SetText(specDropdown, self:GetText())
-                    BISGearCheck:SetSpec(self.value)
+                    BiSGearCheck:SetSpec(self.value)
                 end
                 info.notCheckable = true
                 UIDropDownMenu_AddButton(info, level)
@@ -216,7 +216,7 @@ end
 -- COLLAPSE ALL / EXPAND ALL + COMPARE TAB WISHLIST PICKER
 -- ============================================================
 
-function BISGearCheck:SetupCollapseControls(f)
+function BiSGearCheck:SetupCollapseControls(f)
     local collapseAllBtn = CreateFrame("Button", nil, f)
     collapseAllBtn:SetSize(70, 16)
     collapseAllBtn:SetPoint("TOPLEFT", f, "TOPLEFT", 10, -74)
@@ -224,10 +224,10 @@ function BISGearCheck:SetupCollapseControls(f)
     collapseText:SetPoint("LEFT")
     collapseText:SetText("|cff00ccffCollapse All|r")
     collapseAllBtn:SetScript("OnClick", function()
-        for _, slotName in ipairs(BISGearCheck.SlotOrder) do
-            BISGearCheck.collapsedSlots[slotName] = true
+        for _, slotName in ipairs(BiSGearCheck.SlotOrder) do
+            BiSGearCheck.collapsedSlots[slotName] = true
         end
-        BISGearCheck:RefreshView()
+        BiSGearCheck:RefreshView()
     end)
     collapseAllBtn:SetScript("OnEnter", function(self) collapseText:SetText("|cffffffffCollapse All|r") end)
     collapseAllBtn:SetScript("OnLeave", function(self) collapseText:SetText("|cff00ccffCollapse All|r") end)
@@ -239,22 +239,22 @@ function BISGearCheck:SetupCollapseControls(f)
     expandText:SetPoint("LEFT")
     expandText:SetText("|cff00ccffExpand All|r")
     expandAllBtn:SetScript("OnClick", function()
-        for _, slotName in ipairs(BISGearCheck.SlotOrder) do
-            BISGearCheck.collapsedSlots[slotName] = false
+        for _, slotName in ipairs(BiSGearCheck.SlotOrder) do
+            BiSGearCheck.collapsedSlots[slotName] = false
         end
-        BISGearCheck:RefreshView()
+        BiSGearCheck:RefreshView()
     end)
     expandAllBtn:SetScript("OnEnter", function(self) expandText:SetText("|cffffffffExpand All|r") end)
     expandAllBtn:SetScript("OnLeave", function(self) expandText:SetText("|cff00ccffExpand All|r") end)
 
     -- Wishlist picker (right-aligned, shown on Compare tab)
-    local compareWLDropdown = CreateFrame("Frame", "BISGearCheckCompareWLDropdown", f, "UIDropDownMenuTemplate")
+    local compareWLDropdown = CreateFrame("Frame", "BiSGearCheckCompareWLDropdown", f, "UIDropDownMenuTemplate")
     compareWLDropdown:SetPoint("TOPRIGHT", f, "TOPRIGHT", -5, -74)
     UIDropDownMenu_SetWidth(compareWLDropdown, 90)
     UIDropDownMenu_JustifyText(compareWLDropdown, "RIGHT")
 
     local function CompareWLDropdownInit(self, level)
-        local names = BISGearCheck:GetWishlistNames()
+        local names = BiSGearCheck:GetWishlistNames()
         for _, name in ipairs(names) do
             local info = UIDropDownMenu_CreateInfo()
             info.text = name
@@ -262,7 +262,7 @@ function BISGearCheck:SetupCollapseControls(f)
             info.func = function(self)
                 UIDropDownMenu_SetSelectedValue(compareWLDropdown, self.value)
                 UIDropDownMenu_SetText(compareWLDropdown, self.value)
-                BISGearCheck:SetActiveWishlist(self.value)
+                BiSGearCheck:SetActiveWishlist(self.value)
             end
             info.notCheckable = true
             UIDropDownMenu_AddButton(info, level)
@@ -287,25 +287,25 @@ end
 -- BIS LISTS BAR: Data Source + All-Specs dropdown
 -- ============================================================
 
-function BISGearCheck:SetupBisListBar(f)
+function BiSGearCheck:SetupBisListBar(f)
     local bislistBar = CreateFrame("Frame", nil, f)
     bislistBar:SetSize(self.FRAME_WIDTH - 20, 26)
     bislistBar:SetPoint("TOPLEFT", f, "TOPLEFT", 0, -48)
     bislistBar:Hide()
 
-    local bislistSourceDropdown = CreateFrame("Frame", "BISGearCheckBislistSourceDropdown", bislistBar, "UIDropDownMenuTemplate")
+    local bislistSourceDropdown = CreateFrame("Frame", "BiSGearCheckBislistSourceDropdown", bislistBar, "UIDropDownMenuTemplate")
     bislistSourceDropdown:SetPoint("TOPLEFT", bislistBar, "TOPLEFT", -5, 2)
     UIDropDownMenu_SetWidth(bislistSourceDropdown, 100)
 
     local function BislistSourceInit(self, level)
-        for _, srcInfo in ipairs(BISGearCheck.DataSources) do
+        for _, srcInfo in ipairs(BiSGearCheck.DataSources) do
             local info = UIDropDownMenu_CreateInfo()
             info.text = srcInfo.label
             info.value = srcInfo.key
             info.func = function(self)
                 UIDropDownMenu_SetSelectedValue(bislistSourceDropdown, self.value)
                 UIDropDownMenu_SetText(bislistSourceDropdown, self:GetText())
-                BISGearCheck:SetDataSource(self.value)
+                BiSGearCheck:SetDataSource(self.value)
             end
             info.notCheckable = true
             UIDropDownMenu_AddButton(info, level)
@@ -321,18 +321,18 @@ function BISGearCheck:SetupBisListBar(f)
         end
     end
 
-    local bislistSpecDropdown = CreateFrame("Frame", "BISGearCheckBislistSpecDropdown", bislistBar, "UIDropDownMenuTemplate")
+    local bislistSpecDropdown = CreateFrame("Frame", "BiSGearCheckBislistSpecDropdown", bislistBar, "UIDropDownMenuTemplate")
     bislistSpecDropdown:SetPoint("LEFT", bislistSourceDropdown, "RIGHT", -15, 0)
     UIDropDownMenu_SetWidth(bislistSpecDropdown, 160)
 
     local CLASS_ORDER = { "DRUID", "HUNTER", "MAGE", "PALADIN", "PRIEST", "ROGUE", "SHAMAN", "WARLOCK", "WARRIOR" }
 
     local function BislistSpecInit(self, level)
-        local db = BISGearCheck:GetActiveDB()
+        local db = BiSGearCheck:GetActiveDB()
         if not db then return end
 
         for _, classToken in ipairs(CLASS_ORDER) do
-            local specs = BISGearCheck.ClassSpecs[classToken]
+            local specs = BiSGearCheck.ClassSpecs[classToken]
             if specs then
                 -- Class header
                 local hdr = UIDropDownMenu_CreateInfo()
@@ -354,8 +354,8 @@ function BISGearCheck:SetupBisListBar(f)
                         sInfo.func = function(self)
                             UIDropDownMenu_SetSelectedValue(bislistSpecDropdown, self.value)
                             UIDropDownMenu_SetText(bislistSpecDropdown, self:GetText())
-                            BISGearCheck.bislistSpec = self.value
-                            BISGearCheck:RefreshView()
+                            BiSGearCheck.bislistSpec = self.value
+                            BiSGearCheck:RefreshView()
                         end
                         sInfo.notCheckable = true
                         UIDropDownMenu_AddButton(sInfo, level)

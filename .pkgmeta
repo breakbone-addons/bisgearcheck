@@ -1,4 +1,4 @@
-package-as: BISGearCheck
+package-as: BiSGearCheck
 
 ignore:
   - README.md

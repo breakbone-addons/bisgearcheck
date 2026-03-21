@@ -1,13 +1,13 @@
--- BISGearCheck Character.lua
+-- BiSGearCheck Character.lua
 -- Character key helper, saved variable migration, character registry, viewing character helpers
 
-BISGearCheck = BISGearCheck or {}
+BiSGearCheck = BiSGearCheck or {}
 
 -- ============================================================
 -- CHARACTER KEY HELPER
 -- ============================================================
 
-function BISGearCheck:GetCharacterKey()
+function BiSGearCheck:GetCharacterKey()
     local name = UnitName("player")
     local realm = GetRealmName()
     if name and realm then
@@ -20,65 +20,65 @@ end
 -- SAVED VARIABLE MIGRATION
 -- ============================================================
 
-function BISGearCheck:MigrateSavedVars()
+function BiSGearCheck:MigrateSavedVars()
     -- Initialize account-wide saved vars if needed
-    if not BISGearCheckSaved then
-        BISGearCheckSaved = { characters = {} }
+    if not BiSGearCheckSaved then
+        BiSGearCheckSaved = { characters = {} }
     end
 
     -- Detect old format: wishlists at top level (pre-2.1.0)
-    if BISGearCheckSaved.wishlists or BISGearCheckSaved.wishlist then
-        local oldWishlists = BISGearCheckSaved.wishlists
+    if BiSGearCheckSaved.wishlists or BiSGearCheckSaved.wishlist then
+        local oldWishlists = BiSGearCheckSaved.wishlists
 
         -- Handle even older single-wishlist format
-        if BISGearCheckSaved.wishlist and not oldWishlists then
-            oldWishlists = { ["Default"] = BISGearCheckSaved.wishlist }
+        if BiSGearCheckSaved.wishlist and not oldWishlists then
+            oldWishlists = { ["Default"] = BiSGearCheckSaved.wishlist }
         end
 
         if not oldWishlists then
             oldWishlists = { ["Default"] = {} }
         end
 
-        -- Move per-character settings to BISGearCheckChar
-        if not BISGearCheckChar then
-            BISGearCheckChar = {}
+        -- Move per-character settings to BiSGearCheckChar
+        if not BiSGearCheckChar then
+            BiSGearCheckChar = {}
         end
-        BISGearCheckChar.selectedSpec = BISGearCheckChar.selectedSpec or BISGearCheckSaved.selectedSpec
-        BISGearCheckChar.dataSource = BISGearCheckChar.dataSource or BISGearCheckSaved.dataSource
-        BISGearCheckChar.wishlistAutoFilter = BISGearCheckChar.wishlistAutoFilter or BISGearCheckSaved.wishlistAutoFilter
+        BiSGearCheckChar.selectedSpec = BiSGearCheckChar.selectedSpec or BiSGearCheckSaved.selectedSpec
+        BiSGearCheckChar.dataSource = BiSGearCheckChar.dataSource or BiSGearCheckSaved.dataSource
+        BiSGearCheckChar.wishlistAutoFilter = BiSGearCheckChar.wishlistAutoFilter or BiSGearCheckSaved.wishlistAutoFilter
 
         -- Move wishlists to character registry
-        if not BISGearCheckSaved.characters then
-            BISGearCheckSaved.characters = {}
+        if not BiSGearCheckSaved.characters then
+            BiSGearCheckSaved.characters = {}
         end
 
         local charKey = self:GetCharacterKey()
         if charKey then
-            BISGearCheckSaved.characters[charKey] = {
+            BiSGearCheckSaved.characters[charKey] = {
                 class = select(2, UnitClass("player")),
                 faction = UnitFactionGroup("player") or "Alliance",
                 wishlists = oldWishlists,
-                activeWishlist = BISGearCheckSaved.activeWishlist or "Default",
+                activeWishlist = BiSGearCheckSaved.activeWishlist or "Default",
             }
         end
 
         -- Clean up old top-level fields
-        BISGearCheckSaved.wishlists = nil
-        BISGearCheckSaved.wishlist = nil
-        BISGearCheckSaved.activeWishlist = nil
-        BISGearCheckSaved.selectedSpec = nil
-        BISGearCheckSaved.dataSource = nil
-        BISGearCheckSaved.wishlistAutoFilter = nil
+        BiSGearCheckSaved.wishlists = nil
+        BiSGearCheckSaved.wishlist = nil
+        BiSGearCheckSaved.activeWishlist = nil
+        BiSGearCheckSaved.selectedSpec = nil
+        BiSGearCheckSaved.dataSource = nil
+        BiSGearCheckSaved.wishlistAutoFilter = nil
     end
 
     -- Ensure characters table exists
-    if not BISGearCheckSaved.characters then
-        BISGearCheckSaved.characters = {}
+    if not BiSGearCheckSaved.characters then
+        BiSGearCheckSaved.characters = {}
     end
 
     -- Ensure per-character vars exist
-    if not BISGearCheckChar then
-        BISGearCheckChar = {}
+    if not BiSGearCheckChar then
+        BiSGearCheckChar = {}
     end
 end
 
@@ -86,12 +86,12 @@ end
 -- CHARACTER REGISTRY
 -- ============================================================
 
-function BISGearCheck:RegisterCharacter()
+function BiSGearCheck:RegisterCharacter()
     local charKey = self.playerKey
     if not charKey then return end
 
-    if not BISGearCheckSaved.characters[charKey] then
-        BISGearCheckSaved.characters[charKey] = {
+    if not BiSGearCheckSaved.characters[charKey] then
+        BiSGearCheckSaved.characters[charKey] = {
             class = select(2, UnitClass("player")),
             faction = self.playerFaction,
             wishlists = { ["Default"] = {} },
@@ -99,7 +99,7 @@ function BISGearCheck:RegisterCharacter()
         }
     else
         -- Update class/faction in case of changes
-        local charData = BISGearCheckSaved.characters[charKey]
+        local charData = BiSGearCheckSaved.characters[charKey]
         charData.class = select(2, UnitClass("player"))
         charData.faction = self.playerFaction
     end
@@ -109,7 +109,7 @@ function BISGearCheck:RegisterCharacter()
 end
 
 -- Save current equipped item IDs so other characters can view this character's gear
-function BISGearCheck:SnapshotEquippedGear()
+function BiSGearCheck:SnapshotEquippedGear()
     local charData = self:GetCharacterData(self.playerKey)
     if not charData then return end
 
@@ -133,18 +133,18 @@ function BISGearCheck:SnapshotEquippedGear()
 end
 
 -- Get character data (for any character on the account)
-function BISGearCheck:GetCharacterData(charKey)
-    if not charKey or not BISGearCheckSaved or not BISGearCheckSaved.characters then
+function BiSGearCheck:GetCharacterData(charKey)
+    if not charKey or not BiSGearCheckSaved or not BiSGearCheckSaved.characters then
         return nil
     end
-    return BISGearCheckSaved.characters[charKey]
+    return BiSGearCheckSaved.characters[charKey]
 end
 
 -- Get sorted list of all character keys on the account
-function BISGearCheck:GetCharacterKeys()
+function BiSGearCheck:GetCharacterKeys()
     local keys = {}
-    if BISGearCheckSaved and BISGearCheckSaved.characters then
-        for key in pairs(BISGearCheckSaved.characters) do
+    if BiSGearCheckSaved and BiSGearCheckSaved.characters then
+        for key in pairs(BiSGearCheckSaved.characters) do
             table.insert(keys, key)
         end
     end
@@ -153,12 +153,12 @@ function BISGearCheck:GetCharacterKeys()
 end
 
 -- Get the character key we're currently viewing wishlists for
-function BISGearCheck:GetViewingCharKey()
+function BiSGearCheck:GetViewingCharKey()
     return self.viewingCharKey or self.playerKey
 end
 
 -- Switch which character the entire UI operates as
-function BISGearCheck:SetViewingCharacter(charKey)
+function BiSGearCheck:SetViewingCharacter(charKey)
     local charData = self:GetCharacterData(charKey)
     if not charData then return end
 
@@ -176,7 +176,7 @@ function BISGearCheck:SetViewingCharacter(charKey)
     -- Switch spec context to the viewed character's spec/class
     if charKey == self.playerKey then
         -- Viewing own character — restore per-character spec
-        self.selectedSpec = BISGearCheckChar.selectedSpec or self:GuessSpec()
+        self.selectedSpec = BiSGearCheckChar.selectedSpec or self:GuessSpec()
     else
         -- Viewing another character — use their last-known spec
         self.selectedSpec = charData.selectedSpec
@@ -193,7 +193,7 @@ function BISGearCheck:SetViewingCharacter(charKey)
 end
 
 -- Get the class token for the character we're currently viewing
-function BISGearCheck:GetViewingClass()
+function BiSGearCheck:GetViewingClass()
     local charKey = self:GetViewingCharKey()
     if charKey == self.playerKey then
         return select(2, UnitClass("player"))
@@ -203,7 +203,7 @@ function BISGearCheck:GetViewingClass()
 end
 
 -- Get the faction for the character we're currently viewing
-function BISGearCheck:GetViewingFaction()
+function BiSGearCheck:GetViewingFaction()
     local charKey = self:GetViewingCharKey()
     if charKey == self.playerKey then
         return self.playerFaction
@@ -213,6 +213,6 @@ function BISGearCheck:GetViewingFaction()
 end
 
 -- Check if viewing the currently logged-in character
-function BISGearCheck:IsViewingOwnCharacter()
+function BiSGearCheck:IsViewingOwnCharacter()
     return self.viewingCharKey == nil or self.viewingCharKey == self.playerKey
 end

@@ -1,10 +1,10 @@
--- BISGearCheck Data_AtlasLoot.lua
--- AtlasLoot Phase 1 BiS data converted to BISGearCheck format
+-- BiSGearCheck Data_AtlasLoot.lua
+-- AtlasLoot Phase 1 BiS data converted to BiSGearCheck format
 -- Auto-generated from phaseoneDB.lua
 
-BISGearCheckDB_AtlasLoot = {}
+BiSGearCheckDB_AtlasLoot = {}
 
-BISGearCheckDB_AtlasLoot["DruidBalance"] = {
+BiSGearCheckDB_AtlasLoot["DruidBalance"] = {
     class = "DRUID",
     spec = "Balance",
     slots = {
@@ -27,7 +27,7 @@ BISGearCheckDB_AtlasLoot["DruidBalance"] = {
     }
 }
 
-BISGearCheckDB_AtlasLoot["DruidFeralDPS"] = {
+BiSGearCheckDB_AtlasLoot["DruidFeralDPS"] = {
     class = "DRUID",
     spec = "Feral DPS",
     slots = {
@@ -48,7 +48,7 @@ BISGearCheckDB_AtlasLoot["DruidFeralDPS"] = {
     }
 }
 
-BISGearCheckDB_AtlasLoot["DruidFeralTank"] = {
+BiSGearCheckDB_AtlasLoot["DruidFeralTank"] = {
     class = "DRUID",
     spec = "Feral Tank",
     slots = {
@@ -69,7 +69,7 @@ BISGearCheckDB_AtlasLoot["DruidFeralTank"] = {
     }
 }
 
-BISGearCheckDB_AtlasLoot["DruidRestoration"] = {
+BiSGearCheckDB_AtlasLoot["DruidRestoration"] = {
     class = "DRUID",
     spec = "Restoration",
     slots = {
@@ -92,7 +92,7 @@ BISGearCheckDB_AtlasLoot["DruidRestoration"] = {
     }
 }
 
-BISGearCheckDB_AtlasLoot["HunterBM"] = {
+BiSGearCheckDB_AtlasLoot["HunterBM"] = {
     class = "HUNTER",
     spec = "Beast Mastery",
     slots = {
@@ -115,7 +115,7 @@ BISGearCheckDB_AtlasLoot["HunterBM"] = {
     }
 }
 
-BISGearCheckDB_AtlasLoot["HunterMM"] = {
+BiSGearCheckDB_AtlasLoot["HunterMM"] = {
     class = "HUNTER",
     spec = "Marksmanship",
     slots = {
@@ -138,7 +138,7 @@ BISGearCheckDB_AtlasLoot["HunterMM"] = {
     }
 }
 
-BISGearCheckDB_AtlasLoot["HunterSV"] = {
+BiSGearCheckDB_AtlasLoot["HunterSV"] = {
     class = "HUNTER",
     spec = "Survival",
     slots = {
@@ -161,7 +161,7 @@ BISGearCheckDB_AtlasLoot["HunterSV"] = {
     }
 }
 
-BISGearCheckDB_AtlasLoot["MageArcane"] = {
+BiSGearCheckDB_AtlasLoot["MageArcane"] = {
     class = "MAGE",
     spec = "Arcane",
     slots = {
@@ -184,7 +184,7 @@ BISGearCheckDB_AtlasLoot["MageArcane"] = {
     }
 }
 
-BISGearCheckDB_AtlasLoot["MageFire"] = {
+BiSGearCheckDB_AtlasLoot["MageFire"] = {
     class = "MAGE",
     spec = "Fire",
     slots = {
@@ -207,7 +207,7 @@ BISGearCheckDB_AtlasLoot["MageFire"] = {
     }
 }
 
-BISGearCheckDB_AtlasLoot["MageFrost"] = {
+BiSGearCheckDB_AtlasLoot["MageFrost"] = {
     class = "MAGE",
     spec = "Frost",
     slots = {
@@ -230,7 +230,7 @@ BISGearCheckDB_AtlasLoot["MageFrost"] = {
     }
 }
 
-BISGearCheckDB_AtlasLoot["PaladinHoly"] = {
+BiSGearCheckDB_AtlasLoot["PaladinHoly"] = {
     class = "PALADIN",
     spec = "Holy",
     slots = {
@@ -252,7 +252,7 @@ BISGearCheckDB_AtlasLoot["PaladinHoly"] = {
     }
 }
 
-BISGearCheckDB_AtlasLoot["PaladinProtection"] = {
+BiSGearCheckDB_AtlasLoot["PaladinProtection"] = {
     class = "PALADIN",
     spec = "Protection",
     slots = {
@@ -274,7 +274,7 @@ BISGearCheckDB_AtlasLoot["PaladinProtection"] = {
     }
 }
 
-BISGearCheckDB_AtlasLoot["PaladinRetribution"] = {
+BiSGearCheckDB_AtlasLoot["PaladinRetribution"] = {
     class = "PALADIN",
     spec = "Retribution",
     slots = {
@@ -295,7 +295,7 @@ BISGearCheckDB_AtlasLoot["PaladinRetribution"] = {
     }
 }
 
-BISGearCheckDB_AtlasLoot["PriestHoly"] = {
+BiSGearCheckDB_AtlasLoot["PriestHoly"] = {
     class = "PRIEST",
     spec = "Holy",
     slots = {
@@ -318,7 +318,7 @@ BISGearCheckDB_AtlasLoot["PriestHoly"] = {
     }
 }
 
-BISGearCheckDB_AtlasLoot["PriestShadow"] = {
+BiSGearCheckDB_AtlasLoot["PriestShadow"] = {
     class = "PRIEST",
     spec = "Shadow",
     slots = {
@@ -340,7 +340,7 @@ BISGearCheckDB_AtlasLoot["PriestShadow"] = {
     }
 }
 
-BISGearCheckDB_AtlasLoot["RogueCombat"] = {
+BiSGearCheckDB_AtlasLoot["RogueCombat"] = {
     class = "ROGUE",
     spec = "Combat",
     slots = {
@@ -362,7 +362,7 @@ BISGearCheckDB_AtlasLoot["RogueCombat"] = {
     }
 }
 
-BISGearCheckDB_AtlasLoot["ShamanElemental"] = {
+BiSGearCheckDB_AtlasLoot["ShamanElemental"] = {
     class = "SHAMAN",
     spec = "Elemental",
     slots = {
@@ -384,7 +384,7 @@ BISGearCheckDB_AtlasLoot["ShamanElemental"] = {
     }
 }
 
-BISGearCheckDB_AtlasLoot["ShamanEnhancement"] = {
+BiSGearCheckDB_AtlasLoot["ShamanEnhancement"] = {
     class = "SHAMAN",
     spec = "Enhancement",
     slots = {
@@ -405,7 +405,7 @@ BISGearCheckDB_AtlasLoot["ShamanEnhancement"] = {
     }
 }
 
-BISGearCheckDB_AtlasLoot["ShamanRestoration"] = {
+BiSGearCheckDB_AtlasLoot["ShamanRestoration"] = {
     class = "SHAMAN",
     spec = "Restoration",
     slots = {
@@ -427,7 +427,7 @@ BISGearCheckDB_AtlasLoot["ShamanRestoration"] = {
     }
 }
 
-BISGearCheckDB_AtlasLoot["WarlockAffliction"] = {
+BiSGearCheckDB_AtlasLoot["WarlockAffliction"] = {
     class = "WARLOCK",
     spec = "Affliction",
     slots = {
@@ -450,7 +450,7 @@ BISGearCheckDB_AtlasLoot["WarlockAffliction"] = {
     }
 }
 
-BISGearCheckDB_AtlasLoot["WarlockDestruction"] = {
+BiSGearCheckDB_AtlasLoot["WarlockDestruction"] = {
     class = "WARLOCK",
     spec = "Destruction",
     slots = {
@@ -473,7 +473,7 @@ BISGearCheckDB_AtlasLoot["WarlockDestruction"] = {
     }
 }
 
-BISGearCheckDB_AtlasLoot["WarriorArms"] = {
+BiSGearCheckDB_AtlasLoot["WarriorArms"] = {
     class = "WARRIOR",
     spec = "Arms",
     slots = {
@@ -496,7 +496,7 @@ BISGearCheckDB_AtlasLoot["WarriorArms"] = {
     }
 }
 
-BISGearCheckDB_AtlasLoot["WarriorFury"] = {
+BiSGearCheckDB_AtlasLoot["WarriorFury"] = {
     class = "WARRIOR",
     spec = "Fury",
     slots = {
@@ -519,7 +519,7 @@ BISGearCheckDB_AtlasLoot["WarriorFury"] = {
     }
 }
 
-BISGearCheckDB_AtlasLoot["WarriorProtection"] = {
+BiSGearCheckDB_AtlasLoot["WarriorProtection"] = {
     class = "WARRIOR",
     spec = "Protection",
     slots = {

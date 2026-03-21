@@ -23,7 +23,7 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **Per-Character Settings**: Spec selection, data source, and wishlist auto-filter are now saved per-character instead of account-wide.
 
 ### Changes
-- SavedVariables restructured: `BISGearCheckSaved` is account-wide (character registry, wishlists, tooltip settings), `BISGearCheckChar` is per-character (spec, data source, filters).
+- SavedVariables restructured: `BiSGearCheckSaved` is account-wide (character registry, wishlists, tooltip settings), `BiSGearCheckChar` is per-character (spec, data source, filters).
 - Automatic migration from pre-2.1.0 saved data format.
 - Added `.pkgmeta` and GitHub Actions workflow for CurseForge packaging.
 

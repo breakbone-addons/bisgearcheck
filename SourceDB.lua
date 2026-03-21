@@ -1,8 +1,8 @@
--- BISGearCheck SourceDB.lua
+-- BiSGearCheck SourceDB.lua
 -- Auto-generated from wowtbc.gg Phase 1 (T4) data
 -- Do not edit manually
 
-BISGearCheckSources = {
+BiSGearCheckSources = {
     [8345] = { name = "Wolfshead Helm", source = "Leatherworking", sourceType = "Trainer (225)" },
     [17632] = { name = "Alchemist's Stone", source = "Alchemy", sourceType = "BoP Pattern (350)" },
     [18814] = { name = "Choker of the Fire Lord", source = "Molten Core", sourceType = "Ragnaros" },

@@ -1,10 +1,10 @@
--- BISGearCheck Data.lua
+-- BiSGearCheck Data.lua
 -- WowTBC.gg Phase 1 BiS data (including world bosses)
 -- Auto-generated
 
-BISGearCheckDB = {}
+BiSGearCheckDB = {}
 
-BISGearCheckDB["DruidBalance"] = {
+BiSGearCheckDB["DruidBalance"] = {
     class = "DRUID",
     spec = "Balance",
     slots = {
@@ -26,7 +26,7 @@ BISGearCheckDB["DruidBalance"] = {
     }
 }
 
-BISGearCheckDB["DruidFeralDPS"] = {
+BiSGearCheckDB["DruidFeralDPS"] = {
     class = "DRUID",
     spec = "Feral DPS",
     slots = {
@@ -47,7 +47,7 @@ BISGearCheckDB["DruidFeralDPS"] = {
     }
 }
 
-BISGearCheckDB["DruidFeralTank"] = {
+BiSGearCheckDB["DruidFeralTank"] = {
     class = "DRUID",
     spec = "Feral Tank",
     slots = {
@@ -68,7 +68,7 @@ BISGearCheckDB["DruidFeralTank"] = {
     }
 }
 
-BISGearCheckDB["DruidRestoration"] = {
+BiSGearCheckDB["DruidRestoration"] = {
     class = "DRUID",
     spec = "Restoration",
     slots = {
@@ -90,7 +90,7 @@ BISGearCheckDB["DruidRestoration"] = {
     }
 }
 
-BISGearCheckDB["HunterBM"] = {
+BiSGearCheckDB["HunterBM"] = {
     class = "HUNTER",
     spec = "Beast Mastery",
     slots = {
@@ -112,7 +112,7 @@ BISGearCheckDB["HunterBM"] = {
     }
 }
 
-BISGearCheckDB["HunterMM"] = {
+BiSGearCheckDB["HunterMM"] = {
     class = "HUNTER",
     spec = "Marksmanship",
     slots = {
@@ -134,7 +134,7 @@ BISGearCheckDB["HunterMM"] = {
     }
 }
 
-BISGearCheckDB["HunterSV"] = {
+BiSGearCheckDB["HunterSV"] = {
     class = "HUNTER",
     spec = "Survival",
     slots = {
@@ -156,7 +156,7 @@ BISGearCheckDB["HunterSV"] = {
     }
 }
 
-BISGearCheckDB["MageArcane"] = {
+BiSGearCheckDB["MageArcane"] = {
     class = "MAGE",
     spec = "Arcane",
     slots = {
@@ -178,7 +178,7 @@ BISGearCheckDB["MageArcane"] = {
     }
 }
 
-BISGearCheckDB["MageFire"] = {
+BiSGearCheckDB["MageFire"] = {
     class = "MAGE",
     spec = "Fire",
     slots = {
@@ -200,7 +200,7 @@ BISGearCheckDB["MageFire"] = {
     }
 }
 
-BISGearCheckDB["MageFrost"] = {
+BiSGearCheckDB["MageFrost"] = {
     class = "MAGE",
     spec = "Frost",
     slots = {
@@ -222,7 +222,7 @@ BISGearCheckDB["MageFrost"] = {
     }
 }
 
-BISGearCheckDB["PaladinHoly"] = {
+BiSGearCheckDB["PaladinHoly"] = {
     class = "PALADIN",
     spec = "Holy",
     slots = {
@@ -244,7 +244,7 @@ BISGearCheckDB["PaladinHoly"] = {
     }
 }
 
-BISGearCheckDB["PaladinProtection"] = {
+BiSGearCheckDB["PaladinProtection"] = {
     class = "PALADIN",
     spec = "Protection",
     slots = {
@@ -266,7 +266,7 @@ BISGearCheckDB["PaladinProtection"] = {
     }
 }
 
-BISGearCheckDB["PaladinRetribution"] = {
+BiSGearCheckDB["PaladinRetribution"] = {
     class = "PALADIN",
     spec = "Retribution",
     slots = {
@@ -287,7 +287,7 @@ BISGearCheckDB["PaladinRetribution"] = {
     }
 }
 
-BISGearCheckDB["PriestHoly"] = {
+BiSGearCheckDB["PriestHoly"] = {
     class = "PRIEST",
     spec = "Holy",
     slots = {
@@ -309,7 +309,7 @@ BISGearCheckDB["PriestHoly"] = {
     }
 }
 
-BISGearCheckDB["PriestShadow"] = {
+BiSGearCheckDB["PriestShadow"] = {
     class = "PRIEST",
     spec = "Shadow",
     slots = {
@@ -331,7 +331,7 @@ BISGearCheckDB["PriestShadow"] = {
     }
 }
 
-BISGearCheckDB["RogueAssassination"] = {
+BiSGearCheckDB["RogueAssassination"] = {
     class = "ROGUE",
     spec = "Assassination",
     slots = {
@@ -353,7 +353,7 @@ BISGearCheckDB["RogueAssassination"] = {
     }
 }
 
-BISGearCheckDB["RogueCombat"] = {
+BiSGearCheckDB["RogueCombat"] = {
     class = "ROGUE",
     spec = "Combat",
     slots = {
@@ -375,7 +375,7 @@ BISGearCheckDB["RogueCombat"] = {
     }
 }
 
-BISGearCheckDB["RogueSubtlety"] = {
+BiSGearCheckDB["RogueSubtlety"] = {
     class = "ROGUE",
     spec = "Subtlety",
     slots = {
@@ -397,7 +397,7 @@ BISGearCheckDB["RogueSubtlety"] = {
     }
 }
 
-BISGearCheckDB["ShamanElemental"] = {
+BiSGearCheckDB["ShamanElemental"] = {
     class = "SHAMAN",
     spec = "Elemental",
     slots = {
@@ -419,7 +419,7 @@ BISGearCheckDB["ShamanElemental"] = {
     }
 }
 
-BISGearCheckDB["ShamanEnhancement"] = {
+BiSGearCheckDB["ShamanEnhancement"] = {
     class = "SHAMAN",
     spec = "Enhancement",
     slots = {
@@ -441,7 +441,7 @@ BISGearCheckDB["ShamanEnhancement"] = {
     }
 }
 
-BISGearCheckDB["ShamanRestoration"] = {
+BiSGearCheckDB["ShamanRestoration"] = {
     class = "SHAMAN",
     spec = "Restoration",
     slots = {
@@ -463,7 +463,7 @@ BISGearCheckDB["ShamanRestoration"] = {
     }
 }
 
-BISGearCheckDB["WarlockAffliction"] = {
+BiSGearCheckDB["WarlockAffliction"] = {
     class = "WARLOCK",
     spec = "Affliction",
     slots = {
@@ -485,7 +485,7 @@ BISGearCheckDB["WarlockAffliction"] = {
     }
 }
 
-BISGearCheckDB["WarlockDemonology"] = {
+BiSGearCheckDB["WarlockDemonology"] = {
     class = "WARLOCK",
     spec = "Demonology",
     slots = {
@@ -507,7 +507,7 @@ BISGearCheckDB["WarlockDemonology"] = {
     }
 }
 
-BISGearCheckDB["WarlockDestruction"] = {
+BiSGearCheckDB["WarlockDestruction"] = {
     class = "WARLOCK",
     spec = "Destruction",
     slots = {
@@ -529,7 +529,7 @@ BISGearCheckDB["WarlockDestruction"] = {
     }
 }
 
-BISGearCheckDB["WarriorArms"] = {
+BiSGearCheckDB["WarriorArms"] = {
     class = "WARRIOR",
     spec = "Arms",
     slots = {
@@ -550,7 +550,7 @@ BISGearCheckDB["WarriorArms"] = {
     }
 }
 
-BISGearCheckDB["WarriorFury"] = {
+BiSGearCheckDB["WarriorFury"] = {
     class = "WARRIOR",
     spec = "Fury",
     slots = {
@@ -572,7 +572,7 @@ BISGearCheckDB["WarriorFury"] = {
     }
 }
 
-BISGearCheckDB["WarriorProtection"] = {
+BiSGearCheckDB["WarriorProtection"] = {
     class = "WARRIOR",
     spec = "Protection",
     slots = {
