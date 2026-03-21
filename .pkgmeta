@@ -6,7 +6,6 @@ ignore:
   - .github
   - .gitignore
   - .pkgmeta
-  - CHANGELOG.md
 
 externals:
   libs/LibStub:
