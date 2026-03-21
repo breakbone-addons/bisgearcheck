@@ -20,8 +20,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Rename zip and fix timestamps
+        id: package
         run: |
-          ZIPNAME="BISGearCheck-Build-${{ github.run_number }}.zip"
+          ZIPNAME="BiSGearCheck-Build-${{ github.run_number }}.zip"
 
           # Rename packager output to clean name with build number
           for f in .release/*.zip; do
@@ -29,11 +30,15 @@ jobs:
             break
           done
 
-          # Fix file timestamps inside the zip to avoid future-dated files
+          # Extract version from the packaged TOC
           cd .release
           mkdir -p _tmp
           cd _tmp
           unzip -o "../$ZIPNAME"
+          VERSION=$(grep '## Version:' BISGearCheck/BISGearCheck.toc | sed 's/## Version: *//')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+          # Fix file timestamps inside the zip to avoid future-dated files
           find . -exec touch -t "$(date +%Y%m%d%H%M.%S)" {} +
           zip -r "../$ZIPNAME" .
           cd ..
@@ -43,14 +48,14 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: pre-${{ github.run_number }}
-          name: BISGearCheck Pre-Release #${{ github.run_number }}
+          name: BiSGearCheck_${{ steps.package.outputs.version }}-pre${{ github.run_number }}
           prerelease: true
           body: |
             ## Pre-Release Build
 
             This is a development build for testing. For the latest stable version, see the [Latest Release](https://github.com/${{ github.repository }}/releases/latest).
 
-            Download **BISGearCheck-Build-${{ github.run_number }}.zip** below. Do not download the "Source code" archives.
+            Download **BiSGearCheck-Build-${{ github.run_number }}.zip** below. Do not download the "Source code" archives.
 
             Extract the `BISGearCheck` folder into your WoW AddOns directory:
             ```
@@ -58,7 +63,7 @@ jobs:
             ```
 
             Built from `${{ github.ref_name }}` at ${{ github.sha }}.
-          files: .release/BISGearCheck-Build-${{ github.run_number }}.zip
+          files: .release/BiSGearCheck-Build-${{ github.run_number }}.zip
           fail_on_unmatched_files: true
           make_latest: false
         env:
