@@ -37,6 +37,12 @@ showBiSCheck:SetScript("OnClick", function(self)
     BISGearCheckSaved.tooltip.conflictChoice = nil
 end)
 
+local reloadBtn = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
+reloadBtn:SetSize(70, 22)
+reloadBtn:SetPoint("LEFT", showBiSCheck.Text, "RIGHT", 10, 0)
+reloadBtn:SetText("Reload")
+reloadBtn:SetScript("OnClick", function() ReloadUI() end)
+
 -- ============================================================
 -- Checkbox: Show only my class
 -- ============================================================
