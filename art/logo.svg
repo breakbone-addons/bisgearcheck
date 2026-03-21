@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <!-- Serious: Dark military/tactical shield with angular design -->
+  <defs>
+    <linearGradient id="serBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0d0d0d"/>
+      <stop offset="100%" stop-color="#1a1a1a"/>
+    </linearGradient>
+    <linearGradient id="serShield" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c0a050"/>
+      <stop offset="100%" stop-color="#8a6e30"/>
+    </linearGradient>
+    <linearGradient id="serInner" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a2a3a"/>
+      <stop offset="100%" stop-color="#1a1a28"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" fill="url(#serBg)"/>
+  <!-- Shield shape -->
+  <path d="M200,40 L330,100 L330,220 Q330,310 200,370 Q70,310 70,220 L70,100 Z" fill="url(#serShield)"/>
+  <path d="M200,55 L318,110 L318,218 Q318,300 200,355 Q82,300 82,218 L82,110 Z" fill="url(#serInner)"/>
+  <!-- BiS text centered -->
+  <text x="200" y="195" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="72" font-weight="bold" fill="#c0a050">BiS</text>
+  <!-- Rank bars -->
+  <rect x="145" y="215" width="110" height="3" fill="#c0a050" rx="1"/>
+  <text x="200" y="248" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="20" fill="#c0a050" letter-spacing="6">GEAR CHECK</text>
+  <rect x="145" y="258" width="110" height="3" fill="#c0a050" rx="1"/>
+</svg>

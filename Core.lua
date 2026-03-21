@@ -129,7 +129,7 @@ function BiSGearCheck:CreateMinimapButton()
     local dataObj = ldb:NewDataObject("BiSGearCheck", {
         type = "launcher",
         text = "BiS Gear Check",
-        icon = "Interface\\Icons\\INV_Misc_Book_01",
+        icon = "Interface\\AddOns\\BiSGearCheck\\minimap-icon",
         label = "BiS Gear Check",
         OnClick = function(_, button)
             if IsAltKeyDown() then
