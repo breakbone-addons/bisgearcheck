@@ -19,18 +19,22 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: List packaged files
-        run: find .release -type f 2>/dev/null || echo "No .release directory found"
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: build-${{ github.run_number }}
-          name: Build #${{ github.run_number }} (${{ github.ref_name }})
+          name: BISGearCheck Build #${{ github.run_number }}
           body: |
-            Manually triggered build from `${{ github.ref_name }}` at `${{ github.sha }}`.
+            ## Download
 
-            Download the **BISGearCheck** zip below (not the auto-generated source code archives).
+            Download **BISGearCheck-*.zip** below. Do not download the "Source code" archives.
+
+            Extract the `BISGearCheck` folder into your WoW AddOns directory:
+            ```
+            World of Warcraft/_anniversary_/Interface/AddOns/BISGearCheck/
+            ```
+
+            Built from `${{ github.ref_name }}` at ${{ github.sha }}.
           files: .release/*.zip
           fail_on_unmatched_files: true
           prerelease: true
