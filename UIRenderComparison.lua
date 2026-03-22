@@ -3,6 +3,18 @@
 
 BiSGearCheck = BiSGearCheck or {}
 
+-- Rank text helper (module-level, not per-call)
+local function rankStr(eq)
+    if eq.rank then
+        if eq.rank == 1 then
+            return "|cff00ff00BiS!|r"
+        else
+            return string.format("|cffffffffRank %d|r", eq.rank)
+        end
+    end
+    return "|cff999999Not on list|r"
+end
+
 -- ============================================================
 -- RENDER COMPARISON RESULTS
 -- ============================================================
@@ -68,18 +80,6 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
     local isCollapsed = self.collapsedSlots[slotName]
     local isDualSlot = (slotName == "Rings" or slotName == "Trinkets")
 
-    -- Build rank text helper
-    local function rankStr(eq)
-        if eq.rank then
-            if eq.rank == 1 then
-                return "|cff00ff00BiS!|r"
-            else
-                return string.format("|cffffffffRank %d|r", eq.rank)
-            end
-        end
-        return "|cff999999Not on list|r"
-    end
-
     local arrow = isCollapsed and "|cffffd100[+]|r " or "|cffffd100[-]|r "
 
     if not isDualSlot and #slotResult.equipped == 1 then
@@ -88,39 +88,30 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
         local header = self:CreateRow(parent, yOffset, width)
         local eqText = eq.link or GetInventoryItemLink("player", eq.invSlot) or ("Item #" .. eq.id)
         header.text:SetText(arrow .. "|cffffd100" .. slotName .. ":|r " .. eqText .. " - " .. rankStr(eq))
+        header._slotName = slotName
         header:EnableMouse(true)
-        header:SetScript("OnMouseDown", function()
-            BiSGearCheck.collapsedSlots[slotName] = not BiSGearCheck.collapsedSlots[slotName]
-            BiSGearCheck:RefreshView()
-        end)
+        header:SetScript("OnMouseDown", self.OnSlotHeaderClick)
         if eq.link then
-            header:SetScript("OnEnter", function(self)
-                GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-                GameTooltip:SetHyperlink(eq.link)
-                GameTooltip:Show()
-            end)
-            header:SetScript("OnLeave", function() GameTooltip:Hide() end)
+            header._itemLink = eq.link
+            header:SetScript("OnEnter", self.OnItemLinkEnter)
+            header:SetScript("OnLeave", self.OnTooltipLeave)
         end
         yOffset = yOffset - self.SLOT_HEADER_HEIGHT
     elseif not isDualSlot and #slotResult.equipped == 0 then
         -- Single-slot empty: combine header + empty
         local header = self:CreateRow(parent, yOffset, width)
         header.text:SetText(arrow .. "|cffffd100" .. slotName .. ":|r |cff999999(empty)|r")
+        header._slotName = slotName
         header:EnableMouse(true)
-        header:SetScript("OnMouseDown", function()
-            BiSGearCheck.collapsedSlots[slotName] = not BiSGearCheck.collapsedSlots[slotName]
-            BiSGearCheck:RefreshView()
-        end)
+        header:SetScript("OnMouseDown", self.OnSlotHeaderClick)
         yOffset = yOffset - self.SLOT_HEADER_HEIGHT
     else
         -- Dual-slot: header then equipped items
         local header = self:CreateRow(parent, yOffset, width)
         header.text:SetText(arrow .. "|cffffd100" .. slotName .. "|r")
+        header._slotName = slotName
         header:EnableMouse(true)
-        header:SetScript("OnMouseDown", function()
-            BiSGearCheck.collapsedSlots[slotName] = not BiSGearCheck.collapsedSlots[slotName]
-            BiSGearCheck:RefreshView()
-        end)
+        header:SetScript("OnMouseDown", self.OnSlotHeaderClick)
         yOffset = yOffset - self.SLOT_HEADER_HEIGHT
 
         if not isCollapsed then
@@ -130,13 +121,10 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
                 local eqText = lateLink or ("Item #" .. eq.id)
                 row.text:SetText("  Equipped: " .. eqText .. " - " .. rankStr(eq))
                 if lateLink then
+                    row._itemLink = lateLink
                     row:EnableMouse(true)
-                    row:SetScript("OnEnter", function(self)
-                        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-                        GameTooltip:SetHyperlink(lateLink)
-                        GameTooltip:Show()
-                    end)
-                    row:SetScript("OnLeave", function() GameTooltip:Hide() end)
+                    row:SetScript("OnEnter", self.OnItemLinkEnter)
+                    row:SetScript("OnLeave", self.OnTooltipLeave)
                 end
                 yOffset = yOffset - self.ITEM_ROW_HEIGHT
             end
@@ -168,75 +156,37 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
             row.text:SetText(string.format("  |cff00ccff#%d|r %s %s", upgrade.rank, itemName, sourceText))
             row.text:SetPoint("RIGHT", row, "RIGHT", -30, 0)
 
-            -- Wishlist + button (enlarged with green background)
-            local onWL = self:IsOnWishlist(upgrade.id)
-            local addBtn = CreateFrame("Button", nil, row)
-            addBtn:SetSize(24, 18)
-            addBtn:SetPoint("RIGHT", row, "RIGHT", -1, 0)
+            -- Store data on the row for shared handlers
+            row._upgrade = upgrade
+            row._itemID = upgrade.id
 
-            -- Background texture
-            local btnBg = addBtn:CreateTexture(nil, "BACKGROUND")
-            btnBg:SetAllPoints()
+            -- Wishlist + button (reused from pool, shared handlers)
+            local onWL = self:IsOnWishlist(upgrade.id)
+            local addBtn, btnBg, btnText = self:GetActionButton(row)
+
             if onWL then
                 btnBg:SetColorTexture(0.0, 0.5, 0.0, 0.8)
             else
                 btnBg:SetColorTexture(0.2, 0.2, 0.2, 0.6)
             end
-            addBtn.bg = btnBg
-
-            local btnText = addBtn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-            btnText:SetPoint("CENTER", 0, 0)
             btnText:SetText("|cffffffff+|r")
-            addBtn.label = btnText
 
-            local capturedUpgrade = upgrade
-            addBtn:SetScript("OnClick", function()
-                if BiSGearCheck:IsOnWishlist(capturedUpgrade.id) then
-                    BiSGearCheck:RemoveFromWishlist(capturedUpgrade.id)
-                    btnBg:SetColorTexture(0.2, 0.2, 0.2, 0.6)
-                else
-                    BiSGearCheck:AddToWishlist(capturedUpgrade.id, capturedUpgrade.slotName, capturedUpgrade.rank, capturedUpgrade.source, capturedUpgrade.sourceType)
-                    btnBg:SetColorTexture(0.0, 0.5, 0.0, 0.8)
-                end
-            end)
-            addBtn:SetScript("OnEnter", function(self)
-                GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-                if BiSGearCheck:IsOnWishlist(capturedUpgrade.id) then
-                    GameTooltip:AddLine("Click to remove from Wishlist", 1, 0.3, 0.3)
-                else
-                    GameTooltip:AddLine("Click to add to Wishlist", 0, 1, 0)
-                end
-                GameTooltip:Show()
-            end)
-            addBtn:SetScript("OnLeave", function() GameTooltip:Hide() end)
-            table.insert(parent.rows, addBtn)
+            addBtn:SetScript("OnClick", self.OnWishlistToggleClick)
+            addBtn:SetScript("OnEnter", self.OnWishlistToggleEnter)
+            addBtn:SetScript("OnLeave", self.OnTooltipLeave)
 
-            -- Item tooltip on hover
-            local itemID = upgrade.id
+            -- Item tooltip on hover (shared handler)
             row:EnableMouse(true)
-            row:SetScript("OnEnter", function(self)
-                GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-                local _, link = GetItemInfo(itemID)
-                if link then
-                    GameTooltip:SetHyperlink(link)
-                else
-                    GameTooltip:AddLine("Item #" .. itemID)
-                    GameTooltip:AddLine("Loading...", 0.5, 0.5, 0.5)
-                end
-                GameTooltip:Show()
-            end)
-            row:SetScript("OnLeave", function() GameTooltip:Hide() end)
+            row:SetScript("OnEnter", self.OnItemIDEnter)
+            row:SetScript("OnLeave", self.OnTooltipLeave)
 
             yOffset = yOffset - self.ITEM_ROW_HEIGHT
         end
     end
 
-    -- Separator
+    -- Separator (reused from pool)
     local sep = self:CreateRow(parent, yOffset, width)
-    local line = sep:CreateTexture(nil, "ARTWORK")
-    line:SetHeight(1)
-    line:SetPoint("TOPLEFT", sep, "TOPLEFT", 5, -2)
-    line:SetPoint("TOPRIGHT", sep, "TOPRIGHT", -5, -2)
+    local line = self:GetSeparatorLine(sep)
     line:SetColorTexture(0.3, 0.3, 0.3, 0.5)
     yOffset = yOffset - 6
 

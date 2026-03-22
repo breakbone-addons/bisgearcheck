@@ -3,6 +3,9 @@
 
 BiSGearCheck = BiSGearCheck or {}
 
+-- Reusable buffer for wishlist zone filtering
+local _wlFilterBuf = {}
+
 -- ============================================================
 -- RENDER WISHLIST
 -- ============================================================
@@ -58,13 +61,14 @@ function BiSGearCheck:RenderWishlist()
     local yOffset = -5
     local contentWidth = self.FRAME_WIDTH - 45
 
-    -- Apply zone filter
-    local filteredItems = {}
+    -- Apply zone filter (reuse buffer)
+    wipe(_wlFilterBuf)
     for _, item in ipairs(items) do
         if not self.wishlistZoneFilter or self:ItemMatchesZone(item.id, self.wishlistZoneFilter) then
-            table.insert(filteredItems, item)
+            _wlFilterBuf[#_wlFilterBuf + 1] = item
         end
     end
+    local filteredItems = _wlFilterBuf
 
     if #filteredItems == 0 then
         local row = self:CreateRow(scrollChild, yOffset, contentWidth)
@@ -104,47 +108,22 @@ function BiSGearCheck:RenderWishlist()
             row.text:SetText(string.format("  %s%s %s", prefix, itemName, sourceText))
             row.text:SetPoint("RIGHT", row, "RIGHT", -30, 0)
 
-            -- Remove button (X) - enlarged with red background
-            local removeBtn = CreateFrame("Button", nil, row)
-            removeBtn:SetSize(24, 18)
-            removeBtn:SetPoint("RIGHT", row, "RIGHT", -1, 0)
+            -- Store data on the row for shared handlers
+            row._itemID = item.id
 
-            local removeBg = removeBtn:CreateTexture(nil, "BACKGROUND")
-            removeBg:SetAllPoints()
+            -- Remove button (reused from pool, shared handlers)
+            local removeBtn, removeBg, btnText = self:GetActionButton(row)
             removeBg:SetColorTexture(0.5, 0.0, 0.0, 0.8)
-
-            local btnText = removeBtn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-            btnText:SetPoint("CENTER", 0, 0)
             btnText:SetText("|cffffffffx|r")
 
-            local capturedID = item.id
-            removeBtn:SetScript("OnClick", function()
-                BiSGearCheck:RemoveFromWishlist(capturedID)
-                BiSGearCheck:RefreshView()
-            end)
-            removeBtn:SetScript("OnEnter", function(self)
-                GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-                GameTooltip:AddLine("Remove from Wishlist", 1, 0.3, 0.3)
-                GameTooltip:Show()
-            end)
-            removeBtn:SetScript("OnLeave", function() GameTooltip:Hide() end)
-            table.insert(scrollChild.rows, removeBtn)
+            removeBtn:SetScript("OnClick", self.OnWishlistRemoveClick)
+            removeBtn:SetScript("OnEnter", self.OnWishlistRemoveEnter)
+            removeBtn:SetScript("OnLeave", self.OnTooltipLeave)
 
-            -- Item tooltip
-            local itemID = item.id
+            -- Item tooltip (shared handler)
             row:EnableMouse(true)
-            row:SetScript("OnEnter", function(self)
-                GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-                local _, link = GetItemInfo(itemID)
-                if link then
-                    GameTooltip:SetHyperlink(link)
-                else
-                    GameTooltip:AddLine("Item #" .. itemID)
-                    GameTooltip:AddLine("Loading...", 0.5, 0.5, 0.5)
-                end
-                GameTooltip:Show()
-            end)
-            row:SetScript("OnLeave", function() GameTooltip:Hide() end)
+            row:SetScript("OnEnter", self.OnItemIDEnter)
+            row:SetScript("OnLeave", self.OnTooltipLeave)
 
             yOffset = yOffset - self.ITEM_ROW_HEIGHT
         end
@@ -229,14 +208,12 @@ function BiSGearCheck:RenderBisList()
             local isCollapsed = self.collapsedSlots[slotName]
             local arrow = isCollapsed and "|cffffd100[+]|r " or "|cffffd100[-]|r "
 
-            -- Slot header
+            -- Slot header (shared handler)
             local header = self:CreateRow(scrollChild, yOffset, contentWidth)
             header.text:SetText(arrow .. "|cffffd100" .. slotName .. "|r")
+            header._slotName = slotName
             header:EnableMouse(true)
-            header:SetScript("OnMouseDown", function()
-                BiSGearCheck.collapsedSlots[slotName] = not BiSGearCheck.collapsedSlots[slotName]
-                BiSGearCheck:RefreshView()
-            end)
+            header:SetScript("OnMouseDown", self.OnSlotHeaderClick)
             yOffset = yOffset - self.SLOT_HEADER_HEIGHT
 
             if not isCollapsed then
@@ -262,32 +239,19 @@ function BiSGearCheck:RenderBisList()
 
                     row.text:SetText(string.format("  |cff00ccff#%d|r %s %s", rank, itemText, sourceText))
 
-                    -- Item tooltip on hover
+                    -- Item tooltip on hover (shared handler)
+                    row._itemID = itemID
                     row:EnableMouse(true)
-                    local capturedID = itemID
-                    row:SetScript("OnEnter", function(self)
-                        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-                        local _, rLink = GetItemInfo(capturedID)
-                        if rLink then
-                            GameTooltip:SetHyperlink(rLink)
-                        else
-                            GameTooltip:AddLine("Item #" .. capturedID)
-                            GameTooltip:AddLine("Loading...", 0.5, 0.5, 0.5)
-                        end
-                        GameTooltip:Show()
-                    end)
-                    row:SetScript("OnLeave", function() GameTooltip:Hide() end)
+                    row:SetScript("OnEnter", self.OnItemIDEnter)
+                    row:SetScript("OnLeave", self.OnTooltipLeave)
 
                     yOffset = yOffset - self.ITEM_ROW_HEIGHT
                 end
             end
 
-            -- Separator
+            -- Separator (reused from pool)
             local sep = self:CreateRow(scrollChild, yOffset, contentWidth)
-            local line = sep:CreateTexture(nil, "ARTWORK")
-            line:SetHeight(1)
-            line:SetPoint("TOPLEFT", sep, "TOPLEFT", 5, -2)
-            line:SetPoint("TOPRIGHT", sep, "TOPRIGHT", -5, -2)
+            local line = self:GetSeparatorLine(sep)
             line:SetColorTexture(0.3, 0.3, 0.3, 0.5)
             yOffset = yOffset - 6
             yOffset = yOffset - self.SECTION_SPACING

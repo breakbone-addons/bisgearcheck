@@ -178,6 +178,8 @@ function BiSGearCheck:Toggle()
     end
     if self.mainFrame:IsShown() then
         self.mainFrame:Hide()
+        -- Prompt garbage collection to reclaim render/comparison tables
+        collectgarbage("collect")
     else
         self:Refresh()
         self.mainFrame:Show()

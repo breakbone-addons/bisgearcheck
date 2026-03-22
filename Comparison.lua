@@ -3,6 +3,10 @@
 
 BiSGearCheck = BiSGearCheck or {}
 
+-- Reusable scratch tables (avoid per-call allocation)
+local _filteredBuf = {}
+local _equippedIDsBuf = {}
+
 -- ============================================================
 -- FACTION FILTERING
 -- ============================================================
@@ -18,14 +22,15 @@ function BiSGearCheck:IsItemAvailableForFaction(itemID)
 end
 
 -- Filter a BiS item list to only include items available to the player's faction.
+-- Uses a reusable buffer to avoid creating a new table each call.
 function BiSGearCheck:FilterBisListByFaction(bisItems)
-    local filtered = {}
+    wipe(_filteredBuf)
     for _, itemID in ipairs(bisItems) do
         if self:IsItemAvailableForFaction(itemID) then
-            table.insert(filtered, itemID)
+            _filteredBuf[#_filteredBuf + 1] = itemID
         end
     end
-    return filtered
+    return _filteredBuf
 end
 
 -- ============================================================
@@ -36,27 +41,43 @@ function BiSGearCheck:RunComparison()
     local specKey = self.selectedSpec
     local db = self:GetActiveDB()
     if not specKey or not db or not db[specKey] then
-        self.comparisonResults = {}
+        if self.comparisonResults then
+            wipe(self.comparisonResults)
+        else
+            self.comparisonResults = {}
+        end
         return
     end
 
     local specData = db[specKey]
-    local results = {}
+
+    -- Reuse the top-level results table
+    if not self.comparisonResults then
+        self.comparisonResults = {}
+    else
+        wipe(self.comparisonResults)
+    end
+    local results = self.comparisonResults
 
     for _, slotName in ipairs(self.SlotOrder) do
         local bisItems = specData.slots[slotName]
         if bisItems and #bisItems > 0 then
+            -- FilterBisListByFaction uses _filteredBuf, so copy results
+            -- before the next call overwrites it
             local factionItems = self:FilterBisListByFaction(bisItems)
             if #factionItems > 0 then
-                local slotResult = self:CompareSlot(slotName, factionItems)
+                -- Copy filtered items into a stable list for this slot
+                local stableItems = {}
+                for i = 1, #factionItems do
+                    stableItems[i] = factionItems[i]
+                end
+                local slotResult = self:CompareSlot(slotName, stableItems)
                 if slotResult then
-                    table.insert(results, slotResult)
+                    results[#results + 1] = slotResult
                 end
             end
         end
     end
-
-    self.comparisonResults = results
 
     -- Update gear snapshot for current character after comparison
     if self:IsViewingOwnCharacter() then
@@ -80,7 +101,7 @@ function BiSGearCheck:CompareSlot(slotName, bisItems)
         worstEquippedRank = 0,
     }
 
-    local equippedIDs = {}
+    wipe(_equippedIDsBuf)
 
     if self:IsViewingOwnCharacter() then
         -- Live equipped gear from the current character
@@ -88,12 +109,12 @@ function BiSGearCheck:CompareSlot(slotName, bisItems)
             local itemID = GetInventoryItemID("player", invSlotID)
             local itemLink = GetInventoryItemLink("player", invSlotID)
             if itemID then
-                table.insert(result.equipped, {
+                result.equipped[#result.equipped + 1] = {
                     id = itemID,
                     link = itemLink,
                     invSlot = invSlotID,
-                })
-                equippedIDs[itemID] = true
+                }
+                _equippedIDsBuf[itemID] = true
             end
         end
     else
@@ -101,12 +122,12 @@ function BiSGearCheck:CompareSlot(slotName, bisItems)
         local charData = self:GetViewingCharData()
         if charData and charData.equipped and charData.equipped[slotName] then
             for _, eqInfo in ipairs(charData.equipped[slotName]) do
-                table.insert(result.equipped, {
+                result.equipped[#result.equipped + 1] = {
                     id = eqInfo.id,
                     link = eqInfo.link,
                     invSlot = eqInfo.invSlot,
-                })
-                equippedIDs[eqInfo.id] = true
+                }
+                _equippedIDsBuf[eqInfo.id] = true
             end
         end
     end
@@ -139,7 +160,7 @@ function BiSGearCheck:CompareSlot(slotName, bisItems)
     for rank = 1, math.min(cutoff - 1, #bisItems) do
         if maxShow and shown >= maxShow then break end
         local bisID = bisItems[rank]
-        if not equippedIDs[bisID] then
+        if not _equippedIDsBuf[bisID] then
             local name, link, quality, _, _, _, _, _, _, icon = GetItemInfo(bisID)
             if not name then
                 self.pendingItems[bisID] = true
@@ -147,7 +168,7 @@ function BiSGearCheck:CompareSlot(slotName, bisItems)
             end
 
             local sourceInfo = BiSGearCheckSources and BiSGearCheckSources[bisID]
-            table.insert(result.upgrades, {
+            result.upgrades[#result.upgrades + 1] = {
                 id = bisID,
                 rank = rank,
                 name = name,
@@ -157,7 +178,7 @@ function BiSGearCheck:CompareSlot(slotName, bisItems)
                 source = sourceInfo and sourceInfo.source or "Unknown",
                 sourceType = sourceInfo and sourceInfo.sourceType or "",
                 slotName = slotName,
-            })
+            }
             shown = shown + 1
         end
     end

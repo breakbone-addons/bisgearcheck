@@ -5,6 +5,18 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
+## v3.0.1
+
+### Fixes
+- Fixed memory leak: UI frames are now pooled and recycled instead of created fresh each render.
+- Eliminated per-render closure allocations by using shared script handlers with frame-stored data.
+- Reduced table churn in comparison engine and faction filtering with reusable buffers.
+- Added garbage collection on window close to reclaim render allocations promptly.
+
+### Changes
+- Moved compare screenshot to Gear Comparison section in CurseForge description.
+- Constrained CurseForge images with width attributes and replaced em dashes for encoding compatibility.
+
 ## v3.0.0
 
 ### Breaking Changes

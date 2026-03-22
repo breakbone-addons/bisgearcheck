@@ -21,39 +21,195 @@ BiSGearCheck.COLOR_CYAN = { r = 0.0, g = 0.82, b = 1.0 }
 -- Track collapsed state per slot (persists within session)
 BiSGearCheck.collapsedSlots = BiSGearCheck.collapsedSlots or {}
 
+-- Frame pool for recycling scroll content rows
+BiSGearCheck.framePool = BiSGearCheck.framePool or {}
+
 -- ============================================================
 -- CLEAR SCROLL CONTENT
 -- ============================================================
 
 function BiSGearCheck:ClearScrollContent(scrollChild)
     if scrollChild.rows then
-        for _, row in ipairs(scrollChild.rows) do
+        for i, row in ipairs(scrollChild.rows) do
             row:Hide()
-            row:SetParent(nil)
+            row:ClearAllPoints()
+            row:EnableMouse(false)
+            row:SetScript("OnMouseDown", nil)
+            row:SetScript("OnEnter", nil)
+            row:SetScript("OnLeave", nil)
+            row.text:SetText("")
+            row.text:ClearAllPoints()
+            row.text:SetPoint("LEFT", row, "LEFT", 5, 0)
+            row.text:SetPoint("RIGHT", row, "RIGHT", -5, 0)
+            -- Clear per-row data references
+            row._slotName = nil
+            row._itemLink = nil
+            row._itemID = nil
+            row._upgrade = nil
+            if row.actionBtn then
+                row.actionBtn:Hide()
+                row.actionBtn:SetScript("OnClick", nil)
+                row.actionBtn:SetScript("OnEnter", nil)
+                row.actionBtn:SetScript("OnLeave", nil)
+            end
+            if row.sepLine then
+                row.sepLine:Hide()
+            end
+            self.framePool[#self.framePool + 1] = row
+            scrollChild.rows[i] = nil
         end
+    else
+        scrollChild.rows = {}
     end
-    scrollChild.rows = {}
 end
 
 -- ============================================================
--- CREATE ROW HELPER
+-- CREATE ROW HELPER (pools and reuses frames)
 -- ============================================================
 
 function BiSGearCheck:CreateRow(parent, yOffset, width)
-    local row = CreateFrame("Frame", nil, parent)
-    row:SetSize(width, self.ITEM_ROW_HEIGHT)
-    row:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, yOffset)
+    local row = table.remove(self.framePool)
+    if row then
+        row:SetParent(parent)
+        row:SetSize(width, self.ITEM_ROW_HEIGHT)
+        row:ClearAllPoints()
+        row:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, yOffset)
+        row:Show()
+    else
+        row = CreateFrame("Frame", nil, parent)
+        row:SetSize(width, self.ITEM_ROW_HEIGHT)
+        row:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, yOffset)
 
-    row.text = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    row.text:SetPoint("LEFT", row, "LEFT", 5, 0)
-    row.text:SetPoint("RIGHT", row, "RIGHT", -5, 0)
-    row.text:SetJustifyH("LEFT")
-    row.text:SetWordWrap(false)
+        row.text = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        row.text:SetPoint("LEFT", row, "LEFT", 5, 0)
+        row.text:SetPoint("RIGHT", row, "RIGHT", -5, 0)
+        row.text:SetJustifyH("LEFT")
+        row.text:SetWordWrap(false)
+    end
 
     if not parent.rows then parent.rows = {} end
-    table.insert(parent.rows, row)
+    parent.rows[#parent.rows + 1] = row
 
     return row
+end
+
+-- ============================================================
+-- ACTION BUTTON HELPER (reuses button on a row)
+-- ============================================================
+
+function BiSGearCheck:GetActionButton(row)
+    if row.actionBtn then
+        row.actionBtn:Show()
+        return row.actionBtn, row.actionBtn.bg, row.actionBtn.label
+    end
+
+    local btn = CreateFrame("Button", nil, row)
+    btn:SetSize(24, 18)
+    btn:SetPoint("RIGHT", row, "RIGHT", -1, 0)
+
+    local bg = btn:CreateTexture(nil, "BACKGROUND")
+    bg:SetAllPoints()
+    btn.bg = bg
+
+    local label = btn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    label:SetPoint("CENTER", 0, 0)
+    btn.label = label
+
+    row.actionBtn = btn
+    return btn, bg, label
+end
+
+-- ============================================================
+-- SEPARATOR LINE HELPER (reuses texture on a row)
+-- ============================================================
+
+function BiSGearCheck:GetSeparatorLine(row)
+    if row.sepLine then
+        row.sepLine:Show()
+        return row.sepLine
+    end
+
+    local line = row:CreateTexture(nil, "ARTWORK")
+    line:SetHeight(1)
+    line:SetPoint("TOPLEFT", row, "TOPLEFT", 5, -2)
+    line:SetPoint("TOPRIGHT", row, "TOPRIGHT", -5, -2)
+    row.sepLine = line
+    return line
+end
+
+-- ============================================================
+-- SHARED SCRIPT HANDLERS (eliminates per-render closure creation)
+-- ============================================================
+
+-- Slot header click: toggle collapse
+BiSGearCheck.OnSlotHeaderClick = function(frame)
+    local slotName = frame._slotName
+    BiSGearCheck.collapsedSlots[slotName] = not BiSGearCheck.collapsedSlots[slotName]
+    BiSGearCheck:RefreshView()
+end
+
+-- Item tooltip via hyperlink (for equipped items with known links)
+BiSGearCheck.OnItemLinkEnter = function(frame)
+    GameTooltip:SetOwner(frame, "ANCHOR_RIGHT")
+    GameTooltip:SetHyperlink(frame._itemLink)
+    GameTooltip:Show()
+end
+
+-- Item tooltip via item ID (for upgrade/bis items)
+BiSGearCheck.OnItemIDEnter = function(frame)
+    GameTooltip:SetOwner(frame, "ANCHOR_RIGHT")
+    local _, link = GetItemInfo(frame._itemID)
+    if link then
+        GameTooltip:SetHyperlink(link)
+    else
+        GameTooltip:AddLine("Item #" .. frame._itemID)
+        GameTooltip:AddLine("Loading...", 0.5, 0.5, 0.5)
+    end
+    GameTooltip:Show()
+end
+
+-- Hide tooltip (shared by all leave handlers)
+BiSGearCheck.OnTooltipLeave = function()
+    GameTooltip:Hide()
+end
+
+-- Wishlist add/remove button click
+BiSGearCheck.OnWishlistToggleClick = function(btn)
+    local row = btn:GetParent()
+    local upgrade = row._upgrade
+    if BiSGearCheck:IsOnWishlist(upgrade.id) then
+        BiSGearCheck:RemoveFromWishlist(upgrade.id)
+        btn.bg:SetColorTexture(0.2, 0.2, 0.2, 0.6)
+    else
+        BiSGearCheck:AddToWishlist(upgrade.id, upgrade.slotName, upgrade.rank, upgrade.source, upgrade.sourceType)
+        btn.bg:SetColorTexture(0.0, 0.5, 0.0, 0.8)
+    end
+end
+
+-- Wishlist add/remove button tooltip
+BiSGearCheck.OnWishlistToggleEnter = function(btn)
+    GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
+    local row = btn:GetParent()
+    if BiSGearCheck:IsOnWishlist(row._upgrade.id) then
+        GameTooltip:AddLine("Click to remove from Wishlist", 1, 0.3, 0.3)
+    else
+        GameTooltip:AddLine("Click to add to Wishlist", 0, 1, 0)
+    end
+    GameTooltip:Show()
+end
+
+-- Wishlist remove button click
+BiSGearCheck.OnWishlistRemoveClick = function(btn)
+    local row = btn:GetParent()
+    BiSGearCheck:RemoveFromWishlist(row._itemID)
+    BiSGearCheck:RefreshView()
+end
+
+-- Wishlist remove button tooltip
+BiSGearCheck.OnWishlistRemoveEnter = function(btn)
+    GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
+    GameTooltip:AddLine("Remove from Wishlist", 1, 0.3, 0.3)
+    GameTooltip:Show()
 end
 
 -- ============================================================
