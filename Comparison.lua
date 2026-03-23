@@ -162,7 +162,7 @@ function BiSGearCheck:CompareSlot(slotName, bisItems)
         local bisID = bisItems[rank]
         if not _equippedIDsBuf[bisID] then
             local name, link, quality, _, _, _, _, _, _, icon = GetItemInfo(bisID)
-            if not name then
+            if not name and not self.pendingItems[bisID] then
                 self.pendingItems[bisID] = true
                 C_Item.RequestLoadItemDataByID(bisID)
             end

@@ -28,7 +28,7 @@ function BiSGearCheck:SetupTabs(f)
     end
 
     local compTab = CreateTab(f, "Compare", 1)
-    compTab:SetPoint("TOPLEFT", f, "TOPLEFT", 8, -26)
+    compTab:SetPoint("TOPLEFT", f, "TOPLEFT", 12, -34)
 
     local wlTab = CreateTab(f, "Wishlists", 2)
     wlTab:SetPoint("LEFT", compTab, "RIGHT", 2, 0)
@@ -80,9 +80,35 @@ function BiSGearCheck:SetupTabs(f)
         BiSGearCheck:RefreshView()
     end)
 
+    -- Gear icon button to open settings
+    local settingsBtn = CreateFrame("Button", "BiSGearCheckSettingsBtn", f)
+    settingsBtn:SetSize(20, 20)
+    settingsBtn:SetPoint("RIGHT", f, "TOPRIGHT", -38, -20)
+
+    local settingsIcon = settingsBtn:CreateTexture(nil, "ARTWORK")
+    settingsIcon:SetAllPoints()
+    settingsIcon:SetTexture("Interface\\Scenarios\\ScenarioIcon-Interact")
+    settingsIcon:SetVertexColor(0.8, 0.8, 0.8)
+    settingsBtn.icon = settingsIcon
+
+    settingsBtn:SetScript("OnClick", function()
+        BiSGearCheck:ShowSettings()
+    end)
+    settingsBtn:SetScript("OnEnter", function(self)
+        self.icon:SetVertexColor(1, 1, 1)
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:AddLine("Settings")
+        GameTooltip:Show()
+    end)
+    settingsBtn:SetScript("OnLeave", function(self)
+        self.icon:SetVertexColor(0.8, 0.8, 0.8)
+        GameTooltip:Hide()
+    end)
+
     f.compTab = compTab
     f.wlTab = wlTab
     f.bisTab = bisTab
+    f.settingsBtn = settingsBtn
     f.UpdateTabAppearance = UpdateTabAppearance
 end
 
@@ -92,7 +118,7 @@ end
 
 function BiSGearCheck:SetupCharacterSelector(f)
     local charDropdown = CreateFrame("Frame", "BiSGearCheckCharDropdown", f, "UIDropDownMenuTemplate")
-    charDropdown:SetPoint("TOPRIGHT", f, "TOPRIGHT", 5, -22)
+    charDropdown:SetPoint("TOPRIGHT", f, "TOPRIGHT", 5, -32)
     UIDropDownMenu_SetWidth(charDropdown, 130)
     UIDropDownMenu_JustifyText(charDropdown, "RIGHT")
 
@@ -144,11 +170,11 @@ end
 function BiSGearCheck:SetupSourceSpecDropdowns(f)
     -- Data source dropdown
     local sourceDropdown = CreateFrame("Frame", "BiSGearCheckSourceDropdown", f, "UIDropDownMenuTemplate")
-    sourceDropdown:SetPoint("TOPLEFT", f, "TOPLEFT", -5, -52)
+    sourceDropdown:SetPoint("TOPLEFT", f, "TOPLEFT", -5, -60)
     UIDropDownMenu_SetWidth(sourceDropdown, 100)
 
     local function SourceDropdownInit(self, level)
-        for _, srcInfo in ipairs(BiSGearCheck.DataSources) do
+        for _, srcInfo in ipairs(BiSGearCheck:GetEnabledDataSourcesForPhase()) do
             local info = UIDropDownMenu_CreateInfo()
             info.text = srcInfo.label
             info.value = srcInfo.key
@@ -164,7 +190,7 @@ function BiSGearCheck:SetupSourceSpecDropdowns(f)
     UIDropDownMenu_Initialize(sourceDropdown, SourceDropdownInit)
 
     -- Set initial source text
-    for _, srcInfo in ipairs(self.DataSources) do
+    for _, srcInfo in ipairs(self:GetEnabledDataSourcesForPhase()) do
         if srcInfo.key == self.dataSource then
             UIDropDownMenu_SetText(sourceDropdown, srcInfo.label)
             UIDropDownMenu_SetSelectedValue(sourceDropdown, srcInfo.key)
@@ -219,7 +245,7 @@ end
 function BiSGearCheck:SetupCollapseControls(f)
     local collapseAllBtn = CreateFrame("Button", nil, f)
     collapseAllBtn:SetSize(70, 16)
-    collapseAllBtn:SetPoint("TOPLEFT", f, "TOPLEFT", 10, -78)
+    collapseAllBtn:SetPoint("TOPLEFT", f, "TOPLEFT", 12, -92)
     local collapseText = collapseAllBtn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     collapseText:SetPoint("LEFT")
     collapseText:SetText("|cff00ccffCollapse All|r")
@@ -249,7 +275,7 @@ function BiSGearCheck:SetupCollapseControls(f)
 
     -- Wishlist picker (right-aligned, shown on Compare tab)
     local compareWLDropdown = CreateFrame("Frame", "BiSGearCheckCompareWLDropdown", f, "UIDropDownMenuTemplate")
-    compareWLDropdown:SetPoint("TOPRIGHT", f, "TOPRIGHT", 5, -78)
+    compareWLDropdown:SetPoint("TOPRIGHT", f, "TOPRIGHT", 5, -90)
     UIDropDownMenu_SetWidth(compareWLDropdown, 130)
     UIDropDownMenu_JustifyText(compareWLDropdown, "RIGHT")
 
@@ -355,15 +381,15 @@ end
 function BiSGearCheck:SetupBisListBar(f)
     local bislistBar = CreateFrame("Frame", nil, f)
     bislistBar:SetSize(self.FRAME_WIDTH - 20, 26)
-    bislistBar:SetPoint("TOPLEFT", f, "TOPLEFT", 0, -52)
+    bislistBar:SetPoint("TOPLEFT", f, "TOPLEFT", 0, -60)
     bislistBar:Hide()
 
     local bislistSourceDropdown = CreateFrame("Frame", "BiSGearCheckBislistSourceDropdown", bislistBar, "UIDropDownMenuTemplate")
-    bislistSourceDropdown:SetPoint("TOPLEFT", f, "TOPLEFT", -5, -52)
+    bislistSourceDropdown:SetPoint("TOPLEFT", f, "TOPLEFT", -5, -60)
     UIDropDownMenu_SetWidth(bislistSourceDropdown, 100)
 
     local function BislistSourceInit(self, level)
-        for _, srcInfo in ipairs(BiSGearCheck.DataSources) do
+        for _, srcInfo in ipairs(BiSGearCheck:GetEnabledDataSourcesForPhase()) do
             local info = UIDropDownMenu_CreateInfo()
             info.text = srcInfo.label
             info.value = srcInfo.key
@@ -379,7 +405,7 @@ function BiSGearCheck:SetupBisListBar(f)
     UIDropDownMenu_Initialize(bislistSourceDropdown, BislistSourceInit)
 
     -- Set initial text
-    for _, srcInfo in ipairs(self.DataSources) do
+    for _, srcInfo in ipairs(self:GetEnabledDataSourcesForPhase()) do
         if srcInfo.key == self.dataSource then
             UIDropDownMenu_SetText(bislistSourceDropdown, srcInfo.label)
             break
@@ -431,6 +457,50 @@ function BiSGearCheck:SetupBisListBar(f)
     end
     UIDropDownMenu_Initialize(bislistSpecDropdown, BislistSpecInit)
     UIDropDownMenu_SetText(bislistSpecDropdown, "Select Spec")
+
+    --[[ PHASE DROPDOWN DISABLED — phase data not yet shipping
+    local CURRENT_CONTENT_PHASE = 1
+    local PHASE_OPTIONS = {
+        { value = 0, label = "Pre-Raid" },
+        { value = 1, label = "Phase 1" },
+        { value = 2, label = "Phase 2" },
+        { value = 3, label = "Phase 3" },
+        { value = 4, label = "Phase 4" },
+        { value = 5, label = "Phase 5" },
+    }
+    for _, opt in ipairs(PHASE_OPTIONS) do
+        if opt.value == CURRENT_CONTENT_PHASE then
+            opt.label = opt.label .. " (Current)"
+        end
+    end
+
+    local phaseDropdown = CreateFrame("Frame", "BiSGearCheckPhaseDropdown", bislistBar, "UIDropDownMenuTemplate")
+    phaseDropdown:SetPoint("TOPLEFT", f, "TOPLEFT", -5, -92)
+    UIDropDownMenu_SetWidth(phaseDropdown, 110)
+
+    local function PhaseDropdownInit(self, level)
+        local currentPhase = BiSGearCheck.phaseFilter or 1
+        for _, opt in ipairs(PHASE_OPTIONS) do
+            local info = UIDropDownMenu_CreateInfo()
+            info.text = opt.label
+            info.value = opt.value
+            info.func = function(self)
+                UIDropDownMenu_SetSelectedValue(phaseDropdown, self.value)
+                UIDropDownMenu_SetText(phaseDropdown, PHASE_OPTIONS[self.value + 1].label)
+                BiSGearCheckSaved.phaseFilter = self.value
+                BiSGearCheck.phaseFilter = self.value
+                BiSGearCheck:OnPhaseChanged()
+            end
+            info.checked = (opt.value == currentPhase)
+            UIDropDownMenu_AddButton(info, level)
+        end
+    end
+    UIDropDownMenu_Initialize(phaseDropdown, PhaseDropdownInit)
+
+    local savedPhase = BiSGearCheck.phaseFilter or 1
+    UIDropDownMenu_SetText(phaseDropdown, PHASE_OPTIONS[savedPhase + 1].label)
+    f.phaseDropdown = phaseDropdown
+    --]] -- END PHASE DROPDOWN DISABLED
 
     f.bislistBar = bislistBar
     f.bislistSourceDropdown = bislistSourceDropdown

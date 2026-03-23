@@ -32,10 +32,15 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
         self:UnregisterEvent("PLAYER_ENTERING_WORLD")
         BiSGearCheck:Initialize()
     elseif event == "GET_ITEM_INFO_RECEIVED" then
-        local itemID = ...
+        local itemID, success = ...
         if itemID and BiSGearCheck.pendingItems[itemID] then
-            BiSGearCheck.pendingItems[itemID] = nil
-            BiSGearCheck.needsRefresh = true
+            if success then
+                BiSGearCheck.pendingItems[itemID] = nil
+                BiSGearCheck.needsRefresh = true
+            else
+                -- Item failed to load — leave in pendingItems so we don't re-request
+                BiSGearCheck.pendingItems[itemID] = "failed"
+            end
         end
     elseif event == "PLAYER_EQUIPMENT_CHANGED" then
         -- Update gear snapshot for cross-character viewing
@@ -88,6 +93,27 @@ function BiSGearCheck:Initialize()
 
     if not self.selectedSpec then
         self.selectedSpec = self:GuessSpec()
+    end
+
+    -- Force Phase 1 while phase selection is disabled
+    self.phaseFilter = 1
+    BiSGearCheckSaved.phaseFilter = 1
+
+    -- Initialize data source settings and unload fully disabled sources
+    self:EnsureSourceSettings()
+    self:UnloadDisabledSources()
+
+    -- Ensure the saved data source is valid for the current phase
+    local currentSrc
+    for _, src in ipairs(self.DataSources) do
+        if src.key == self.dataSource then currentSrc = src; break end
+    end
+    if not currentSrc or not self:SourceHasPhase(currentSrc, self.phaseFilter or 1) then
+        local available = self:GetEnabledDataSourcesForPhase()
+        if available[1] then
+            self.dataSource = available[1].key
+            BiSGearCheckChar.dataSource = self.dataSource
+        end
     end
 
     -- Ensure minimap saved vars
@@ -244,14 +270,39 @@ function BiSGearCheck:SetDataSource(sourceKey)
     self:Refresh()
 end
 
--- Get the active BiS database based on selected data source
-function BiSGearCheck:GetActiveDB()
+-- Called when the phase dropdown changes — switch source if needed and refresh
+function BiSGearCheck:OnPhaseChanged()
+    -- If the current source has no data for the new phase, switch to one that does
+    local phase = self.phaseFilter or 1
+    local currentSrc
     for _, src in ipairs(self.DataSources) do
         if src.key == self.dataSource then
-            return _G[src.db]
+            currentSrc = src
+            break
         end
     end
-    return BiSGearCheckDB
+    if not currentSrc or not self:SourceHasPhase(currentSrc, phase) then
+        local available = self:GetEnabledDataSourcesForPhase()
+        if available[1] then
+            self.dataSource = available[1].key
+            BiSGearCheckChar.dataSource = self.dataSource
+        end
+    end
+    self:BuildTooltipIndex()
+    self:Refresh()
+end
+
+-- Get the active BiS database based on selected data source and phase
+function BiSGearCheck:GetActiveDB()
+    local phase = self.phaseFilter or 1
+    for _, src in ipairs(self.DataSources) do
+        if src.key == self.dataSource then
+            local dbName = self:GetSourceDBName(src, phase)
+            if dbName then return _G[dbName] end
+            return nil
+        end
+    end
+    return nil
 end
 
 -- ============================================================

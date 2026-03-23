@@ -76,6 +76,14 @@ function BiSGearCheck:MigrateSavedVars()
         BiSGearCheckSaved.characters = {}
     end
 
+    -- Ensure character filter settings exist
+    if BiSGearCheckSaved.minCharLevel == nil then
+        BiSGearCheckSaved.minCharLevel = 70
+    end
+    if not BiSGearCheckSaved.ignoredCharacters then
+        BiSGearCheckSaved.ignoredCharacters = {}
+    end
+
     -- Ensure per-character vars exist
     if not BiSGearCheckChar then
         BiSGearCheckChar = {}
@@ -90,18 +98,28 @@ function BiSGearCheck:RegisterCharacter()
     local charKey = self.playerKey
     if not charKey then return end
 
+    -- Check ignore list — ignored characters are not registered or updated
+    if self:IsCharacterIgnored(charKey) then return end
+
+    -- Check minimum level threshold — characters below it are not registered
+    local playerLevel = UnitLevel("player") or 0
+    local minLevel = BiSGearCheckSaved.minCharLevel or 70
+    if playerLevel < minLevel then return end
+
     if not BiSGearCheckSaved.characters[charKey] then
         BiSGearCheckSaved.characters[charKey] = {
             class = select(2, UnitClass("player")),
             faction = self.playerFaction,
+            level = playerLevel,
             wishlists = { ["Default"] = {} },
             activeWishlist = "Default",
         }
     else
-        -- Update class/faction in case of changes
+        -- Update class/faction/level in case of changes
         local charData = BiSGearCheckSaved.characters[charKey]
         charData.class = select(2, UnitClass("player"))
         charData.faction = self.playerFaction
+        charData.level = playerLevel
     end
 
     -- Snapshot equipped gear for cross-character viewing
@@ -110,6 +128,9 @@ end
 
 -- Save current equipped item IDs so other characters can view this character's gear
 function BiSGearCheck:SnapshotEquippedGear()
+    -- Don't snapshot ignored characters
+    if self:IsCharacterIgnored(self.playerKey) then return end
+
     local charData = self:GetCharacterData(self.playerKey)
     if not charData then return end
 
@@ -140,8 +161,23 @@ function BiSGearCheck:GetCharacterData(charKey)
     return BiSGearCheckSaved.characters[charKey]
 end
 
--- Get sorted list of all character keys on the account
+-- Get sorted list of visible character keys (filtered by level threshold and ignore list)
 function BiSGearCheck:GetCharacterKeys()
+    local keys = {}
+    if BiSGearCheckSaved and BiSGearCheckSaved.characters then
+        local minLevel = BiSGearCheckSaved.minCharLevel or 70
+        for key, charData in pairs(BiSGearCheckSaved.characters) do
+            if not self:IsCharacterIgnored(key) and (charData.level or 70) >= minLevel then
+                table.insert(keys, key)
+            end
+        end
+    end
+    table.sort(keys)
+    return keys
+end
+
+-- Get sorted list of ALL character keys (unfiltered, for settings UI)
+function BiSGearCheck:GetAllCharacterKeys()
     local keys = {}
     if BiSGearCheckSaved and BiSGearCheckSaved.characters then
         for key in pairs(BiSGearCheckSaved.characters) do
@@ -150,6 +186,33 @@ function BiSGearCheck:GetCharacterKeys()
     end
     table.sort(keys)
     return keys
+end
+
+-- ============================================================
+-- CHARACTER FILTER HELPERS
+-- ============================================================
+
+-- Check if a character is on the ignore list
+function BiSGearCheck:IsCharacterIgnored(charKey)
+    if not BiSGearCheckSaved or not BiSGearCheckSaved.ignoredCharacters then
+        return false
+    end
+    return BiSGearCheckSaved.ignoredCharacters[charKey] == true
+end
+
+-- Add a character to the ignore list
+function BiSGearCheck:IgnoreCharacter(charKey)
+    if not BiSGearCheckSaved then return end
+    if not BiSGearCheckSaved.ignoredCharacters then
+        BiSGearCheckSaved.ignoredCharacters = {}
+    end
+    BiSGearCheckSaved.ignoredCharacters[charKey] = true
+end
+
+-- Remove a character from the ignore list
+function BiSGearCheck:UnignoreCharacter(charKey)
+    if not BiSGearCheckSaved or not BiSGearCheckSaved.ignoredCharacters then return end
+    BiSGearCheckSaved.ignoredCharacters[charKey] = nil
 end
 
 -- Get the character key we're currently viewing wishlists for

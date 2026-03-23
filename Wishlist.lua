@@ -154,7 +154,7 @@ function BiSGearCheck:GetWishlistItems()
         end
 
         local name, link, quality, _, _, _, _, _, _, icon = GetItemInfo(itemID)
-        if not name then
+        if not name and not self.pendingItems[itemID] then
             self.pendingItems[itemID] = true
             C_Item.RequestLoadItemDataByID(itemID)
         end

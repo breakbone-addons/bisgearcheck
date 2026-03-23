@@ -24,8 +24,9 @@ function BiSGearCheck:RenderWishlist()
     f.zoneFilterDropdown:Hide()
     f.sourceDropdown:Hide()
     f.specDropdown:Hide()
+    if f.phaseDropdown then f.phaseDropdown:Hide() end
     f.UpdateTabAppearance()
-    f.scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", self.CONTENT_PADDING, -104)
+    f.scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", self.CONTENT_PADDING, -114)
 
     -- Update character dropdown text
     self:UpdateCharDropdownText()
@@ -55,7 +56,7 @@ function BiSGearCheck:RenderWishlist()
             titleSuffix = charName .. " - " .. titleSuffix
         end
     end
-    f.title:SetText("BiS Gear Check - " .. titleSuffix)
+    f.title:SetText("BiSGearCheck")
 
     local items = self:GetWishlistItems()
     local yOffset = -5
@@ -145,17 +146,35 @@ function BiSGearCheck:RenderBisList()
     f.wlSelectorBar:Hide()
     f.compareWLDropdown:Hide()
     f.compareWLLabel:Hide()
-    f.collapseAllBtn:Show()
-    f.expandAllBtn:Show()
     f.sourceDropdown:Hide()
     f.specDropdown:Hide()
-    -- Position zone filter on the bislist bar row, after the spec dropdown
+    -- Position zone filter on the bislist bar row
     f.zoneFilterDropdown:ClearAllPoints()
-    f.zoneFilterDropdown:SetPoint("TOPRIGHT", f, "TOPRIGHT", 5, -52)
+    f.zoneFilterDropdown:SetPoint("TOPRIGHT", f, "TOPRIGHT", 5, -60)
     f.zoneFilterDropdown:Show()
     UIDropDownMenu_SetText(f.zoneFilterDropdown, self.zoneFilter or "All Zones")
+    -- Show phase dropdown (if available) and position collapse/expand after it
+    if f.phaseDropdown then
+        f.phaseDropdown:Show()
+        local savedPhase = self.phaseFilter
+        if savedPhase and savedPhase > 0 then
+            local PHASE_LABELS = { "Phase 1", "Through Phase 2", "Through Phase 3", "Through Phase 4", "Through Phase 5" }
+            UIDropDownMenu_SetText(f.phaseDropdown, PHASE_LABELS[savedPhase])
+        else
+            UIDropDownMenu_SetText(f.phaseDropdown, "All Phases")
+        end
+        f.collapseAllBtn:ClearAllPoints()
+        f.collapseAllBtn:SetPoint("LEFT", f.phaseDropdown, "RIGHT", -15, 2)
+    else
+        f.collapseAllBtn:ClearAllPoints()
+        f.collapseAllBtn:SetPoint("TOPLEFT", f, "TOPLEFT", self.CONTENT_PADDING, -95)
+    end
+    f.collapseAllBtn:Show()
+    f.expandAllBtn:ClearAllPoints()
+    f.expandAllBtn:SetPoint("LEFT", f.collapseAllBtn, "RIGHT", 5, 0)
+    f.expandAllBtn:Show()
     f.UpdateTabAppearance()
-    f.scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", self.CONTENT_PADDING, -104)
+    f.scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", self.CONTENT_PADDING, -124)
 
     -- Update character dropdown
     self:UpdateCharDropdownText()
@@ -185,7 +204,7 @@ function BiSGearCheck:RenderBisList()
     local db = self:GetActiveDB()
 
     if not specKey or not db or not db[specKey] then
-        f.title:SetText("BiS Gear Check - |cff00ccffBiS Lists|r")
+        f.title:SetText("BiSGearCheck")
         local yOffset = -5
         local contentWidth = self.FRAME_WIDTH - 45
         local row = self:CreateRow(scrollChild, yOffset, contentWidth)
@@ -198,9 +217,9 @@ function BiSGearCheck:RenderBisList()
     local classColor = RAID_CLASS_COLORS[specData.class]
     if classColor then
         local colored = string.format("|cff%02x%02x%02x%s|r", classColor.r * 255, classColor.g * 255, classColor.b * 255, specData.spec)
-        f.title:SetText("BiS Gear Check - " .. colored)
+        f.title:SetText("BiSGearCheck")
     else
-        f.title:SetText("BiS Gear Check - " .. specData.spec)
+        f.title:SetText("BiSGearCheck")
     end
 
     local yOffset = -5
@@ -241,7 +260,7 @@ function BiSGearCheck:RenderBisList()
                     local row = self:CreateRow(scrollChild, yOffset, contentWidth)
 
                     local name, link, quality, _, _, _, _, _, _, icon = GetItemInfo(itemID)
-                    if not name then
+                    if not name and not self.pendingItems[itemID] then
                         self.pendingItems[itemID] = true
                         C_Item.RequestLoadItemDataByID(itemID)
                     end

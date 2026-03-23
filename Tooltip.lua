@@ -6,12 +6,14 @@ BiSGearCheck = BiSGearCheck or {}
 -- Reverse lookup: itemID -> { { specKey, slotName, rank }, ... }
 BiSGearCheck.TooltipIndex = {}
 
--- Build the reverse index from all data sources
+-- Build the reverse index from enabled data sources
 function BiSGearCheck:BuildTooltipIndex()
     self.TooltipIndex = {}
 
-    for _, src in ipairs(self.DataSources) do
-        local db = _G[src.db]
+    local phase = self.phaseFilter or 1
+    for _, src in ipairs(self:GetTooltipDataSources()) do
+        local dbName = self:GetSourceDBName(src, phase)
+        local db = dbName and _G[dbName]
         if db then
             for specKey, specData in pairs(db) do
                 if specData.slots then
@@ -29,6 +31,7 @@ function BiSGearCheck:BuildTooltipIndex()
                                 rank = rank,
                                 source = src.key,
                                 sourceLabel = src.label,
+                                phase = phase,
                             })
                         end
                     end
@@ -62,7 +65,6 @@ function BiSGearCheck:EnsureTooltipSettings()
     local t = BiSGearCheckSaved.tooltip
     if t.showBiS == nil then t.showBiS = true end
     if t.showOnlyMyClass == nil then t.showOnlyMyClass = false end
-    if t.dataSource == nil then t.dataSource = "all" end -- "all", "wowtbcgg", "atlasloot"
 end
 
 -- Render BiS info into a tooltip
@@ -81,7 +83,6 @@ function BiSGearCheck:OnTooltipSetItem(tooltip)
     local entries = self.TooltipIndex[itemID]
     local _, playerClass = UnitClass("player")
     local filterClass = BiSGearCheckSaved.tooltip.showOnlyMyClass
-    local sourceFilter = BiSGearCheckSaved.tooltip.dataSource or "all"
 
     -- Skip faction-restricted items unavailable to the player
     local numItemID = tonumber(itemID)
@@ -89,33 +90,44 @@ function BiSGearCheck:OnTooltipSetItem(tooltip)
         return
     end
 
-    local headerShown = false
+    local currentPhase = self.phaseFilter or 1
 
+    -- Group visible entries by source
+    local sourceOrder = {}
+    local sourceGroups = {}
     for _, entry in ipairs(entries) do
         local show = true
-
-        -- Class filter
         if filterClass and entry.class ~= playerClass then
             show = false
         end
-
-        -- Source filter
-        if sourceFilter ~= "all" and entry.source ~= sourceFilter then
-            show = false
-        end
-
         if show then
-            if not headerShown then
-                tooltip:AddLine(" ")
-                tooltip:AddDoubleLine(
-                    "BiS Gear Check",
-                    "Rank",
-                    1.0, 0.82, 0.0,
-                    0, 1, 0.82
-                )
-                headerShown = true
+            if not sourceGroups[entry.source] then
+                sourceGroups[entry.source] = { label = entry.sourceLabel, entries = {} }
+                sourceOrder[#sourceOrder + 1] = entry.source
             end
+            table.insert(sourceGroups[entry.source].entries, entry)
+        end
+    end
 
+    local anyShown = false
+    for _, sourceKey in ipairs(sourceOrder) do
+        local group = sourceGroups[sourceKey]
+
+        -- Source header
+        local header = "BiSGearCheck (" .. group.label .. ")"
+        if currentPhase ~= 1 then
+            header = header .. " P" .. currentPhase
+        end
+        tooltip:AddLine(" ")
+        tooltip:AddDoubleLine(
+            header,
+            "Rank",
+            1.0, 0.82, 0.0,
+            0, 1, 0.82
+        )
+        anyShown = true
+
+        for _, entry in ipairs(group.entries) do
             local classColor = RAID_CLASS_COLORS[entry.class]
             if classColor then
                 tooltip:AddDoubleLine(
@@ -128,7 +140,7 @@ function BiSGearCheck:OnTooltipSetItem(tooltip)
         end
     end
 
-    if headerShown then
+    if anyShown then
         tooltip:Show()
     end
 end

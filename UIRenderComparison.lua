@@ -26,20 +26,27 @@ function BiSGearCheck:RenderResults()
     f.filterBar:Hide()
     f.bislistBar:Hide()
     f.wlSelectorBar:Hide()
-    f.collapseAllBtn:Show()
-    f.expandAllBtn:Show()
+    f.compareWLDropdown:ClearAllPoints()
+    f.compareWLDropdown:SetPoint("TOPRIGHT", f, "TOPRIGHT", 5, -88)
     f.compareWLDropdown:Show()
     f.compareWLLabel:Show()
+    f.collapseAllBtn:ClearAllPoints()
+    f.collapseAllBtn:SetPoint("TOPLEFT", f, "TOPLEFT", 15, -94)
+    f.collapseAllBtn:Show()
+    f.expandAllBtn:ClearAllPoints()
+    f.expandAllBtn:SetPoint("LEFT", f.collapseAllBtn, "RIGHT", 5, 0)
+    f.expandAllBtn:Show()
     UIDropDownMenu_SetText(f.compareWLDropdown, self.activeWishlist)
     f.sourceDropdown:Show()
     f.specDropdown:Show()
+    if f.phaseDropdown then f.phaseDropdown:Hide() end
     -- Position zone filter on the source/spec row, after the spec dropdown
     f.zoneFilterDropdown:ClearAllPoints()
-    f.zoneFilterDropdown:SetPoint("TOPRIGHT", f, "TOPRIGHT", 5, -52)
+    f.zoneFilterDropdown:SetPoint("TOPRIGHT", f, "TOPRIGHT", 5, -60)
     f.zoneFilterDropdown:Show()
     UIDropDownMenu_SetText(f.zoneFilterDropdown, self.zoneFilter or "All Zones")
     f.UpdateTabAppearance()
-    f.scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", self.CONTENT_PADDING, -104)
+    f.scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", self.CONTENT_PADDING, -124)
 
     local scrollChild = f.scrollChild
     self:ClearScrollContent(scrollChild)
@@ -53,7 +60,7 @@ function BiSGearCheck:RenderResults()
             local specData = db[self.selectedSpec]
             local classToken = self:GetViewingClass()
             local classColored = self:ClassColor(classToken, specData.spec)
-            f.title:SetText("BiS Gear Check - " .. classColored)
+            f.title:SetText("BiSGearCheck")
             UIDropDownMenu_SetText(f.specDropdown, specData.spec)
         end
     end
@@ -174,6 +181,7 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
             wf:SetWidth(wLabel:GetStringWidth() + 8)
             if wrongEnchantID then
                 wf._enchantID = wrongEnchantID
+                wf._enchantSlot = slotName
                 wf:SetScript("OnEnter", self.OnEnchantEnter)
                 wf:SetScript("OnLeave", self.OnTooltipLeave)
             end
@@ -223,6 +231,7 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
                     wf:SetWidth(wLabel:GetStringWidth() + 8)
                     if wrongEnchantID then
                         wf._enchantID = wrongEnchantID
+                        wf._enchantSlot = slotName
                         wf:SetScript("OnEnter", self.OnEnchantEnter)
                         wf:SetScript("OnLeave", self.OnTooltipLeave)
                     end

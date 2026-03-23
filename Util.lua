@@ -80,48 +80,231 @@ BiSGearCheck.ClassSpecs = {
 }
 
 -- Data source definitions
+-- Each source maps phases to global table names.
+-- Phase 0 = Pre-Raid, 1-5 = content phases.
 BiSGearCheck.DataSources = {
-    { key = "wowtbcgg",   label = "WowTBC.gg",  db = "BiSGearCheckDB" },
-    { key = "atlasloot",  label = "AtlasLoot",   db = "BiSGearCheckDB_AtlasLoot" },
+    { key = "wowtbcgg",    label = "WowTBC.gg",    phases = { [1] = "BiSGearCheckDB_WowTBCgg" } },
+    { key = "bistooltip",  label = "BiS-Tooltip",   phases = { [1] = "BiSGearCheckDB_Phase1" } },
+    { key = "atlasloot",   label = "AtlasLoot",     phases = { [1] = "BiSGearCheckDB_AtlasLoot" } },
+    { key = "wowsims",     label = "WoWSims",       phases = { [1] = "BiSGearCheckDB_WoWSims" } },
+    { key = "tmb",          label = "ThatsMyBis",    phases = { [1] = "BiSGearCheckDB_TMB" } },
+    { key = "wowhead",     label = "Wowhead",       phases = { [1] = "BiSGearCheckDB_Wowhead" } },
 }
+
+-- Resolve the global DB table name for a source at a given phase
+function BiSGearCheck:GetSourceDBName(src, phase)
+    if not src.phases then return nil end
+    return src.phases[phase]
+end
+
+-- Check if a source has data for a given phase
+function BiSGearCheck:SourceHasPhase(src, phase)
+    return src.phases and src.phases[phase] ~= nil
+end
+
+-- Ensure sourceSettings saved var exists (all enabled by default)
+-- Structure: sourceSettings[key] = { addon = bool, tooltip = bool }
+function BiSGearCheck:EnsureSourceSettings()
+    if not BiSGearCheckSaved then BiSGearCheckSaved = { characters = {} } end
+    if not BiSGearCheckSaved.sourceSettings then
+        BiSGearCheckSaved.sourceSettings = {}
+        -- Migrate from old enabledSources/tooltipSources if present
+        for _, src in ipairs(self.DataSources) do
+            local addonEnabled = true
+            local tooltipEnabled = true
+            if BiSGearCheckSaved.enabledSources then
+                addonEnabled = BiSGearCheckSaved.enabledSources[src.key] ~= false
+            end
+            if BiSGearCheckSaved.tooltipSources then
+                tooltipEnabled = BiSGearCheckSaved.tooltipSources[src.key] ~= false
+            elseif BiSGearCheckSaved.enabledSources then
+                tooltipEnabled = BiSGearCheckSaved.enabledSources[src.key] ~= false
+            end
+            BiSGearCheckSaved.sourceSettings[src.key] = {
+                addon = addonEnabled,
+                tooltip = tooltipEnabled,
+            }
+        end
+    end
+    -- Ensure every source has an entry
+    for _, src in ipairs(self.DataSources) do
+        if not BiSGearCheckSaved.sourceSettings[src.key] then
+            BiSGearCheckSaved.sourceSettings[src.key] = { addon = true, tooltip = true }
+        end
+    end
+end
+
+-- Backward compat alias
+function BiSGearCheck:EnsureEnabledSources()
+    self:EnsureSourceSettings()
+end
+
+-- Get source setting
+function BiSGearCheck:GetSourceSetting(key, field)
+    self:EnsureSourceSettings()
+    local s = BiSGearCheckSaved.sourceSettings[key]
+    return s and s[field] ~= false
+end
+
+-- Check if a data source is enabled for the addon UI
+function BiSGearCheck:IsSourceEnabled(key)
+    return self:GetSourceSetting(key, "addon")
+end
+
+-- Check if a data source is enabled for tooltips
+function BiSGearCheck:IsTooltipSourceEnabled(key)
+    return self:GetSourceSetting(key, "tooltip")
+end
+
+-- Get data sources enabled for the addon UI
+function BiSGearCheck:GetEnabledDataSources()
+    local enabled = {}
+    for _, src in ipairs(self.DataSources) do
+        if self:IsSourceEnabled(src.key) then
+            enabled[#enabled + 1] = src
+        end
+    end
+    return enabled
+end
+
+-- Get data sources enabled for the addon UI that have data for the current phase
+function BiSGearCheck:GetEnabledDataSourcesForPhase()
+    local phase = self.phaseFilter or 1
+    local enabled = {}
+    for _, src in ipairs(self.DataSources) do
+        if self:IsSourceEnabled(src.key) and self:SourceHasPhase(src, phase) then
+            enabled[#enabled + 1] = src
+        end
+    end
+    return enabled
+end
+
+-- Get data sources enabled for tooltips
+function BiSGearCheck:GetTooltipDataSources()
+    local enabled = {}
+    for _, src in ipairs(self.DataSources) do
+        if self:IsTooltipSourceEnabled(src.key) then
+            enabled[#enabled + 1] = src
+        end
+    end
+    return enabled
+end
+
+-- Nil out globals for fully disabled sources (saves memory)
+function BiSGearCheck:UnloadDisabledSources()
+    self:EnsureSourceSettings()
+    for _, src in ipairs(self.DataSources) do
+        local s = BiSGearCheckSaved.sourceSettings[src.key]
+        if s and not s.addon and not s.tooltip and src.phases then
+            for _, dbName in pairs(src.phases) do
+                _G[dbName] = nil
+            end
+        end
+    end
+end
+
+-- Called when source settings change — rebuild tooltip index and refresh UI
+function BiSGearCheck:OnSourceSettingsChanged()
+    self:BuildTooltipIndex()
+    -- If the selected data source was disabled or has no data for current phase, switch
+    local needSwitch = not self:IsSourceEnabled(self.dataSource)
+    if not needSwitch then
+        local phase = self.phaseFilter or 1
+        local currentSrc
+        for _, src in ipairs(self.DataSources) do
+            if src.key == self.dataSource then currentSrc = src; break end
+        end
+        needSwitch = not currentSrc or not self:SourceHasPhase(currentSrc, phase)
+    end
+    if needSwitch then
+        local available = self:GetEnabledDataSourcesForPhase()
+        if available[1] then
+            self.dataSource = available[1].key
+            BiSGearCheckChar.dataSource = self.dataSource
+        end
+    end
+    if self.mainFrame and self.mainFrame:IsShown() then
+        self:Refresh()
+    end
+end
 
 -- Map SourceDB source strings to zone names returned by GetRealZoneText()
 -- Multiple source strings can map to the same zone
 BiSGearCheck.SourceToZone = {
-    -- Raids
+    -- TBC Phase 1 Raids
     ["Karazhan"]            = "Karazhan",
     ["Gruul's Lair"]        = "Gruul's Lair",
     ["Magtheridon's Lair"]  = "Magtheridon's Lair",
-    -- Hellfire Citadel
+    -- TBC Phase 2 Raids
+    ["Serpentshrine Cavern"] = "Serpentshrine Cavern",
+    ["Tempest Keep"]        = "Tempest Keep",
+    -- TBC Phase 3 Raids
+    ["Hyjal Summit"]        = "Hyjal Summit",
+    ["Black Temple"]        = "Black Temple",
+    -- TBC Phase 4
+    ["Zul'Aman"]            = "Zul'Aman",
+    -- TBC Phase 5
+    ["Sunwell Plateau"]     = "Sunwell Plateau",
+    ["Magisters' Terrace"]  = "Magisters' Terrace",
+    -- Hellfire Citadel (normal + heroic variants)
     ["Hellfire Ramparts"]   = "Hellfire Ramparts",
+    ["Hellfire Ramparts (H)"] = "Hellfire Ramparts",
+    ["Ramparts (H)"]        = "Hellfire Ramparts",
     ["Blood Furnace"]       = "The Blood Furnace",
+    ["Blood Furnace (N)"]   = "The Blood Furnace",
+    ["Blood Furnace (H)"]   = "The Blood Furnace",
     ["The Blood Furnace"]   = "The Blood Furnace",
+    ["The Blood Furnace (H)"] = "The Blood Furnace",
     ["Shattered Halls"]     = "The Shattered Halls",
+    ["Shattered Halls (H)"] = "The Shattered Halls",
     ["The Shattered Halls"] = "The Shattered Halls",
+    ["The Shattered Halls (H)"] = "The Shattered Halls",
     -- Coilfang Reservoir
     ["Slave Pens"]          = "The Slave Pens",
+    ["Slave Pens (N)"]      = "The Slave Pens",
+    ["Slave Pens (H)"]      = "The Slave Pens",
     ["The Slave Pens"]      = "The Slave Pens",
+    ["The Slave Pens (H)"]  = "The Slave Pens",
     ["Underbog"]            = "The Underbog",
+    ["Underbog (H)"]        = "The Underbog",
     ["The Underbog"]        = "The Underbog",
+    ["The Underbog (H)"]    = "The Underbog",
     ["Steamvaults"]         = "The Steamvault",
+    ["Steamvaults (H)"]     = "The Steamvault",
     ["The Steamvault"]      = "The Steamvault",
+    ["The Steamvault (H)"]  = "The Steamvault",
     -- Auchindoun
     ["Mana-Tombs"]          = "Mana-Tombs",
+    ["Mana-Tombs (H)"]      = "Mana-Tombs",
     ["Mana Tombs"]          = "Mana-Tombs",
+    ["Mana Tombs (H)"]      = "Mana-Tombs",
     ["Auchenai Crypts"]     = "Auchenai Crypts",
+    ["Auchenai Crypts (H)"] = "Auchenai Crypts",
     ["Sethekk Halls"]       = "Sethekk Halls",
+    ["Sethekk Halls (H)"]   = "Sethekk Halls",
     ["Shadow Labyrinth"]    = "Shadow Labyrinth",
-    -- Tempest Keep
+    ["Shadow Labyrinth (H)"] = "Shadow Labyrinth",
+    -- Tempest Keep (dungeon wing)
     ["The Mechanar"]        = "The Mechanar",
+    ["The Mechanar (H)"]    = "The Mechanar",
     ["Mechanar"]            = "The Mechanar",
+    ["Mechanar (H)"]        = "The Mechanar",
     ["The Botanica"]        = "The Botanica",
+    ["The Botanica (H)"]    = "The Botanica",
     ["Botanica"]            = "The Botanica",
+    ["Botanica (H)"]        = "The Botanica",
     ["The Arcatraz"]        = "The Arcatraz",
+    ["The Arcatraz (H)"]    = "The Arcatraz",
     ["Arcatraz"]            = "The Arcatraz",
+    ["Arcatraz (H)"]        = "The Arcatraz",
     -- Caverns of Time
-    ["Old Hillsbrad Foothills"] = "Old Hillsbrad Foothills",
+    ["Old Hillsbrad Foothills"]     = "Old Hillsbrad Foothills",
+    ["Old Hillsbrad Foothills (N)"] = "Old Hillsbrad Foothills",
+    ["Old Hillsbrad Foothills (H)"] = "Old Hillsbrad Foothills",
     ["The Black Morass"]    = "The Black Morass",
+    ["The Black Morass (H)"] = "The Black Morass",
     ["Black Morass"]        = "The Black Morass",
+    ["Black Morass (H)"]    = "The Black Morass",
     -- Classic raids
     ["Molten Core"]         = "Molten Core",
     ["Blackwing Lair"]      = "Blackwing Lair",
@@ -130,6 +313,15 @@ BiSGearCheck.SourceToZone = {
     -- Classic dungeons
     ["Blackrock Depths"]    = "Blackrock Depths",
     ["Stratholme"]          = "Stratholme",
+    -- Other
+    ["Tailoring"]           = "Crafted",
+    ["Leatherworking"]      = "Crafted",
+    ["Blacksmithing"]       = "Crafted",
+    ["Alchemy"]             = "Crafted",
+    ["Engineering"]         = "Crafted",
+    ["Jewelcrafting"]       = "Crafted",
+    ["Quest Reward"]        = "Quest",
+    ["PvP"]                 = "PvP",
 }
 
 -- Reverse map: zone name -> list of source strings that drop items there
@@ -145,7 +337,12 @@ end
 BiSGearCheck.ZoneCategories = {
     {
         label = "TBC Raids",
-        zones = { "Karazhan", "Gruul's Lair", "Magtheridon's Lair" },
+        zones = {
+            "Karazhan", "Gruul's Lair", "Magtheridon's Lair",
+            "Serpentshrine Cavern", "Tempest Keep",
+            "Hyjal Summit", "Black Temple",
+            "Zul'Aman", "Sunwell Plateau",
+        },
     },
     {
         label = "TBC Dungeons",
@@ -155,6 +352,7 @@ BiSGearCheck.ZoneCategories = {
             "Mana-Tombs", "Auchenai Crypts", "Sethekk Halls", "Shadow Labyrinth",
             "The Mechanar", "The Botanica", "The Arcatraz",
             "Old Hillsbrad Foothills", "The Black Morass",
+            "Magisters' Terrace",
         },
     },
     {
@@ -163,6 +361,10 @@ BiSGearCheck.ZoneCategories = {
             "Molten Core", "Blackwing Lair", "Ahn'Qiraj", "Naxxramas",
             "Blackrock Depths", "Stratholme",
         },
+    },
+    {
+        label = "Other",
+        zones = { "Crafted", "Quest", "PvP" },
     },
 }
 
@@ -198,6 +400,17 @@ function BiSGearCheck:ItemMatchesZone(itemID, zone)
     if not sourceInfo or not sourceInfo.source then return false end
     local itemZone = self.SourceToZone[sourceInfo.source]
     return itemZone == zone
+end
+
+-- Check if an item belongs to a phase at or below the given max phase
+-- Items with no phase data are assumed to be available (phase 1 / pre-raid)
+function BiSGearCheck:ItemInPhase(itemID, maxPhase)
+    if not maxPhase then return true end
+    local phases = BiSGearCheckItemPhases
+    if not phases then return true end
+    local itemPhase = phases[itemID]
+    if not itemPhase then return true end  -- unknown phase = always show
+    return itemPhase <= maxPhase
 end
 
 -- Try to auto-detect spec from talent points
@@ -458,8 +671,10 @@ function BiSGearCheck:GetEquipWarnings(itemLink, slotName, specKey)
                     wrongGemCount = wrongGemCount + 1    -- White/Grey
                 end
             else
-                C_Item.RequestLoadItemDataByID(gemID)
-                self.needsRefresh = true
+                if not self.pendingItems[gemID] then
+                    self.pendingItems[gemID] = true
+                    C_Item.RequestLoadItemDataByID(gemID)
+                end
             end
         end
     end

@@ -29,12 +29,13 @@ See every upgrade available for your spec, ranked by slot. Your equipped item is
 
 ## BiS Lists
 
-Browse the full BiS list for any spec across all classes. Switch between data sources to compare rankings.
+Browse the full BiS list for any spec across all classes. Switch between data sources to compare rankings. Filter by zone to focus on a specific dungeon or raid.
 
 <img src="art/screenshot-bis-lists.png" alt="BiS Lists Tab" width="600"/>
 
 - Class-colored headers in the spec dropdown
-- WowTBC.gg and AtlasLoot data sources
+- Six data sources: WowTBC.gg, BiS-Tooltip, AtlasLoot, WoWSims, ThatsMyBis, Wowhead
+- Zone filter to narrow results to a specific instance
 
 ## Wishlists
 
@@ -49,18 +50,19 @@ Track the items you're chasing across dungeons and raids. Create multiple named 
 
 ## Tooltip Integration
 
-BiS rankings appear directly in item tooltips. Hover over any item to see which specs rank it and at what position, with class-colored spec names.
+BiS rankings appear directly in item tooltips, grouped by data source. Hover over any item to see which specs rank it and at what position, with class-colored spec names.
 
 <img src="art/screenshot-tooltip.png" alt="Tooltip Integration" width="380"/>
 
 - Works in bags, chat links, vendor windows, and the auction house
-- Shows all specs that rank the item, with their BiS position
-- Filter to your class only, choose your data source, or disable entirely
+- Entries grouped by source with labeled headers (e.g., "BiSGearCheck (AtlasLoot)")
+- Filter to your class only, or disable entirely
+- Each source can be independently enabled/disabled for tooltips in Settings
 - Detects conflicts with AtlasBIS Tooltips and lets you choose which to use
 
 ## Multi-Character Support
 
-Switch between all characters on your account from the character selector dropdown. View another character's gear on the Compare tab, edit their wishlists, and plan upgrades across your roster. Gear snapshots are saved automatically.
+Switch between all characters on your account from the character selector dropdown. View another character's gear on the Compare tab, edit their wishlists, and plan upgrades across your roster. Gear snapshots are saved automatically. Set a minimum level threshold or ignore specific characters to keep the dropdown clean.
 
 ## Usage
 
@@ -74,10 +76,14 @@ Switch between all characters on your account from the character selector dropdo
 
 | Source | Database | Description |
 |--------|----------|-------------|
-| WowTBC.gg | `Data.lua` (`BiSGearCheckDB`) | BiS rankings sourced from wowtbc.gg |
-| AtlasLoot | `Data_AtlasLoot.lua` (`BiSGearCheckDB_AtlasLoot`) | BiS rankings from AtlasLoot data |
+| WowTBC.gg | `Data.lua` | BiS rankings sourced from wowtbc.gg |
+| BiS-Tooltip | `Data_Phase1.lua` | BiS rankings from BiS-Tooltip (boegi1) + WoWSims presets |
+| AtlasLoot | `Data_AtlasLoot.lua` | BiS rankings from AtlasLoot data |
+| WoWSims | `Data_WoWSims.lua` | Simulation-derived BiS from WoWSims TBC |
+| ThatsMyBis | `Data_TMB.lua` | Community wishlist aggregates from thatsmybis.com |
+| Wowhead | `Data_Wowhead.lua` | BiS rankings from Wowhead editorial guides |
 
-Item drop sources (boss names, zones, quest names) are stored in `SourceDB.lua`. Items can be tagged with a `faction` field ("Alliance" or "Horde") for faction-specific filtering; untagged items are available to both factions.
+Each source can be independently enabled for the addon UI and/or tooltips in Settings. Item drop sources (boss names, zones, quest names) are stored in `SourceDB.lua` covering 2,200+ items. Items can be tagged with a `faction` field ("Alliance" or "Horde") for faction-specific filtering; untagged items are available to both factions.
 
 ## Dependencies
 

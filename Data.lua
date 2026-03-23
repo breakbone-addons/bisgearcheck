@@ -2,9 +2,9 @@
 -- WowTBC.gg Phase 1 BiS data (including world bosses)
 -- Auto-generated
 
-BiSGearCheckDB = {}
+BiSGearCheckDB_WowTBCgg = {}
 
-BiSGearCheckDB["DruidBalance"] = {
+BiSGearCheckDB_WowTBCgg["DruidBalance"] = {
     class = "DRUID",
     spec = "Balance",
     slots = {
@@ -26,7 +26,7 @@ BiSGearCheckDB["DruidBalance"] = {
     }
 }
 
-BiSGearCheckDB["DruidFeralDPS"] = {
+BiSGearCheckDB_WowTBCgg["DruidFeralDPS"] = {
     class = "DRUID",
     spec = "Feral DPS",
     slots = {
@@ -41,13 +41,13 @@ BiSGearCheckDB["DruidFeralDPS"] = {
         ["Legs"] = { 28741, 31544, 27837, 30535, 30538, 25687, 27908 },
         ["Feet"] = { 28545, 30674, 25686, 29248, 28422, 30939, 27467 },
         ["Rings"] = { 28649, 28791, 30738, 28757, 30365, 30834, 27925, 30860, 29177, 31277 },
-        ["Trinkets"] = { 19406, 17632, 28034, 29383, 28579, 28288, 23041, 28041, 28121, 24128, 22954, 29776, 28830 },
+        ["Trinkets"] = { 19406, 13503, 28034, 29383, 28579, 28288, 23041, 28041, 28121, 24128, 22954, 29776, 28830 },
         ["Main Hand"] = { 28658, 30010, 27877, 29359, 32014, 31334, 29171 },
         ["Ranged"] = { 32387, 29390, 28064 },
     }
 }
 
-BiSGearCheckDB["DruidFeralTank"] = {
+BiSGearCheckDB_WowTBCgg["DruidFeralTank"] = {
     class = "DRUID",
     spec = "Feral Tank",
     slots = {
@@ -68,7 +68,7 @@ BiSGearCheckDB["DruidFeralTank"] = {
     }
 }
 
-BiSGearCheckDB["DruidRestoration"] = {
+BiSGearCheckDB_WowTBCgg["DruidRestoration"] = {
     class = "DRUID",
     spec = "Restoration",
     slots = {
@@ -83,14 +83,14 @@ BiSGearCheckDB["DruidRestoration"] = {
         ["Legs"] = { 30727, 28591, 28742, 30543, 24261, 31343, 28218, 29088, 31335, 31377 },
         ["Feet"] = { 30737, 28752, 27411, 28663, 29251, 25792, 31595, 28251, 27525 },
         ["Rings"] = { 28763, 30736, 29290, 31383, 28790, 27780, 29169, 28661, 29814, 29373, 31923 },
-        ["Trinkets"] = { 29376, 19395, 28590, 23047, 30841, 28190, 25634, 28823, 17632, 28370 },
+        ["Trinkets"] = { 29376, 19395, 28590, 23047, 30841, 28190, 25634, 28823, 13503, 28370 },
         ["Main Hand"] = { 30732, 28782, 28771, 28604, 35082, 28522, 23556, 29353, 31342, 29175, 28257 },
         ["Offhand"] = { 29274, 29170, 23048, 27477, 23029, 28728, 28213, 28525, 31493, 27714 },
         ["Ranged"] = { 27886, 32387, 25643 },
     }
 }
 
-BiSGearCheckDB["HunterBM"] = {
+BiSGearCheckDB_WowTBCgg["HunterBM"] = {
     class = "HUNTER",
     spec = "Beast Mastery",
     slots = {
@@ -112,7 +112,7 @@ BiSGearCheckDB["HunterBM"] = {
     }
 }
 
-BiSGearCheckDB["HunterMM"] = {
+BiSGearCheckDB_WowTBCgg["HunterMM"] = {
     class = "HUNTER",
     spec = "Marksmanship",
     slots = {
@@ -134,7 +134,7 @@ BiSGearCheckDB["HunterMM"] = {
     }
 }
 
-BiSGearCheckDB["HunterSV"] = {
+BiSGearCheckDB_WowTBCgg["HunterSV"] = {
     class = "HUNTER",
     spec = "Survival",
     slots = {
@@ -156,7 +156,7 @@ BiSGearCheckDB["HunterSV"] = {
     }
 }
 
-BiSGearCheckDB["MageArcane"] = {
+BiSGearCheckDB_WowTBCgg["MageArcane"] = {
     class = "MAGE",
     spec = "Arcane",
     slots = {
@@ -178,7 +178,7 @@ BiSGearCheckDB["MageArcane"] = {
     }
 }
 
-BiSGearCheckDB["MageFire"] = {
+BiSGearCheckDB_WowTBCgg["MageFire"] = {
     class = "MAGE",
     spec = "Fire",
     slots = {
@@ -200,7 +200,7 @@ BiSGearCheckDB["MageFire"] = {
     }
 }
 
-BiSGearCheckDB["MageFrost"] = {
+BiSGearCheckDB_WowTBCgg["MageFrost"] = {
     class = "MAGE",
     spec = "Frost",
     slots = {
@@ -222,7 +222,7 @@ BiSGearCheckDB["MageFrost"] = {
     }
 }
 
-BiSGearCheckDB["PaladinHoly"] = {
+BiSGearCheckDB_WowTBCgg["PaladinHoly"] = {
     class = "PALADIN",
     spec = "Holy",
     slots = {
@@ -244,7 +244,7 @@ BiSGearCheckDB["PaladinHoly"] = {
     }
 }
 
-BiSGearCheckDB["PaladinProtection"] = {
+BiSGearCheckDB_WowTBCgg["PaladinProtection"] = {
     class = "PALADIN",
     spec = "Protection",
     slots = {
@@ -259,14 +259,14 @@ BiSGearCheckDB["PaladinProtection"] = {
         ["Legs"] = { 29069, 28621, 27705, 29184, 23518, 27527, 29783, 27839, 27977 },
         ["Feet"] = { 30641, 29254, 28747, 28642, 29239, 27813, 32866, 29325, 28318 },
         ["Rings"] = { 28793, 29172, 29279, 28555, 28792, 28675, 28407, 29384, 31319, 31924, 29126, 29323 },
-        ["Trinkets"] = { 29370, 28528, 23836, 27891, 24125, 30300, 27529, 17632, 27770, 29387, 28789 },
+        ["Trinkets"] = { 29370, 28528, 23836, 27891, 24125, 30300, 27529, 13503, 27770, 29387, 28789 },
         ["Main Hand"] = { 35014, 28802, 30832, 29153, 27905, 29185, 27899 },
         ["Offhand"] = { 28825, 28606, 32045, 29266, 28611, 29176, 29268, 32082, 28316, 27449 },
         ["Ranged"] = { 29388, 27917, 22400 },
     }
 }
 
-BiSGearCheckDB["PaladinRetribution"] = {
+BiSGearCheckDB_WowTBCgg["PaladinRetribution"] = {
     class = "PALADIN",
     spec = "Retribution",
     slots = {
@@ -287,7 +287,7 @@ BiSGearCheckDB["PaladinRetribution"] = {
     }
 }
 
-BiSGearCheckDB["PriestHoly"] = {
+BiSGearCheckDB_WowTBCgg["PriestHoly"] = {
     class = "PRIEST",
     spec = "Holy",
     slots = {
@@ -302,14 +302,14 @@ BiSGearCheckDB["PriestHoly"] = {
         ["Legs"] = { 30727, 28742, 30543, 31343, 24261, 29053, 28218, 30532, 30531 },
         ["Feet"] = { 28663, 27411, 29251, 25792, 27525, 19437, 22516, 28406, 28179 },
         ["Rings"] = { 28763, 30736, 29290, 28790, 23061, 27780, 29169, 31383, 28661, 29814, 29373, 31923, 28259, 29322, 27491, 27996, 29287 },
-        ["Trinkets"] = { 29376, 19395, 28590, 23047, 28190, 30841, 24390, 25634, 28823, 28727, 17632, 29179, 28040, 28370, 24127, 27828 },
+        ["Trinkets"] = { 29376, 19395, 28590, 23047, 28190, 30841, 24390, 25634, 28823, 28727, 13503, 29179, 28040, 28370, 24127, 27828 },
         ["Main Hand"] = { 30732, 28782, 28771, 28604, 35082, 28522, 23556, 29353, 31342, 29175, 28257 },
         ["Offhand"] = { 29170, 29274, 28728, 23048, 23029, 27477, 28525, 28213, 27714, 31493 },
         ["Ranged"] = { 28588, 23009, 27885, 29779, 24380, 28783, 25806, 25295, 22821, 29350 },
     }
 }
 
-BiSGearCheckDB["PriestShadow"] = {
+BiSGearCheckDB_WowTBCgg["PriestShadow"] = {
     class = "PRIEST",
     spec = "Shadow",
     slots = {
@@ -331,7 +331,7 @@ BiSGearCheckDB["PriestShadow"] = {
     }
 }
 
-BiSGearCheckDB["RogueAssassination"] = {
+BiSGearCheckDB_WowTBCgg["RogueAssassination"] = {
     class = "ROGUE",
     spec = "Assassination",
     slots = {
@@ -353,7 +353,7 @@ BiSGearCheckDB["RogueAssassination"] = {
     }
 }
 
-BiSGearCheckDB["RogueCombat"] = {
+BiSGearCheckDB_WowTBCgg["RogueCombat"] = {
     class = "ROGUE",
     spec = "Combat",
     slots = {
@@ -375,7 +375,7 @@ BiSGearCheckDB["RogueCombat"] = {
     }
 }
 
-BiSGearCheckDB["RogueSubtlety"] = {
+BiSGearCheckDB_WowTBCgg["RogueSubtlety"] = {
     class = "ROGUE",
     spec = "Subtlety",
     slots = {
@@ -397,7 +397,7 @@ BiSGearCheckDB["RogueSubtlety"] = {
     }
 }
 
-BiSGearCheckDB["ShamanElemental"] = {
+BiSGearCheckDB_WowTBCgg["ShamanElemental"] = {
     class = "SHAMAN",
     spec = "Elemental",
     slots = {
@@ -419,7 +419,7 @@ BiSGearCheckDB["ShamanElemental"] = {
     }
 }
 
-BiSGearCheckDB["ShamanEnhancement"] = {
+BiSGearCheckDB_WowTBCgg["ShamanEnhancement"] = {
     class = "SHAMAN",
     spec = "Enhancement",
     slots = {
@@ -441,7 +441,7 @@ BiSGearCheckDB["ShamanEnhancement"] = {
     }
 }
 
-BiSGearCheckDB["ShamanRestoration"] = {
+BiSGearCheckDB_WowTBCgg["ShamanRestoration"] = {
     class = "SHAMAN",
     spec = "Restoration",
     slots = {
@@ -456,14 +456,14 @@ BiSGearCheckDB["ShamanRestoration"] = {
         ["Legs"] = { 30727, 28751, 28591, 24261, 28742, 30543, 29030, 31343, 31406, 28218, 30541 },
         ["Feet"] = { 30737, 28752, 27411, 28663, 27549, 27525, 29251, 25792, 28406 },
         ["Rings"] = { 30736, 28763, 28790, 29169, 29814, 29290, 28259, 31923, 29373, 27780 },
-        ["Trinkets"] = { 29376, 19395, 28590, 28190, 23047, 30841, 24390, 25634, 28823, 28727, 29179, 28040, 17632, 28370, 24127, 27828 },
+        ["Trinkets"] = { 29376, 19395, 28590, 28190, 23047, 30841, 24390, 25634, 28823, 28727, 29179, 28040, 13503, 28370, 24127, 27828 },
         ["Main Hand"] = { 30732, 28782, 28771, 35082, 28522, 28604, 23556, 29353, 31342, 29175, 27538 },
         ["Offhand"] = { 29274, 29458, 28728, 22819, 23048, 29170, 27477, 29267, 27772, 28754, 27714 },
         ["Ranged"] = { 28523, 27544, 228179 },
     }
 }
 
-BiSGearCheckDB["WarlockAffliction"] = {
+BiSGearCheckDB_WowTBCgg["WarlockAffliction"] = {
     class = "WARLOCK",
     spec = "Affliction",
     slots = {
@@ -485,7 +485,7 @@ BiSGearCheckDB["WarlockAffliction"] = {
     }
 }
 
-BiSGearCheckDB["WarlockDemonology"] = {
+BiSGearCheckDB_WowTBCgg["WarlockDemonology"] = {
     class = "WARLOCK",
     spec = "Demonology",
     slots = {
@@ -507,7 +507,7 @@ BiSGearCheckDB["WarlockDemonology"] = {
     }
 }
 
-BiSGearCheckDB["WarlockDestruction"] = {
+BiSGearCheckDB_WowTBCgg["WarlockDestruction"] = {
     class = "WARLOCK",
     spec = "Destruction",
     slots = {
@@ -529,7 +529,7 @@ BiSGearCheckDB["WarlockDestruction"] = {
     }
 }
 
-BiSGearCheckDB["WarriorArms"] = {
+BiSGearCheckDB_WowTBCgg["WarriorArms"] = {
     class = "WARRIOR",
     spec = "Arms",
     slots = {
@@ -550,7 +550,7 @@ BiSGearCheckDB["WarriorArms"] = {
     }
 }
 
-BiSGearCheckDB["WarriorFury"] = {
+BiSGearCheckDB_WowTBCgg["WarriorFury"] = {
     class = "WARRIOR",
     spec = "Fury",
     slots = {
@@ -572,7 +572,7 @@ BiSGearCheckDB["WarriorFury"] = {
     }
 }
 
-BiSGearCheckDB["WarriorProtection"] = {
+BiSGearCheckDB_WowTBCgg["WarriorProtection"] = {
     class = "WARRIOR",
     spec = "Protection",
     slots = {

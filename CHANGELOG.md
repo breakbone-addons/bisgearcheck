@@ -5,6 +5,20 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
+## v3.3.0
+
+### Features
+- Added BiS-Tooltip, WoWSims, Wowhead, and ThatsMyBis data sources with per-source enable for addon UI and tooltips.
+- Tooltip BiS entries grouped by source with labeled headers.
+- Minimap button (LibDBIcon).
+- Zone filter for BiS Lists and Wishlists, including Crafted, Quest, and PvP.
+- SourceDB expanded to 2,200+ items.
+- Character level threshold and ignore list settings.
+
+### Fixes
+- Fixed wrong enchantment ID for Enchant Bracer - Major Intellect causing false warnings.
+- Fixed [Wrong Enchant] tooltip showing wrong slot name for shared enchant IDs.
+
 ## v3.2.0
 
 ### Features

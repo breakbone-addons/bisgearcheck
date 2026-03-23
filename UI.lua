@@ -235,6 +235,11 @@ BiSGearCheck.OnEnchantEnter = function(frame)
     GameTooltip:SetOwner(frame, "ANCHOR_RIGHT")
     local linkData = BiSGearCheckEnchantLinks and BiSGearCheckEnchantLinks[enchantID]
     if linkData then
+        -- Check for slot-specific override (e.g., same enchantID used on different slots)
+        local slotName = frame._enchantSlot
+        if slotName and linkData[slotName] then
+            linkData = linkData[slotName]
+        end
         local linkType, linkID = linkData[1], linkData[2]
         if linkType == "spell" then
             GameTooltip:SetHyperlink("spell:" .. linkID)
@@ -313,7 +318,7 @@ end
 function BiSGearCheck:CreateUI()
     if self.mainFrame then return end
 
-    local f = CreateFrame("Frame", "BiSGearCheckFrame", UIParent, "BasicFrameTemplateWithInset")
+    local f = CreateFrame("Frame", "BiSGearCheckFrame", UIParent, "BackdropTemplate")
     f:SetSize(self.FRAME_WIDTH, self.FRAME_HEIGHT)
     f:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
     f:SetMovable(true)
@@ -322,14 +327,30 @@ function BiSGearCheck:CreateUI()
     f:SetScript("OnDragStart", f.StartMoving)
     f:SetScript("OnDragStop", f.StopMovingOrSizing)
     f:SetClampedToScreen(true)
+    f:SetBackdrop({
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
+        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+        tile = true, tileSize = 32, edgeSize = 32,
+        insets = { left = 8, right = 8, top = 8, bottom = 8 },
+    })
     f:Hide()
 
     table.insert(UISpecialFrames, "BiSGearCheckFrame")
 
-    -- Title
-    f.title = f:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    f.title:SetPoint("TOP", f.TitleBg, "TOP", 0, -3)
-    f.title:SetText("BiS Gear Check")
+    -- Title bar
+    f.title = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    f.title:SetText("BiSGearCheck")
+
+    local titleBar = f:CreateTexture(nil, "ARTWORK")
+    titleBar:SetTexture("Interface\\DialogFrame\\UI-DialogBox-Header")
+    titleBar:SetSize(200, 64)
+    titleBar:SetPoint("TOP", 0, 12)
+
+    f.title:SetPoint("TOP", titleBar, "TOP", 0, -14)
+
+    -- Close button
+    local closeBtn = CreateFrame("Button", nil, f, "UIPanelCloseButton")
+    closeBtn:SetPoint("TOPRIGHT", -4, -4)
 
     -- Setup all control groups (defined in other UI files)
     self:SetupTabs(f)
@@ -345,8 +366,8 @@ function BiSGearCheck:CreateUI()
     -- ============================================================
 
     local scrollFrame = CreateFrame("ScrollFrame", "BiSGearCheckScrollFrame", f, "UIPanelScrollFrameTemplate")
-    scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", self.CONTENT_PADDING, -90)
-    scrollFrame:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -28, 8)
+    scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", self.CONTENT_PADDING, -124)
+    scrollFrame:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -34, 14)
 
     local scrollChild = CreateFrame("Frame", "BiSGearCheckScrollChild")
     scrollChild:SetWidth(self.FRAME_WIDTH - 40)

@@ -10,7 +10,7 @@ See every upgrade available for your spec, ranked by slot. Your currently equipp
 
 ### BiS Lists Browser
 
-Browse the full BiS list for any spec across all classes. Switch between WowTBC.gg and AtlasLoot data sources to compare rankings. Class-colored headers make it easy to find what you're looking for.
+Browse the full BiS list for any spec across all classes. Switch between data sources to compare rankings. Filter by zone to focus on a specific dungeon or raid. Class-colored headers make it easy to find what you're looking for.
 
 <img src="https://raw.githubusercontent.com/breakbone-addons/bisgearcheck/main/art/screenshot-bis-lists.png" alt="BiS Lists" width="500"/>
 
@@ -22,13 +22,13 @@ Track the items you're chasing. Create multiple named wishlists, add upgrades di
 
 ### Tooltip Integration
 
-BiS rankings are injected directly into item tooltips. Hover over any item in your bags, in chat, or on a vendor and see which specs rank it and at what position, with class-colored spec names. Configurable in the settings -- filter to your class only, choose your data source, or turn it off entirely.
+BiS rankings appear directly in item tooltips, grouped by data source. Hover over any item in your bags, in chat, or on a vendor and see which specs rank it and at what position, with class-colored spec names. Each enabled source gets its own section so you can compare rankings across sources at a glance.
 
 <img src="https://raw.githubusercontent.com/breakbone-addons/bisgearcheck/main/art/screenshot-tooltip.png" alt="Tooltip Integration" width="300"/>
 
 ### Multi-Character Support
 
-Switch between all characters on your account without logging out. View another character's gear on the Compare tab, edit their wishlists, and plan upgrades across your roster. Gear snapshots are saved automatically.
+Switch between all characters on your account without logging out. View another character's gear on the Compare tab, edit their wishlists, and plan upgrades across your roster. Gear snapshots are saved automatically. Set a minimum level threshold or ignore specific characters to keep the dropdown clean.
 
 ### Enchant & Gem Warnings
 
@@ -43,9 +43,15 @@ Alliance and Horde characters see only the items available to their faction. Fac
 ## Data Sources
 
 - **WowTBC.gg** -- BiS rankings sourced from wowtbc.gg
+- **BiS-Tooltip** -- BiS rankings from BiS-Tooltip (boegi1's TBC backport) combined with WoWSims presets
 - **AtlasLoot** -- BiS rankings from AtlasLoot data
+- **WoWSims** -- Simulation-derived BiS from WoWSims TBC
+- **ThatsMyBis** -- Community wishlist aggregates from thatsmybis.com
+- **Wowhead** -- BiS rankings from Wowhead editorial guides
 
-Switch between sources at any time to compare rankings.
+Each source can be independently enabled for the main addon UI and/or tooltips in the Settings panel. Switch between sources at any time to compare rankings.
+
+<img src="https://raw.githubusercontent.com/breakbone-addons/bisgearcheck/main/art/screenshot-settings.png" alt="Settings" width="500"/>
 
 ## Usage
 
