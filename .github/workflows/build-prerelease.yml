@@ -22,36 +22,37 @@ jobs:
       - name: Rename zip and fix timestamps
         id: package
         run: |
-          # Extract version from the packaged TOC
+          # Save original packager zip name, extract version from the packaged TOC
           cd .release
+          ORIG_ZIP=$(ls BiSGearCheck-*.zip)
           mkdir -p _tmp
           cd _tmp
-          unzip -o ../BiSGearCheck-*.zip
+          unzip -o "../$ORIG_ZIP"
           VERSION=$(grep '## Version:' BiSGearCheck/BiSGearCheck.toc | sed 's/## Version: *//;s/\r//')
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
           # Fix file timestamps inside the zip to avoid future-dated files
           find . -exec touch -t "$(date +%Y%m%d%H%M.%S)" {} +
 
-          ZIPNAME="BiSGearCheck_${VERSION}-Build-${{ github.run_number }}.zip"
+          ZIPNAME="BiSGearCheck-v${VERSION}-bcc-Build-${{ github.run_number }}.zip"
           zip -r "../$ZIPNAME" .
           cd ..
           rm -rf _tmp
           # Remove original packager zip
-          rm -f BiSGearCheck-*.zip
+          rm -f "$ORIG_ZIP"
 
       - name: Create GitHub Pre-Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: pre-${{ github.run_number }}
-          name: BiSGearCheck_${{ steps.package.outputs.version }}-pre${{ github.run_number }}
+          name: BiSGearCheck v${{ steps.package.outputs.version }}-bcc-pre${{ github.run_number }}
           prerelease: true
           body: |
             ## Pre-Release Build
 
             This is a development build for testing. For the latest stable version, see the [Latest Release](https://github.com/${{ github.repository }}/releases/latest).
 
-            Download **BiSGearCheck_${{ steps.package.outputs.version }}-Build-${{ github.run_number }}.zip** below. Do not download the "Source code" archives.
+            Download **BiSGearCheck-v${{ steps.package.outputs.version }}-bcc-Build-${{ github.run_number }}.zip** below. Do not download the "Source code" archives.
 
             Extract the `BiSGearCheck` folder into your WoW AddOns directory:
             ```
@@ -59,7 +60,7 @@ jobs:
             ```
 
             Built from `${{ github.ref_name }}` at ${{ github.sha }}.
-          files: .release/BiSGearCheck_${{ steps.package.outputs.version }}-Build-${{ github.run_number }}.zip
+          files: .release/BiSGearCheck-v${{ steps.package.outputs.version }}-bcc-Build-${{ github.run_number }}.zip
           fail_on_unmatched_files: true
           make_latest: false
         env:
