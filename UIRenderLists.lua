@@ -16,16 +16,16 @@ function BiSGearCheck:RenderWishlist()
 
     f.wlSelectorBar:Show()
     f.filterBar:Show()
-    f.filterBar:SetPoint("TOPLEFT", f, "TOPLEFT", 10, -74)
     f.bislistBar:Hide()
     f.compareWLDropdown:Hide()
     f.compareWLLabel:Hide()
     f.collapseAllBtn:Hide()
     f.expandAllBtn:Hide()
+    f.zoneFilterDropdown:Hide()
     f.sourceDropdown:Hide()
     f.specDropdown:Hide()
     f.UpdateTabAppearance()
-    f.scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", self.CONTENT_PADDING, -100)
+    f.scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", self.CONTENT_PADDING, -104)
 
     -- Update character dropdown text
     self:UpdateCharDropdownText()
@@ -149,8 +149,13 @@ function BiSGearCheck:RenderBisList()
     f.expandAllBtn:Show()
     f.sourceDropdown:Hide()
     f.specDropdown:Hide()
+    -- Position zone filter on the bislist bar row, after the spec dropdown
+    f.zoneFilterDropdown:ClearAllPoints()
+    f.zoneFilterDropdown:SetPoint("TOPRIGHT", f, "TOPRIGHT", 5, -52)
+    f.zoneFilterDropdown:Show()
+    UIDropDownMenu_SetText(f.zoneFilterDropdown, self.zoneFilter or "All Zones")
     f.UpdateTabAppearance()
-    f.scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", self.CONTENT_PADDING, -90)
+    f.scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", self.CONTENT_PADDING, -104)
 
     -- Update character dropdown
     self:UpdateCharDropdownText()
@@ -204,6 +209,19 @@ function BiSGearCheck:RenderBisList()
     for _, slotName in ipairs(self.SlotOrder) do
         local rawItems = specData.slots[slotName]
         local items = rawItems and self:FilterBisListByFaction(rawItems) or {}
+
+        -- When zone filter is active, check if any items match
+        if self.zoneFilter and #items > 0 then
+            local hasMatch = false
+            for _, itemID in ipairs(items) do
+                if self:ItemMatchesZone(itemID, self.zoneFilter) then
+                    hasMatch = true
+                    break
+                end
+            end
+            if not hasMatch then items = {} end
+        end
+
         if #items > 0 then
             local isCollapsed = self.collapsedSlots[slotName]
             local arrow = isCollapsed and "|cffffd100[+]|r " or "|cffffd100[-]|r "
@@ -218,6 +236,8 @@ function BiSGearCheck:RenderBisList()
 
             if not isCollapsed then
                 for rank, itemID in ipairs(items) do
+                    -- Skip items that don't match zone filter
+                    if not self.zoneFilter or self:ItemMatchesZone(itemID, self.zoneFilter) then
                     local row = self:CreateRow(scrollChild, yOffset, contentWidth)
 
                     local name, link, quality, _, _, _, _, _, _, icon = GetItemInfo(itemID)
@@ -246,6 +266,27 @@ function BiSGearCheck:RenderBisList()
                     row:SetScript("OnLeave", self.OnTooltipLeave)
 
                     yOffset = yOffset - self.ITEM_ROW_HEIGHT
+                    end -- end zone filter check
+                end
+
+                -- Enchant recommendations for this slot
+                local enchantSlot = self.SlotToEnchantSlot[slotName]
+                local specEnchants = specKey and BiSGearCheckEnchantsDB and BiSGearCheckEnchantsDB[specKey]
+                local slotEnchants = enchantSlot and specEnchants and specEnchants[enchantSlot]
+                if slotEnchants and #slotEnchants > 0 then
+                    local enchHeader = self:CreateRow(scrollChild, yOffset, contentWidth)
+                    enchHeader.text:SetText("  |cff00ccffEnchants:|r")
+                    yOffset = yOffset - self.ITEM_ROW_HEIGHT
+
+                    for _, enchant in ipairs(slotEnchants) do
+                        local row = self:CreateRow(scrollChild, yOffset, contentWidth)
+                        row.text:SetText(string.format("    |cffa335ee%s|r", enchant[2]))
+                        row._enchantID = enchant[1]
+                        row:EnableMouse(true)
+                        row:SetScript("OnEnter", self.OnEnchantEnter)
+                        row:SetScript("OnLeave", self.OnTooltipLeave)
+                        yOffset = yOffset - self.ITEM_ROW_HEIGHT
+                    end
                 end
             end
 
@@ -256,6 +297,45 @@ function BiSGearCheck:RenderBisList()
             yOffset = yOffset - 6
             yOffset = yOffset - self.SECTION_SPACING
         end
+    end
+
+    -- Recommended gems section at bottom
+    local gemsData = specKey and BiSGearCheckGemsDB and BiSGearCheckGemsDB[specKey]
+    if gemsData then
+        local gemHeader = self:CreateRow(scrollChild, yOffset, contentWidth)
+        gemHeader.text:SetText("|cffffd100Recommended Gems|r")
+        yOffset = yOffset - self.SLOT_HEADER_HEIGHT
+
+        if gemsData.meta then
+            local row = self:CreateRow(scrollChild, yOffset, contentWidth)
+            row.text:SetText(string.format("  |cff888888Meta:|r |cffa335ee%s|r", gemsData.meta[2]))
+            row._itemID = gemsData.meta[1]
+            row:EnableMouse(true)
+            row:SetScript("OnEnter", self.OnItemIDEnter)
+            row:SetScript("OnLeave", self.OnTooltipLeave)
+            yOffset = yOffset - self.ITEM_ROW_HEIGHT
+        end
+
+        for _, color in ipairs({"red", "yellow", "blue"}) do
+            local gems = gemsData[color]
+            if gems and #gems > 0 then
+                local label = color:sub(1,1):upper() .. color:sub(2)
+                for _, gem in ipairs(gems) do
+                    local row = self:CreateRow(scrollChild, yOffset, contentWidth)
+                    row.text:SetText(string.format("  |cff888888%s:|r |cffa335ee%s|r", label, gem[2]))
+                    row._itemID = gem[1]
+                    row:EnableMouse(true)
+                    row:SetScript("OnEnter", self.OnItemIDEnter)
+                    row:SetScript("OnLeave", self.OnTooltipLeave)
+                    yOffset = yOffset - self.ITEM_ROW_HEIGHT
+                end
+            end
+        end
+
+        local sep = self:CreateRow(scrollChild, yOffset, contentWidth)
+        local line = self:GetSeparatorLine(sep)
+        line:SetColorTexture(0.3, 0.3, 0.3, 0.5)
+        yOffset = yOffset - 6
     end
 
     scrollChild:SetHeight(math.abs(yOffset) + 20)

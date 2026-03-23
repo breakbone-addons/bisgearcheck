@@ -46,6 +46,7 @@ function BiSGearCheck:ClearScrollContent(scrollChild)
             row._itemLink = nil
             row._itemID = nil
             row._upgrade = nil
+            row._enchantID = nil
             if row.actionBtn then
                 row.actionBtn:Hide()
                 row.actionBtn:SetScript("OnClick", nil)
@@ -164,6 +165,30 @@ BiSGearCheck.OnItemIDEnter = function(frame)
     else
         GameTooltip:AddLine("Item #" .. frame._itemID)
         GameTooltip:AddLine("Loading...", 0.5, 0.5, 0.5)
+    end
+    GameTooltip:Show()
+end
+
+-- Enchant tooltip via spell or item link (uses BiSGearCheckEnchantLinks lookup)
+BiSGearCheck.OnEnchantEnter = function(frame)
+    GameTooltip:SetOwner(frame, "ANCHOR_RIGHT")
+    local linkData = BiSGearCheckEnchantLinks and BiSGearCheckEnchantLinks[frame._enchantID]
+    if linkData then
+        local linkType, linkID = linkData[1], linkData[2]
+        if linkType == "spell" then
+            GameTooltip:SetHyperlink("spell:" .. linkID)
+        elseif linkType == "item" then
+            local _, link = GetItemInfo(linkID)
+            if link then
+                GameTooltip:SetHyperlink(link)
+            else
+                GameTooltip:AddLine("Loading item...")
+                C_Item.RequestLoadItemDataByID(linkID)
+            end
+        end
+    else
+        -- Fallback: try enchant hyperlink
+        GameTooltip:SetHyperlink("enchant:" .. frame._enchantID)
     end
     GameTooltip:Show()
 end

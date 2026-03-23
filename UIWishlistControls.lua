@@ -107,13 +107,14 @@ StaticPopupDialogs["BISGEARCHECK_DELETE_WISHLIST"] = {
 
 function BiSGearCheck:SetupWishlistFilterBar(f)
     local filterBar = CreateFrame("Frame", nil, f)
-    filterBar:SetSize(self.FRAME_WIDTH - 20, 26)
-    filterBar:SetPoint("TOPLEFT", f, "TOPLEFT", 10, -74)
+    filterBar:SetSize(self.FRAME_WIDTH - 20, 52)
+    filterBar:SetPoint("TOPLEFT", f, "TOPLEFT", 0, -52)
     filterBar:Hide()
 
+    -- Zone dropdown (right-aligned, same row as wishlist name dropdown)
     local zoneDropdown = CreateFrame("Frame", "BiSGearCheckZoneDropdown", filterBar, "UIDropDownMenuTemplate")
-    zoneDropdown:SetPoint("TOPLEFT", filterBar, "TOPLEFT", -15, 2)
-    UIDropDownMenu_SetWidth(zoneDropdown, 160)
+    zoneDropdown:SetPoint("TOPRIGHT", f, "TOPRIGHT", 5, -52)
+    UIDropDownMenu_SetWidth(zoneDropdown, 130)
 
     local function ZoneDropdownInit(self, level)
         -- "All Zones" option
@@ -143,9 +144,9 @@ function BiSGearCheck:SetupWishlistFilterBar(f)
                 local hasItems = BiSGearCheck:ZoneHasWishlistItems(zone)
                 local zInfo = UIDropDownMenu_CreateInfo()
                 if hasItems then
-                    zInfo.text = "|cff00ff00" .. zone .. "|r"
+                    zInfo.text = "  |cff00ff00" .. zone .. "|r"
                 else
-                    zInfo.text = zone
+                    zInfo.text = "  " .. zone
                 end
                 zInfo.value = zone
                 zInfo.func = function(self)
@@ -162,12 +163,13 @@ function BiSGearCheck:SetupWishlistFilterBar(f)
     UIDropDownMenu_Initialize(zoneDropdown, ZoneDropdownInit)
     UIDropDownMenu_SetText(zoneDropdown, "All Zones")
 
+    -- Auto checkbox (right-aligned, below zone dropdown)
     local autoCheck = CreateFrame("CheckButton", "BiSGearCheckAutoFilter", filterBar, "UICheckButtonTemplate")
     autoCheck:SetSize(24, 24)
-    autoCheck:SetPoint("LEFT", zoneDropdown, "RIGHT", -5, 0)
+    autoCheck:SetPoint("TOPRIGHT", f, "TOPRIGHT", -10, -78)
     autoCheck:SetChecked(self.wishlistAutoFilter)
     autoCheck.text = autoCheck:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    autoCheck.text:SetPoint("LEFT", autoCheck, "RIGHT", 2, 0)
+    autoCheck.text:SetPoint("RIGHT", autoCheck, "LEFT", -2, 0)
     autoCheck.text:SetText("Auto")
     autoCheck:SetScript("OnClick", function(self)
         BiSGearCheck:SetWishlistAutoFilter(self:GetChecked())
@@ -192,13 +194,13 @@ end
 
 function BiSGearCheck:SetupWishlistSelectorBar(f)
     local wlSelectorBar = CreateFrame("Frame", nil, f)
-    wlSelectorBar:SetSize(self.FRAME_WIDTH - 20, 26)
+    wlSelectorBar:SetSize(self.FRAME_WIDTH - 20, 52)
     wlSelectorBar:SetPoint("TOPLEFT", f, "TOPLEFT", 0, -52)
     wlSelectorBar:Hide()
 
-    -- Wishlist name dropdown
+    -- Wishlist name dropdown (left side, row 2)
     local wlNameDropdown = CreateFrame("Frame", "BiSGearCheckWLNameDropdown", wlSelectorBar, "UIDropDownMenuTemplate")
-    wlNameDropdown:SetPoint("TOPLEFT", wlSelectorBar, "TOPLEFT", -5, 2)
+    wlNameDropdown:SetPoint("TOPLEFT", f, "TOPLEFT", -5, -52)
     UIDropDownMenu_SetWidth(wlNameDropdown, 130)
 
     local function WLNameDropdownInit(self, level)
@@ -219,9 +221,10 @@ function BiSGearCheck:SetupWishlistSelectorBar(f)
     UIDropDownMenu_Initialize(wlNameDropdown, WLNameDropdownInit)
     UIDropDownMenu_SetText(wlNameDropdown, self.activeWishlist)
 
+    -- New / Rename / Delete buttons (below wishlist dropdown, row 3)
     local wlNewBtn = CreateFrame("Button", nil, wlSelectorBar, "UIPanelButtonTemplate")
     wlNewBtn:SetSize(50, 22)
-    wlNewBtn:SetPoint("LEFT", wlNameDropdown, "RIGHT", -10, 0)
+    wlNewBtn:SetPoint("TOPLEFT", f, "TOPLEFT", 10, -78)
     wlNewBtn:SetText("New")
     wlNewBtn:SetScript("OnClick", function()
         StaticPopup_Show("BISGEARCHECK_NEW_WISHLIST")

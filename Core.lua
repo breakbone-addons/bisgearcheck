@@ -10,6 +10,7 @@ BiSGearCheck.pendingItems = {}
 BiSGearCheck.viewMode = "comparison" -- "comparison", "wishlist", or "bislist"
 BiSGearCheck.bislistSpec = nil -- selected spec on BiS Lists tab (any class)
 BiSGearCheck.wishlistZoneFilter = nil -- nil = no filter, string = zone name
+BiSGearCheck.zoneFilter = nil -- zone filter for Compare and BiS Lists tabs
 BiSGearCheck.wishlistAutoFilter = false
 BiSGearCheck.activeWishlist = "Default" -- name of current wishlist
 BiSGearCheck.currentZone = ""

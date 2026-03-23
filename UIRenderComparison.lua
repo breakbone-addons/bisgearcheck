@@ -33,8 +33,13 @@ function BiSGearCheck:RenderResults()
     UIDropDownMenu_SetText(f.compareWLDropdown, self.activeWishlist)
     f.sourceDropdown:Show()
     f.specDropdown:Show()
+    -- Position zone filter on the source/spec row, after the spec dropdown
+    f.zoneFilterDropdown:ClearAllPoints()
+    f.zoneFilterDropdown:SetPoint("TOPRIGHT", f, "TOPRIGHT", 5, -52)
+    f.zoneFilterDropdown:Show()
+    UIDropDownMenu_SetText(f.zoneFilterDropdown, self.zoneFilter or "All Zones")
     f.UpdateTabAppearance()
-    f.scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", self.CONTENT_PADDING, -90)
+    f.scrollFrame:SetPoint("TOPLEFT", f, "TOPLEFT", self.CONTENT_PADDING, -104)
 
     local scrollChild = f.scrollChild
     self:ClearScrollContent(scrollChild)
@@ -64,8 +69,65 @@ function BiSGearCheck:RenderResults()
     local contentWidth = self.FRAME_WIDTH - 45
 
     for _, slotResult in ipairs(self.comparisonResults) do
-        yOffset = self:RenderSlotSection(scrollChild, slotResult, yOffset, contentWidth)
-        yOffset = yOffset - self.SECTION_SPACING
+        -- When zone filter is active, skip slots with no matching upgrades
+        if self.zoneFilter then
+            local hasMatch = false
+            for _, upgrade in ipairs(slotResult.upgrades) do
+                if self:ItemMatchesZone(upgrade.id, self.zoneFilter) then
+                    hasMatch = true
+                    break
+                end
+            end
+            if not hasMatch then
+                -- skip this slot entirely
+            else
+                yOffset = self:RenderSlotSection(scrollChild, slotResult, yOffset, contentWidth)
+                yOffset = yOffset - self.SECTION_SPACING
+            end
+        else
+            yOffset = self:RenderSlotSection(scrollChild, slotResult, yOffset, contentWidth)
+            yOffset = yOffset - self.SECTION_SPACING
+        end
+    end
+
+    -- Recommended gems section at bottom
+    local specKey = self.selectedSpec
+    local gemsData = specKey and BiSGearCheckGemsDB and BiSGearCheckGemsDB[specKey]
+    if gemsData then
+        local gemHeader = self:CreateRow(scrollChild, yOffset, contentWidth)
+        gemHeader.text:SetText("|cffffd100Recommended Gems|r")
+        yOffset = yOffset - self.SLOT_HEADER_HEIGHT
+
+        if gemsData.meta then
+            local row = self:CreateRow(scrollChild, yOffset, contentWidth)
+            row.text:SetText(string.format("  |cff888888Meta:|r |cffa335ee%s|r", gemsData.meta[2]))
+            row._itemID = gemsData.meta[1]
+            row:EnableMouse(true)
+            row:SetScript("OnEnter", self.OnItemIDEnter)
+            row:SetScript("OnLeave", self.OnTooltipLeave)
+            yOffset = yOffset - self.ITEM_ROW_HEIGHT
+        end
+
+        for _, color in ipairs({"red", "yellow", "blue"}) do
+            local gems = gemsData[color]
+            if gems and #gems > 0 then
+                local label = color:sub(1,1):upper() .. color:sub(2)
+                for _, gem in ipairs(gems) do
+                    local row = self:CreateRow(scrollChild, yOffset, contentWidth)
+                    row.text:SetText(string.format("  |cff888888%s:|r |cffa335ee%s|r", label, gem[2]))
+                    row._itemID = gem[1]
+                    row:EnableMouse(true)
+                    row:SetScript("OnEnter", self.OnItemIDEnter)
+                    row:SetScript("OnLeave", self.OnTooltipLeave)
+                    yOffset = yOffset - self.ITEM_ROW_HEIGHT
+                end
+            end
+        end
+
+        local sep = self:CreateRow(scrollChild, yOffset, contentWidth)
+        local line = self:GetSeparatorLine(sep)
+        line:SetColorTexture(0.3, 0.3, 0.3, 0.5)
+        yOffset = yOffset - 6
     end
 
     scrollChild:SetHeight(math.abs(yOffset) + 20)
@@ -79,6 +141,7 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
     local slotName = slotResult.slotName
     local isCollapsed = self.collapsedSlots[slotName]
     local isDualSlot = (slotName == "Rings" or slotName == "Trinkets")
+    local specKey = self.selectedSpec
 
     local arrow = isCollapsed and "|cffffd100[+]|r " or "|cffffd100[-]|r "
 
@@ -86,13 +149,15 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
         -- Single-slot: combine header + equipped on one line
         local eq = slotResult.equipped[1]
         local header = self:CreateRow(parent, yOffset, width)
-        local eqText = eq.link or GetInventoryItemLink("player", eq.invSlot) or ("Item #" .. eq.id)
-        header.text:SetText(arrow .. "|cffffd100" .. slotName .. ":|r " .. eqText .. " - " .. rankStr(eq))
+        local eqLink = eq.link or GetInventoryItemLink("player", eq.invSlot)
+        local eqText = eqLink or ("Item #" .. eq.id)
+        local warnings = eqLink and self:GetEquipWarnings(eqLink, slotName, specKey) or ""
+        header.text:SetText(arrow .. "|cffffd100" .. slotName .. ":|r " .. eqText .. " - " .. rankStr(eq) .. warnings)
         header._slotName = slotName
         header:EnableMouse(true)
         header:SetScript("OnMouseDown", self.OnSlotHeaderClick)
-        if eq.link then
-            header._itemLink = eq.link
+        if eqLink then
+            header._itemLink = eqLink
             header:SetScript("OnEnter", self.OnItemLinkEnter)
             header:SetScript("OnLeave", self.OnTooltipLeave)
         end
@@ -119,7 +184,8 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
                 local row = self:CreateRow(parent, yOffset, width)
                 local lateLink = eq.link or GetInventoryItemLink("player", eq.invSlot)
                 local eqText = lateLink or ("Item #" .. eq.id)
-                row.text:SetText("  Equipped: " .. eqText .. " - " .. rankStr(eq))
+                local warnings = lateLink and self:GetEquipWarnings(lateLink, slotName, specKey) or ""
+                row.text:SetText("  Equipped: " .. eqText .. " - " .. rankStr(eq) .. warnings)
                 if lateLink then
                     row._itemLink = lateLink
                     row:EnableMouse(true)
@@ -139,6 +205,10 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
 
     if not isCollapsed then
         for _, upgrade in ipairs(slotResult.upgrades) do
+            -- Skip items that don't match the zone filter
+            if self.zoneFilter and not self:ItemMatchesZone(upgrade.id, self.zoneFilter) then
+                -- skip
+            else
             local row = self:CreateRow(parent, yOffset, width)
 
             -- Re-query item info at render time in case it loaded since comparison
@@ -181,6 +251,27 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
             row:SetScript("OnLeave", self.OnTooltipLeave)
 
             yOffset = yOffset - self.ITEM_ROW_HEIGHT
+            end -- end zone filter else
+        end
+
+        -- Enchant recommendations for this slot
+        local enchantSlot = self.SlotToEnchantSlot[slotName]
+        local specEnchants = specKey and BiSGearCheckEnchantsDB and BiSGearCheckEnchantsDB[specKey]
+        local slotEnchants = enchantSlot and specEnchants and specEnchants[enchantSlot]
+        if slotEnchants and #slotEnchants > 0 then
+            local enchHeader = self:CreateRow(parent, yOffset, width)
+            enchHeader.text:SetText("  |cff00ccffEnchants:|r")
+            yOffset = yOffset - self.ITEM_ROW_HEIGHT
+
+            for _, enchant in ipairs(slotEnchants) do
+                local row = self:CreateRow(parent, yOffset, width)
+                row.text:SetText(string.format("    |cffa335ee%s|r", enchant[2]))
+                row._enchantID = enchant[1]
+                row:EnableMouse(true)
+                row:SetScript("OnEnter", self.OnEnchantEnter)
+                row:SetScript("OnLeave", self.OnTooltipLeave)
+                yOffset = yOffset - self.ITEM_ROW_HEIGHT
+            end
         end
     end
 

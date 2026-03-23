@@ -93,7 +93,7 @@ end
 function BiSGearCheck:SetupCharacterSelector(f)
     local charDropdown = CreateFrame("Frame", "BiSGearCheckCharDropdown", f, "UIDropDownMenuTemplate")
     charDropdown:SetPoint("TOPRIGHT", f, "TOPRIGHT", 5, -22)
-    UIDropDownMenu_SetWidth(charDropdown, 110)
+    UIDropDownMenu_SetWidth(charDropdown, 130)
     UIDropDownMenu_JustifyText(charDropdown, "RIGHT")
 
     local function CharDropdownInit(self, level)
@@ -144,7 +144,7 @@ end
 function BiSGearCheck:SetupSourceSpecDropdowns(f)
     -- Data source dropdown
     local sourceDropdown = CreateFrame("Frame", "BiSGearCheckSourceDropdown", f, "UIDropDownMenuTemplate")
-    sourceDropdown:SetPoint("TOPLEFT", f, "TOPLEFT", -5, -48)
+    sourceDropdown:SetPoint("TOPLEFT", f, "TOPLEFT", -5, -52)
     UIDropDownMenu_SetWidth(sourceDropdown, 100)
 
     local function SourceDropdownInit(self, level)
@@ -219,7 +219,7 @@ end
 function BiSGearCheck:SetupCollapseControls(f)
     local collapseAllBtn = CreateFrame("Button", nil, f)
     collapseAllBtn:SetSize(70, 16)
-    collapseAllBtn:SetPoint("TOPLEFT", f, "TOPLEFT", 10, -74)
+    collapseAllBtn:SetPoint("TOPLEFT", f, "TOPLEFT", 10, -78)
     local collapseText = collapseAllBtn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     collapseText:SetPoint("LEFT")
     collapseText:SetText("|cff00ccffCollapse All|r")
@@ -249,8 +249,8 @@ function BiSGearCheck:SetupCollapseControls(f)
 
     -- Wishlist picker (right-aligned, shown on Compare tab)
     local compareWLDropdown = CreateFrame("Frame", "BiSGearCheckCompareWLDropdown", f, "UIDropDownMenuTemplate")
-    compareWLDropdown:SetPoint("TOPRIGHT", f, "TOPRIGHT", -5, -74)
-    UIDropDownMenu_SetWidth(compareWLDropdown, 90)
+    compareWLDropdown:SetPoint("TOPRIGHT", f, "TOPRIGHT", 5, -78)
+    UIDropDownMenu_SetWidth(compareWLDropdown, 130)
     UIDropDownMenu_JustifyText(compareWLDropdown, "RIGHT")
 
     local function CompareWLDropdownInit(self, level)
@@ -277,8 +277,73 @@ function BiSGearCheck:SetupCollapseControls(f)
     compareWLLabel:SetText("|cffffd100Wishlist:|r")
     compareWLLabel:Hide()
 
+    -- Zone filter dropdown (shown on Compare and BiS Lists tabs, positioned dynamically)
+    local zoneFilterDropdown = CreateFrame("Frame", "BiSGearCheckZoneFilterDropdown", f, "UIDropDownMenuTemplate")
+    UIDropDownMenu_SetWidth(zoneFilterDropdown, 130)
+
+    local function ZoneFilterInit(self, level)
+        local info = UIDropDownMenu_CreateInfo()
+        info.text = "All Zones"
+        info.value = ""
+        info.func = function()
+            UIDropDownMenu_SetSelectedValue(zoneFilterDropdown, "")
+            UIDropDownMenu_SetText(zoneFilterDropdown, "All Zones")
+            BiSGearCheck.zoneFilter = nil
+            BiSGearCheck:RefreshView()
+        end
+        info.notCheckable = true
+        UIDropDownMenu_AddButton(info, level)
+
+        -- Build a set of zones that have items for the current spec
+        local specKey = BiSGearCheck.viewMode == "bislist" and BiSGearCheck.bislistSpec or BiSGearCheck.selectedSpec
+        local db = BiSGearCheck:GetActiveDB()
+        local specData = specKey and db and db[specKey]
+        local zoneHasItems = {}
+        if specData and specData.slots then
+            for _, items in pairs(specData.slots) do
+                for _, itemID in ipairs(items) do
+                    local sourceInfo = BiSGearCheckSources and BiSGearCheckSources[itemID]
+                    if sourceInfo and sourceInfo.source then
+                        local zone = BiSGearCheck.SourceToZone[sourceInfo.source]
+                        if zone then zoneHasItems[zone] = true end
+                    end
+                end
+            end
+        end
+
+        for _, category in ipairs(BiSGearCheck.ZoneCategories) do
+            local hdr = UIDropDownMenu_CreateInfo()
+            hdr.text = category.label
+            hdr.isTitle = true
+            hdr.notCheckable = true
+            UIDropDownMenu_AddButton(hdr, level)
+
+            for _, zone in ipairs(category.zones) do
+                local zInfo = UIDropDownMenu_CreateInfo()
+                if zoneHasItems[zone] then
+                    zInfo.text = "  |cff00ff00" .. zone .. "|r"
+                else
+                    zInfo.text = "  " .. zone
+                end
+                zInfo.value = zone
+                zInfo.func = function(self)
+                    UIDropDownMenu_SetSelectedValue(zoneFilterDropdown, self.value)
+                    UIDropDownMenu_SetText(zoneFilterDropdown, zone)
+                    BiSGearCheck.zoneFilter = self.value
+                    BiSGearCheck:RefreshView()
+                end
+                zInfo.notCheckable = true
+                UIDropDownMenu_AddButton(zInfo, level)
+            end
+        end
+    end
+    UIDropDownMenu_Initialize(zoneFilterDropdown, ZoneFilterInit)
+    UIDropDownMenu_SetText(zoneFilterDropdown, "All Zones")
+    zoneFilterDropdown:Hide()
+
     f.collapseAllBtn = collapseAllBtn
     f.expandAllBtn = expandAllBtn
+    f.zoneFilterDropdown = zoneFilterDropdown
     f.compareWLDropdown = compareWLDropdown
     f.compareWLLabel = compareWLLabel
 end
@@ -290,11 +355,11 @@ end
 function BiSGearCheck:SetupBisListBar(f)
     local bislistBar = CreateFrame("Frame", nil, f)
     bislistBar:SetSize(self.FRAME_WIDTH - 20, 26)
-    bislistBar:SetPoint("TOPLEFT", f, "TOPLEFT", 0, -48)
+    bislistBar:SetPoint("TOPLEFT", f, "TOPLEFT", 0, -52)
     bislistBar:Hide()
 
     local bislistSourceDropdown = CreateFrame("Frame", "BiSGearCheckBislistSourceDropdown", bislistBar, "UIDropDownMenuTemplate")
-    bislistSourceDropdown:SetPoint("TOPLEFT", bislistBar, "TOPLEFT", -5, 2)
+    bislistSourceDropdown:SetPoint("TOPLEFT", f, "TOPLEFT", -5, -52)
     UIDropDownMenu_SetWidth(bislistSourceDropdown, 100)
 
     local function BislistSourceInit(self, level)
@@ -323,7 +388,7 @@ function BiSGearCheck:SetupBisListBar(f)
 
     local bislistSpecDropdown = CreateFrame("Frame", "BiSGearCheckBislistSpecDropdown", bislistBar, "UIDropDownMenuTemplate")
     bislistSpecDropdown:SetPoint("LEFT", bislistSourceDropdown, "RIGHT", -15, 0)
-    UIDropDownMenu_SetWidth(bislistSpecDropdown, 160)
+    UIDropDownMenu_SetWidth(bislistSpecDropdown, 120)
 
     local CLASS_ORDER = { "DRUID", "HUNTER", "MAGE", "PALADIN", "PRIEST", "ROGUE", "SHAMAN", "WARLOCK", "WARRIOR" }
 
@@ -349,7 +414,7 @@ function BiSGearCheck:SetupBisListBar(f)
                 for _, specInfo in ipairs(specs) do
                     if db[specInfo.key] then
                         local sInfo = UIDropDownMenu_CreateInfo()
-                        sInfo.text = specInfo.label
+                        sInfo.text = "  " .. specInfo.label
                         sInfo.value = specInfo.key
                         sInfo.func = function(self)
                             UIDropDownMenu_SetSelectedValue(bislistSpecDropdown, self.value)

@@ -253,3 +253,156 @@ local QUALITY_COLORS = {
 function BiSGearCheck:QualityColor(quality)
     return QUALITY_COLORS[quality] or "ffffff"
 end
+
+-- ============================================================
+-- ITEM LINK PARSING (for enchant/gem detection)
+-- ============================================================
+
+-- Map our slot names to enchant DB slot keys
+BiSGearCheck.SlotToEnchantSlot = {
+    ["Head"]      = "Head",
+    ["Shoulders"] = "Shoulder",
+    ["Back"]      = "Back",
+    ["Chest"]     = "Chest",
+    ["Wrist"]     = "Wrist",
+    ["Hands"]     = "Hands",
+    ["Legs"]      = "Legs",
+    ["Feet"]      = "Feet",
+    ["Main Hand"] = "Weapon",
+    ["Offhand"]   = "Shield",
+    ["Twohand"]   = "Weapon",
+    ["Ranged"]    = "Ranged",
+    ["Rings"]     = "Ring",
+}
+
+-- Slots that can have enchants (used for warnings)
+-- Excludes Neck, Waist, Trinkets (not enchantable in TBC)
+BiSGearCheck.EnchantableSlots = {
+    ["Head"] = true, ["Shoulders"] = true, ["Back"] = true,
+    ["Chest"] = true, ["Wrist"] = true, ["Hands"] = true,
+    ["Legs"] = true, ["Feet"] = true,
+    ["Main Hand"] = true, ["Offhand"] = true, ["Twohand"] = true,
+    ["Ranged"] = true, ["Rings"] = true,
+}
+
+-- Parse an item link string, extracting enchantID and gem itemIDs
+-- Format: item:itemID:enchantID:gem1:gem2:gem3:gem4:suffixID:uniqueID
+function BiSGearCheck:ParseItemLink(itemLink)
+    if not itemLink then return nil end
+    local fields = { itemLink:match("item:(%d+):(%d*):(%d*):(%d*):(%d*):(%d*)") }
+    if not fields[1] then return nil end
+    local result = {}
+    for i = 1, 6 do
+        result[i] = tonumber(fields[i]) or 0
+    end
+    return result[1], result[2], result[3], result[4], result[5], result[6]
+    -- returns: itemID, enchantID, gem1, gem2, gem3, gem4
+end
+
+-- Check if an enchantID is in the spec's recommended list for a given slot
+function BiSGearCheck:IsEnchantRecommended(specKey, slotName, enchantID)
+    if not enchantID or enchantID == 0 then return false end
+    local enchantSlot = self.SlotToEnchantSlot[slotName]
+    if not enchantSlot then return false end
+    local specEnchants = BiSGearCheckEnchantsDB and BiSGearCheckEnchantsDB[specKey]
+    if not specEnchants then return false end
+    local slotEnchants = specEnchants[enchantSlot]
+    if not slotEnchants then return false end
+    for _, enchant in ipairs(slotEnchants) do
+        if enchant[1] == enchantID then return true end
+    end
+    return false
+end
+
+-- Get a hidden tooltip for scanning item socket info
+function BiSGearCheck:GetScanTooltip()
+    if not self.scanTooltip then
+        local tip = CreateFrame("GameTooltip", "BiSGearCheckScanTip", nil, "GameTooltipTemplate")
+        tip:SetOwner(WorldFrame, "ANCHOR_NONE")
+        self.scanTooltip = tip
+    end
+    return self.scanTooltip
+end
+
+-- Count sockets on an equipped item by scanning its tooltip
+function BiSGearCheck:CountItemSockets(itemLink)
+    if not itemLink then return 0 end
+    local tip = self:GetScanTooltip()
+    tip:ClearLines()
+    tip:SetOwner(WorldFrame, "ANCHOR_NONE")
+    tip:SetHyperlink(itemLink)
+    local count = 0
+    for i = 1, tip:NumLines() do
+        local left = _G["BiSGearCheckScanTipTextLeft" .. i]
+        if left then
+            local text = left:GetText()
+            if text then
+                if text:find("Red Socket") or text:find("Blue Socket")
+                   or text:find("Yellow Socket") or text:find("Meta Socket") then
+                    count = count + 1
+                end
+            end
+        end
+    end
+    return count
+end
+
+-- Build warning text for an equipped item's enchant and gems
+-- Returns a string like " |cffff4d4d[No Enchant] [Empty Socket]|r" or ""
+function BiSGearCheck:GetEquipWarnings(itemLink, slotName, specKey)
+    if not itemLink or not specKey then return "" end
+
+    local _, enchantID, gem1, gem2, gem3, gem4 = self:ParseItemLink(itemLink)
+    local warnings = {}
+
+    -- Enchant check (only for enchantable slots that have spec recommendations)
+    if self.EnchantableSlots[slotName] then
+        local enchantSlot = self.SlotToEnchantSlot[slotName]
+        local specEnchants = BiSGearCheckEnchantsDB and BiSGearCheckEnchantsDB[specKey]
+        local hasRecommendations = specEnchants and specEnchants[enchantSlot] and #specEnchants[enchantSlot] > 0
+        if hasRecommendations then
+            if not enchantID or enchantID == 0 then
+                warnings[#warnings + 1] = "[No Enchant]"
+            elseif not self:IsEnchantRecommended(specKey, slotName, enchantID) then
+                warnings[#warnings + 1] = "[Wrong Enchant]"
+            end
+        end
+    end
+
+    -- Gem check: count sockets vs filled gems, check quality
+    local totalSockets = self:CountItemSockets(itemLink)
+    if totalSockets > 0 then
+        local gems = { gem1, gem2, gem3, gem4 }
+        local filledCount = 0
+        local lowQualityCount = 0
+        for i = 1, totalSockets do
+            local gemID = gems[i]
+            if gemID and gemID > 0 then
+                filledCount = filledCount + 1
+                local _, _, quality = GetItemInfo(gemID)
+                if quality and quality < 3 then
+                    lowQualityCount = lowQualityCount + 1
+                end
+            end
+        end
+
+        local emptyCount = totalSockets - filledCount
+        if emptyCount > 0 then
+            if emptyCount == 1 then
+                warnings[#warnings + 1] = "[Empty Socket]"
+            else
+                warnings[#warnings + 1] = "[" .. emptyCount .. " Empty Sockets]"
+            end
+        end
+        if lowQualityCount > 0 then
+            if lowQualityCount == 1 then
+                warnings[#warnings + 1] = "[Low Gem]"
+            else
+                warnings[#warnings + 1] = "[" .. lowQualityCount .. " Low Gems]"
+            end
+        end
+    end
+
+    if #warnings == 0 then return "" end
+    return " |cffff4d4d" .. table.concat(warnings, " ") .. "|r"
+end
