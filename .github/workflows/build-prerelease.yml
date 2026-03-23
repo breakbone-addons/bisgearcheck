@@ -27,7 +27,7 @@ jobs:
           mkdir -p _tmp
           cd _tmp
           unzip -o ../BiSGearCheck-*.zip
-          VERSION=$(grep '## Version:' BiSGearCheck/BiSGearCheck.toc | sed 's/## Version: *//')
+          VERSION=$(grep '## Version:' BiSGearCheck/BiSGearCheck.toc | sed 's/## Version: *//;s/\r//')
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
           # Fix file timestamps inside the zip to avoid future-dated files
