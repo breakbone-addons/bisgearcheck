@@ -5,6 +5,11 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
+## v3.0.3
+
+### Fixes
+- Fixed CurseForge description: moved gear comparison screenshot to correct section, added missing BiS Lists image placement.
+
 ## v3.0.2
 
 ### Fixes
