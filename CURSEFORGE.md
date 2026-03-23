@@ -30,9 +30,13 @@ BiS rankings are injected directly into item tooltips. Hover over any item in yo
 
 Switch between all characters on your account without logging out. View another character's gear on the Compare tab, edit their wishlists, and plan upgrades across your roster. Gear snapshots are saved automatically.
 
+### Enchant & Gem Warnings
+
+Equipped gear is checked for missing enchants, wrong enchants, empty sockets, and low-quality gems. Warnings appear pinned to the right of each equipped item row. Hover [Wrong Enchant] to see exactly what's applied. Recommended enchants and gems are shown per slot and per spec, with Aldor/Scryer filtering based on your reputation.
+
 ### Faction-Aware
 
-Alliance and Horde characters see only the items available to their faction. Faction-specific quest rewards and reputation items are filtered automatically.
+Alliance and Horde characters see only the items available to their faction. Faction-specific quest rewards, reputation items, and Aldor/Scryer enchants are filtered automatically.
 
 ## Data Sources
 

@@ -275,6 +275,43 @@ BiSGearCheck.SlotToEnchantSlot = {
     ["Rings"]     = "Ring",
 }
 
+-- Aldor/Scryer shoulder enchant IDs (SpellItemEnchantment IDs)
+BiSGearCheck.AldorEnchantIDs = {
+    [2986] = true, [2982] = true, [2980] = true, [2978] = true,  -- Greater Inscriptions
+    [2985] = true, [2981] = true, [2979] = true, [2977] = true,  -- Lesser Inscriptions
+}
+BiSGearCheck.ScryerEnchantIDs = {
+    [2995] = true, [2997] = true, [2993] = true,  -- Greater Inscriptions
+    [2994] = true, [2996] = true, [2992] = true,  -- Lesser Inscriptions
+}
+
+-- Detect player's Shattrath faction (Aldor=932, Scryer=934)
+-- Returns "aldor", "scryer", or nil if unchosen
+function BiSGearCheck:GetShattFaction()
+    if self._shattFaction then return self._shattFaction end
+    local _, _, aldorStanding = GetFactionInfoByID(932)
+    local _, _, scryerStanding = GetFactionInfoByID(934)
+    if aldorStanding and aldorStanding >= 5 then
+        self._shattFaction = "aldor"
+    elseif scryerStanding and scryerStanding >= 5 then
+        self._shattFaction = "scryer"
+    else
+        return nil  -- don't cache nil, check again next time
+    end
+    return self._shattFaction
+end
+
+-- Check if an enchant ID belongs to the opposing Shattrath faction
+function BiSGearCheck:IsWrongShattFaction(enchantID)
+    local faction = self:GetShattFaction()
+    if not faction then return false end  -- can't determine, allow all
+    if faction == "aldor" then
+        return self.ScryerEnchantIDs[enchantID] or false
+    else
+        return self.AldorEnchantIDs[enchantID] or false
+    end
+end
+
 -- Slots that can have enchants (used for warnings)
 -- Excludes Neck, Waist, Trinkets (not enchantable in TBC)
 BiSGearCheck.EnchantableSlots = {
@@ -300,6 +337,7 @@ function BiSGearCheck:ParseItemLink(itemLink)
 end
 
 -- Check if an enchantID is in the spec's recommended list for a given slot
+-- Filters out enchants from the opposing Shattrath faction
 function BiSGearCheck:IsEnchantRecommended(specKey, slotName, enchantID)
     if not enchantID or enchantID == 0 then return false end
     local enchantSlot = self.SlotToEnchantSlot[slotName]
@@ -309,7 +347,9 @@ function BiSGearCheck:IsEnchantRecommended(specKey, slotName, enchantID)
     local slotEnchants = specEnchants[enchantSlot]
     if not slotEnchants then return false end
     for _, enchant in ipairs(slotEnchants) do
-        if enchant[1] == enchantID then return true end
+        if enchant[1] == enchantID and not self:IsWrongShattFaction(enchantID) then
+            return true
+        end
     end
     return false
 end
@@ -347,13 +387,15 @@ function BiSGearCheck:CountItemSockets(itemLink)
     return count
 end
 
--- Build warning text for an equipped item's enchant and gems
--- Returns a string like " |cffff4d4d[No Enchant] [Empty Socket]|r" or ""
+-- Build warning list for an equipped item's enchant and gems
+-- Returns: warnings (table of strings), wrongEnchantID (number or nil)
+-- All warnings are returned as a list; wrongEnchantID is the interactive one
 function BiSGearCheck:GetEquipWarnings(itemLink, slotName, specKey)
-    if not itemLink or not specKey then return "" end
+    if not itemLink or not specKey then return {}, nil end
 
     local _, enchantID, gem1, gem2, gem3, gem4 = self:ParseItemLink(itemLink)
     local warnings = {}
+    local wrongEnchantID = nil
 
     -- Enchant check (only for enchantable slots that have spec recommendations)
     if self.EnchantableSlots[slotName] then
@@ -364,45 +406,46 @@ function BiSGearCheck:GetEquipWarnings(itemLink, slotName, specKey)
             if not enchantID or enchantID == 0 then
                 warnings[#warnings + 1] = "[No Enchant]"
             elseif not self:IsEnchantRecommended(specKey, slotName, enchantID) then
+                wrongEnchantID = enchantID
                 warnings[#warnings + 1] = "[Wrong Enchant]"
             end
         end
     end
 
-    -- Gem check: count sockets vs filled gems, check quality
-    local totalSockets = self:CountItemSockets(itemLink)
-    if totalSockets > 0 then
-        local gems = { gem1, gem2, gem3, gem4 }
-        local filledCount = 0
-        local lowQualityCount = 0
-        for i = 1, totalSockets do
-            local gemID = gems[i]
-            if gemID and gemID > 0 then
-                filledCount = filledCount + 1
-                local _, _, quality = GetItemInfo(gemID)
-                if quality and quality < 3 then
+    -- Gem check: filled gems from item link, empty sockets from tooltip
+    local gems = { gem1, gem2, gem3, gem4 }
+    local filledCount = 0
+    local lowQualityCount = 0
+    for i = 1, 4 do
+        local gemID = gems[i]
+        if gemID and gemID > 0 then
+            filledCount = filledCount + 1
+            local _, _, quality = GetItemInfo(gemID)
+            if quality then
+                if quality < 3 then
                     lowQualityCount = lowQualityCount + 1
                 end
-            end
-        end
-
-        local emptyCount = totalSockets - filledCount
-        if emptyCount > 0 then
-            if emptyCount == 1 then
-                warnings[#warnings + 1] = "[Empty Socket]"
             else
-                warnings[#warnings + 1] = "[" .. emptyCount .. " Empty Sockets]"
-            end
-        end
-        if lowQualityCount > 0 then
-            if lowQualityCount == 1 then
-                warnings[#warnings + 1] = "[Low Gem]"
-            else
-                warnings[#warnings + 1] = "[" .. lowQualityCount .. " Low Gems]"
+                C_Item.RequestLoadItemDataByID(gemID)
+                self.needsRefresh = true
             end
         end
     end
 
-    if #warnings == 0 then return "" end
-    return " |cffff4d4d" .. table.concat(warnings, " ") .. "|r"
+    -- Tooltip only shows unfilled sockets ("Red Socket", etc.)
+    local emptySockets = self:CountItemSockets(itemLink)
+    if filledCount + emptySockets > 0 then
+        if emptySockets > 0 then
+            if emptySockets == 1 then
+                warnings[#warnings + 1] = "[Empty Socket]"
+            else
+                warnings[#warnings + 1] = "[" .. emptySockets .. " Empty Sockets]"
+            end
+        end
+        if lowQualityCount > 0 then
+            warnings[#warnings + 1] = "[Wrong Gems]"
+        end
+    end
+
+    return warnings, wrongEnchantID
 end

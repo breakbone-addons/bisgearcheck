@@ -274,18 +274,31 @@ function BiSGearCheck:RenderBisList()
                 local specEnchants = specKey and BiSGearCheckEnchantsDB and BiSGearCheckEnchantsDB[specKey]
                 local slotEnchants = enchantSlot and specEnchants and specEnchants[enchantSlot]
                 if slotEnchants and #slotEnchants > 0 then
-                    local enchHeader = self:CreateRow(scrollChild, yOffset, contentWidth)
-                    enchHeader.text:SetText("  |cff00ccffEnchants:|r")
-                    yOffset = yOffset - self.ITEM_ROW_HEIGHT
-
+                    -- Filter out enchants from the opposing Shattrath faction
+                    local hasVisible = false
                     for _, enchant in ipairs(slotEnchants) do
-                        local row = self:CreateRow(scrollChild, yOffset, contentWidth)
-                        row.text:SetText(string.format("    |cffa335ee%s|r", enchant[2]))
-                        row._enchantID = enchant[1]
-                        row:EnableMouse(true)
-                        row:SetScript("OnEnter", self.OnEnchantEnter)
-                        row:SetScript("OnLeave", self.OnTooltipLeave)
+                        if not self:IsWrongShattFaction(enchant[1]) then
+                            hasVisible = true
+                            break
+                        end
+                    end
+
+                    if hasVisible then
+                        local enchHeader = self:CreateRow(scrollChild, yOffset, contentWidth)
+                        enchHeader.text:SetText("  |cff00ccffEnchants:|r")
                         yOffset = yOffset - self.ITEM_ROW_HEIGHT
+
+                        for _, enchant in ipairs(slotEnchants) do
+                            if not self:IsWrongShattFaction(enchant[1]) then
+                                local row = self:CreateRow(scrollChild, yOffset, contentWidth)
+                                row.text:SetText(string.format("    |cffa335ee%s|r", enchant[2]))
+                                local lf = self:GetLinkFrame(row)
+                                lf._enchantID = enchant[1]
+                                lf:SetScript("OnEnter", self.OnEnchantEnter)
+                                lf:SetScript("OnLeave", self.OnTooltipLeave)
+                                yOffset = yOffset - self.ITEM_ROW_HEIGHT
+                            end
+                        end
                     end
                 end
             end

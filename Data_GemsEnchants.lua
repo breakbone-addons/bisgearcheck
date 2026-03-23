@@ -68,8 +68,8 @@
 --   Legs:
 --     3012 = Nethercobra Leg Armor (+50 AP, +12 crit)
 --     3013 = Nethercleft Leg Armor (+40 stam, +12 agi)
---     2746 = Runic Spellthread (+35 SP, +20 stam)
---     2748 = Golden Spellthread (+35 SP, +20 stam) [healer version]
+--     2748 = Runic Spellthread (+35 SP, +20 stam)
+--     2746 = Golden Spellthread (+66 healing, +20 stam) [healer version]
 --     3011 = Clefthide Leg Armor (+30 stam, +10 agi)
 --   Feet:
 --     2940 = Boar's Speed (+9 stam, minor speed)
@@ -117,7 +117,7 @@ BiSGearCheckEnchantLinks = {
     -- Head enchants (consumable items - Arcanums/Glyphs)
     [3002] = { "item", 29191 },   -- Glyph of Power
     [3003] = { "item", 29192 },   -- Glyph of Ferocity
-    [3001] = { "item", 29190 },   -- Glyph of Renewal
+    [3001] = { "item", 29189, horde = 29190 },   -- Glyph of Renewal (Alliance: Honor Hold 29189, Horde: Thrallmar 29190)
     [2999] = { "item", 29186 },   -- Glyph of the Defender
 
     -- Shoulder enchants (consumable items - Inscriptions)
@@ -128,6 +128,14 @@ BiSGearCheckEnchantLinks = {
     [2997] = { "item", 28910 },   -- Greater Inscription of the Blade
     [2978] = { "item", 28889 },   -- Greater Inscription of Warding
     [2993] = { "item", 28911 },   -- Greater Inscription of the Knight
+    -- Lesser shoulder inscriptions (common "wrong" enchants)
+    [2985] = { "item", 28878 },   -- Inscription of Vengeance
+    [2981] = { "item", 28881 },   -- Inscription of Discipline
+    [2979] = { "item", 28878 },   -- Inscription of Faith
+    [2994] = { "item", 28903 },   -- Inscription of the Orb
+    [2996] = { "item", 28904 },   -- Inscription of the Blade
+    [2977] = { "item", 28907 },   -- Inscription of Warding
+    [2992] = { "item", 28905 },   -- Inscription of the Knight
 
     -- Back enchants (enchanting spells)
     [2621] = { "spell", 25084 },  -- Subtlety
@@ -166,8 +174,11 @@ BiSGearCheckEnchantLinks = {
     [3012] = { "item", 29535 },   -- Nethercobra Leg Armor
     [3013] = { "item", 29536 },   -- Nethercleft Leg Armor
     [3011] = { "item", 29534 },   -- Clefthide Leg Armor
-    [2746] = { "item", 24274 },   -- Runic Spellthread
-    [2748] = { "item", 24276 },   -- Golden Spellthread
+    [3010] = { "item", 29533 },   -- Cobrahide Leg Armor
+    [2746] = { "item", 24276 },   -- Golden Spellthread (enchant 2746)
+    [2748] = { "item", 24274 },   -- Runic Spellthread (enchant 2748)
+    [2745] = { "item", 24275 },   -- Silver Spellthread (enchant 2745)
+    [2747] = { "item", 24273 },   -- Mystic Spellthread (enchant 2747)
 
     -- Feet enchants (enchanting spells)
     [2940] = { "spell", 34008 },  -- Boar's Speed
@@ -316,8 +327,8 @@ local ENCHANTS = {
     LEGS_NETHERCOBRA       = { 3012, "Nethercobra Leg Armor" },     -- +50 AP, +12 crit
     LEGS_NETHERCLEFT       = { 3013, "Nethercleft Leg Armor" },     -- +40 stam, +12 agi
     LEGS_CLEFTHIDE         = { 3011, "Clefthide Leg Armor" },       -- +30 stam, +10 agi
-    LEGS_RUNIC_SPELLTHREAD = { 2746, "Runic Spellthread" },         -- +35 SP, +20 stam
-    LEGS_GOLDEN_SPELLTHREAD= { 2748, "Golden Spellthread" },        -- +66 healing, +20 stam [UNVERIFIED exact ID]
+    LEGS_RUNIC_SPELLTHREAD = { 2748, "Runic Spellthread" },         -- +35 SP, +20 stam
+    LEGS_GOLDEN_SPELLTHREAD= { 2746, "Golden Spellthread" },        -- +66 healing, +20 stam
 
     -- Feet
     FEET_BOAR_SPEED        = { 2940, "Enchant Boots - Boar's Speed" },    -- +9 stam, minor speed
@@ -391,7 +402,7 @@ BiSGearCheckEnchantsDB["DruidBalance"] = {
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
     Wrist    = { { 2650, "Enchant Bracer - Spellpower" } },
     Hands    = { { 2937, "Enchant Gloves - Major Spellpower" } },
-    Legs     = { { 2746, "Runic Spellthread" } },
+    Legs     = { { 2748, "Runic Spellthread" } },
     Feet     = { { 2940, "Enchant Boots - Boar's Speed" } },
     Weapon   = { { 2671, "Enchant Weapon - Sunfire" }, { 2669, "Enchant Weapon - Major Spellpower" } },
 }
@@ -445,7 +456,7 @@ BiSGearCheckEnchantsDB["DruidRestoration"] = {
     Chest    = { { 2665, "Enchant Chest - Major Spirit" }, { 2661, "Enchant Chest - Exceptional Stats" } },
     Wrist    = { { 2617, "Enchant Bracer - Superior Healing" } },
     Hands    = { { 2612, "Enchant Gloves - Major Healing" } },
-    Legs     = { { 2748, "Golden Spellthread" } },
+    Legs     = { { 2746, "Golden Spellthread" } },
     Feet     = { { 2940, "Enchant Boots - Boar's Speed" } },
     Weapon   = { { 2669, "Enchant Weapon - Major Healing" } },
 }
@@ -528,7 +539,7 @@ BiSGearCheckEnchantsDB["MageArcane"] = {
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
     Wrist    = { { 2650, "Enchant Bracer - Spellpower" } },
     Hands    = { { 2937, "Enchant Gloves - Major Spellpower" } },
-    Legs     = { { 2746, "Runic Spellthread" } },
+    Legs     = { { 2748, "Runic Spellthread" } },
     Feet     = { { 2940, "Enchant Boots - Boar's Speed" } },
     Weapon   = { { 2671, "Enchant Weapon - Sunfire" }, { 2669, "Enchant Weapon - Major Spellpower" } },
 }
@@ -546,7 +557,7 @@ BiSGearCheckEnchantsDB["MageFire"] = {
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
     Wrist    = { { 2650, "Enchant Bracer - Spellpower" } },
     Hands    = { { 2937, "Enchant Gloves - Major Spellpower" } },
-    Legs     = { { 2746, "Runic Spellthread" } },
+    Legs     = { { 2748, "Runic Spellthread" } },
     Feet     = { { 2940, "Enchant Boots - Boar's Speed" } },
     Weapon   = { { 2671, "Enchant Weapon - Sunfire" } },
 }
@@ -564,7 +575,7 @@ BiSGearCheckEnchantsDB["MageFrost"] = {
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
     Wrist    = { { 2650, "Enchant Bracer - Spellpower" } },
     Hands    = { { 2937, "Enchant Gloves - Major Spellpower" } },
-    Legs     = { { 2746, "Runic Spellthread" } },
+    Legs     = { { 2748, "Runic Spellthread" } },
     Feet     = { { 2940, "Enchant Boots - Boar's Speed" } },
     Weapon   = { { 2672, "Enchant Weapon - Soulfrost" }, { 2669, "Enchant Weapon - Major Spellpower" } },
 }
@@ -586,7 +597,7 @@ BiSGearCheckEnchantsDB["PaladinHoly"] = {
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
     Wrist    = { { 2654, "Enchant Bracer - Major Intellect" } },
     Hands    = { { 2612, "Enchant Gloves - Major Healing" } },
-    Legs     = { { 2748, "Golden Spellthread" } },
+    Legs     = { { 2746, "Golden Spellthread" } },
     Feet     = { { 2940, "Enchant Boots - Boar's Speed" } },
     Weapon   = { { 2666, "Enchant Weapon - Major Intellect" }, { 2669, "Enchant Weapon - Major Healing" } },
     Shield   = { { 2654, "Enchant Shield - Intellect" } },
@@ -605,7 +616,7 @@ BiSGearCheckEnchantsDB["PaladinProtection"] = {
     Chest    = { { 2659, "Enchant Chest - Exceptional Health" } },
     Wrist    = { { 2650, "Enchant Bracer - Spellpower" } },
     Hands    = { { 2613, "Enchant Gloves - Threat" } },
-    Legs     = { { 2746, "Runic Spellthread" } },
+    Legs     = { { 2748, "Runic Spellthread" } },
     Feet     = { { 2649, "Enchant Boots - Fortitude" } },
     Weapon   = { { 2669, "Enchant Weapon - Major Spellpower" } },
     Shield   = { { 2653, "Enchant Shield - Major Stamina" } },
@@ -646,7 +657,7 @@ BiSGearCheckEnchantsDB["PriestHoly"] = {
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
     Wrist    = { { 2617, "Enchant Bracer - Superior Healing" } },
     Hands    = { { 2612, "Enchant Gloves - Major Healing" } },
-    Legs     = { { 2748, "Golden Spellthread" } },
+    Legs     = { { 2746, "Golden Spellthread" } },
     Feet     = { { 2940, "Enchant Boots - Boar's Speed" } },
     Weapon   = { { 2669, "Enchant Weapon - Major Healing" } },
 }
@@ -664,7 +675,7 @@ BiSGearCheckEnchantsDB["PriestShadow"] = {
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
     Wrist    = { { 2650, "Enchant Bracer - Spellpower" } },
     Hands    = { { 2937, "Enchant Gloves - Major Spellpower" } },
-    Legs     = { { 2746, "Runic Spellthread" } },
+    Legs     = { { 2748, "Runic Spellthread" } },
     Feet     = { { 2940, "Enchant Boots - Boar's Speed" } },
     Weapon   = { { 2672, "Enchant Weapon - Soulfrost" } },
 }
@@ -744,7 +755,7 @@ BiSGearCheckEnchantsDB["ShamanElemental"] = {
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
     Wrist    = { { 2650, "Enchant Bracer - Spellpower" } },
     Hands    = { { 2937, "Enchant Gloves - Major Spellpower" } },
-    Legs     = { { 2746, "Runic Spellthread" } },
+    Legs     = { { 2748, "Runic Spellthread" } },
     Feet     = { { 2940, "Enchant Boots - Boar's Speed" } },
     Weapon   = { { 2669, "Enchant Weapon - Major Spellpower" } },
     Shield   = { { 2654, "Enchant Shield - Intellect" } },
@@ -781,7 +792,7 @@ BiSGearCheckEnchantsDB["ShamanRestoration"] = {
     Chest    = { { 2679, "Enchant Chest - Restore Mana Prime" }, { 2661, "Enchant Chest - Exceptional Stats" } },
     Wrist    = { { 2617, "Enchant Bracer - Superior Healing" } },
     Hands    = { { 2612, "Enchant Gloves - Major Healing" } },
-    Legs     = { { 2748, "Golden Spellthread" } },
+    Legs     = { { 2746, "Golden Spellthread" } },
     Feet     = { { 2940, "Enchant Boots - Boar's Speed" } },
     Weapon   = { { 2669, "Enchant Weapon - Major Healing" } },
     Shield   = { { 2654, "Enchant Shield - Intellect" } },
@@ -804,7 +815,7 @@ BiSGearCheckEnchantsDB["WarlockAffliction"] = {
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
     Wrist    = { { 2650, "Enchant Bracer - Spellpower" } },
     Hands    = { { 2937, "Enchant Gloves - Major Spellpower" } },
-    Legs     = { { 2746, "Runic Spellthread" } },
+    Legs     = { { 2748, "Runic Spellthread" } },
     Feet     = { { 2940, "Enchant Boots - Boar's Speed" } },
     Weapon   = { { 2672, "Enchant Weapon - Soulfrost" } },
 }
@@ -822,7 +833,7 @@ BiSGearCheckEnchantsDB["WarlockDemonology"] = {
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
     Wrist    = { { 2650, "Enchant Bracer - Spellpower" } },
     Hands    = { { 2937, "Enchant Gloves - Major Spellpower" } },
-    Legs     = { { 2746, "Runic Spellthread" } },
+    Legs     = { { 2748, "Runic Spellthread" } },
     Feet     = { { 2940, "Enchant Boots - Boar's Speed" } },
     Weapon   = { { 2672, "Enchant Weapon - Soulfrost" } },
 }
@@ -840,7 +851,7 @@ BiSGearCheckEnchantsDB["WarlockDestruction"] = {
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
     Wrist    = { { 2650, "Enchant Bracer - Spellpower" } },
     Hands    = { { 2937, "Enchant Gloves - Major Spellpower" } },
-    Legs     = { { 2746, "Runic Spellthread" } },
+    Legs     = { { 2748, "Runic Spellthread" } },
     Feet     = { { 2940, "Enchant Boots - Boar's Speed" } },
     Weapon   = { { 2671, "Enchant Weapon - Sunfire" }, { 2672, "Enchant Weapon - Soulfrost" } },
 }

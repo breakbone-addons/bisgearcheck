@@ -5,6 +5,22 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
+## v3.1.0
+
+### Features
+- Equipped gear warnings: [No Enchant], [Wrong Enchant], [Empty Socket], [Wrong Gems] displayed pinned-right on equipped item rows.
+- [Wrong Enchant] is interactive -- hover to see a tooltip of the currently applied enchant.
+- Enchant recommendations shown per slot on Compare and BiS Lists tabs with spell/item tooltips.
+- Gem recommendations shown per spec (meta, red, yellow, blue) at the bottom of Compare and BiS Lists.
+- Aldor/Scryer-aware shoulder enchant filtering -- only shows inscriptions available to your chosen faction.
+- Faction-aware enchant tooltips (e.g., Glyph of Renewal shows the correct Alliance or Horde variant).
+
+### Fixes
+- Fixed gem quality check not detecting low-quality gems in filled sockets (tooltip scan only found empty sockets).
+- Fixed Runic/Golden Spellthread enchant ID swap (2748 = Runic, 2746 = Golden).
+- Fixed Silver/Mystic Spellthread item ID mapping.
+- Added non-BiS enchants (lesser inscriptions, lesser spellthreads, leg armors) to tooltip lookup so [Wrong Enchant] shows useful tooltips.
+
 ## v3.0.4
 
 ### Changes

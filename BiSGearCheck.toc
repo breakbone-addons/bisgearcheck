@@ -2,7 +2,7 @@
 ## Title: BiS Gear Check
 ## Notes: Compare equipped gear against Best in Slot lists with tooltip integration.
 ## Author: Breakbone - Dreamscythe
-## Version: 3.0.4
+## Version: 3.1.0
 ## X-License: All Rights Reserved
 ## X-Curse-Project-ID: 1492057
 ## SavedVariables: BiSGearCheckSaved

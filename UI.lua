@@ -47,6 +47,20 @@ function BiSGearCheck:ClearScrollContent(scrollChild)
             row._itemID = nil
             row._upgrade = nil
             row._enchantID = nil
+            if row._linkFrame then
+                row._linkFrame:Hide()
+                row._linkFrame:EnableMouse(false)
+                row._linkFrame:SetScript("OnEnter", nil)
+                row._linkFrame:SetScript("OnLeave", nil)
+                row._linkFrame._enchantID = nil
+            end
+            if row._warnFrame then
+                row._warnFrame:Hide()
+                row._warnFrame:EnableMouse(false)
+                row._warnFrame:SetScript("OnEnter", nil)
+                row._warnFrame:SetScript("OnLeave", nil)
+                row._warnFrame._enchantID = nil
+            end
             if row.actionBtn then
                 row.actionBtn:Hide()
                 row.actionBtn:SetScript("OnClick", nil)
@@ -121,6 +135,29 @@ function BiSGearCheck:GetActionButton(row)
 end
 
 -- ============================================================
+-- WARNING LABEL HELPER (pinned-right tooltip zone on a row)
+-- ============================================================
+
+function BiSGearCheck:GetWarningLabel(row)
+    if row._warnFrame then
+        row._warnFrame:Show()
+        return row._warnFrame, row._warnFrame.label
+    end
+
+    local wf = CreateFrame("Frame", nil, row)
+    wf:SetHeight(18)
+    wf:SetPoint("RIGHT", row, "RIGHT", -1, 0)
+    wf:EnableMouse(true)
+
+    local label = wf:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    label:SetPoint("CENTER", 0, 0)
+    wf.label = label
+
+    row._warnFrame = wf
+    return wf, label
+end
+
+-- ============================================================
 -- SEPARATOR LINE HELPER (reuses texture on a row)
 -- ============================================================
 
@@ -136,6 +173,27 @@ function BiSGearCheck:GetSeparatorLine(row)
     line:SetPoint("TOPRIGHT", row, "TOPRIGHT", -5, -2)
     row.sepLine = line
     return line
+end
+
+-- ============================================================
+-- LINK FRAME HELPER (tooltip target sized to text, not full row)
+-- ============================================================
+
+function BiSGearCheck:GetLinkFrame(row)
+    local lf = row._linkFrame
+    if not lf then
+        lf = CreateFrame("Frame", nil, row)
+        row._linkFrame = lf
+    end
+    lf:ClearAllPoints()
+    lf:SetPoint("LEFT", row.text, "LEFT", -2, 0)
+    lf:SetPoint("TOP", row, "TOP")
+    lf:SetPoint("BOTTOM", row, "BOTTOM")
+    local tw = row.text:GetStringWidth()
+    lf:SetWidth(math.max(tw + 4, 20))
+    lf:EnableMouse(true)
+    lf:Show()
+    return lf
 end
 
 -- ============================================================
@@ -170,25 +228,36 @@ BiSGearCheck.OnItemIDEnter = function(frame)
 end
 
 -- Enchant tooltip via spell or item link (uses BiSGearCheckEnchantLinks lookup)
+-- Works on both rows (frame._enchantID) and link frames (frame._enchantID)
 BiSGearCheck.OnEnchantEnter = function(frame)
+    local enchantID = frame._enchantID
+    if not enchantID then return end
     GameTooltip:SetOwner(frame, "ANCHOR_RIGHT")
-    local linkData = BiSGearCheckEnchantLinks and BiSGearCheckEnchantLinks[frame._enchantID]
+    local linkData = BiSGearCheckEnchantLinks and BiSGearCheckEnchantLinks[enchantID]
     if linkData then
         local linkType, linkID = linkData[1], linkData[2]
         if linkType == "spell" then
             GameTooltip:SetHyperlink("spell:" .. linkID)
         elseif linkType == "item" then
-            local _, link = GetItemInfo(linkID)
+            local itemID = linkID
+            -- Faction-aware: use horde variant if player is Horde
+            if linkData.horde and UnitFactionGroup("player") == "Horde" then
+                itemID = linkData.horde
+            end
+            local _, link = GetItemInfo(itemID)
             if link then
                 GameTooltip:SetHyperlink(link)
             else
                 GameTooltip:AddLine("Loading item...")
-                C_Item.RequestLoadItemDataByID(linkID)
+                C_Item.RequestLoadItemDataByID(itemID)
             end
         end
     else
-        -- Fallback: try enchant hyperlink
-        GameTooltip:SetHyperlink("enchant:" .. frame._enchantID)
+        -- Try enchant hyperlink (works in some Classic builds)
+        local ok = pcall(GameTooltip.SetHyperlink, GameTooltip, "enchant:" .. enchantID)
+        if not ok then
+            GameTooltip:AddLine("Unknown enchant (ID: " .. enchantID .. ")", 1, 1, 1)
+        end
     end
     GameTooltip:Show()
 end

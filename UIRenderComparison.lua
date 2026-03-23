@@ -151,8 +151,11 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
         local header = self:CreateRow(parent, yOffset, width)
         local eqLink = eq.link or GetInventoryItemLink("player", eq.invSlot)
         local eqText = eqLink or ("Item #" .. eq.id)
-        local warnings = eqLink and self:GetEquipWarnings(eqLink, slotName, specKey) or ""
-        header.text:SetText(arrow .. "|cffffd100" .. slotName .. ":|r " .. eqText .. " - " .. rankStr(eq) .. warnings)
+        local warnings, wrongEnchantID = {}, nil
+        if eqLink then
+            warnings, wrongEnchantID = self:GetEquipWarnings(eqLink, slotName, specKey)
+        end
+        header.text:SetText(arrow .. "|cffffd100" .. slotName .. ":|r " .. eqText .. " - " .. rankStr(eq))
         header._slotName = slotName
         header:EnableMouse(true)
         header:SetScript("OnMouseDown", self.OnSlotHeaderClick)
@@ -161,6 +164,21 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
             header:SetScript("OnEnter", self.OnItemLinkEnter)
             header:SetScript("OnLeave", self.OnTooltipLeave)
         end
+
+        -- All warnings pinned to right side of same row
+        if #warnings > 0 then
+            local warnText = "|cffff4d4d" .. table.concat(warnings, " ") .. "|r"
+            header.text:SetPoint("RIGHT", header, "RIGHT", -100, 0)
+            local wf, wLabel = self:GetWarningLabel(header)
+            wLabel:SetText(warnText)
+            wf:SetWidth(wLabel:GetStringWidth() + 8)
+            if wrongEnchantID then
+                wf._enchantID = wrongEnchantID
+                wf:SetScript("OnEnter", self.OnEnchantEnter)
+                wf:SetScript("OnLeave", self.OnTooltipLeave)
+            end
+        end
+
         yOffset = yOffset - self.SLOT_HEADER_HEIGHT
     elseif not isDualSlot and #slotResult.equipped == 0 then
         -- Single-slot empty: combine header + empty
@@ -184,14 +202,32 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
                 local row = self:CreateRow(parent, yOffset, width)
                 local lateLink = eq.link or GetInventoryItemLink("player", eq.invSlot)
                 local eqText = lateLink or ("Item #" .. eq.id)
-                local warnings = lateLink and self:GetEquipWarnings(lateLink, slotName, specKey) or ""
-                row.text:SetText("  Equipped: " .. eqText .. " - " .. rankStr(eq) .. warnings)
+                local warnings, wrongEnchantID = {}, nil
+                if lateLink then
+                    warnings, wrongEnchantID = self:GetEquipWarnings(lateLink, slotName, specKey)
+                end
+                row.text:SetText("  Equipped: " .. eqText .. " - " .. rankStr(eq))
                 if lateLink then
                     row._itemLink = lateLink
                     row:EnableMouse(true)
                     row:SetScript("OnEnter", self.OnItemLinkEnter)
                     row:SetScript("OnLeave", self.OnTooltipLeave)
                 end
+
+                -- All warnings pinned to right side of same row
+                if #warnings > 0 then
+                    local warnText = "|cffff4d4d" .. table.concat(warnings, " ") .. "|r"
+                    row.text:SetPoint("RIGHT", row, "RIGHT", -100, 0)
+                    local wf, wLabel = self:GetWarningLabel(row)
+                    wLabel:SetText(warnText)
+                    wf:SetWidth(wLabel:GetStringWidth() + 8)
+                    if wrongEnchantID then
+                        wf._enchantID = wrongEnchantID
+                        wf:SetScript("OnEnter", self.OnEnchantEnter)
+                        wf:SetScript("OnLeave", self.OnTooltipLeave)
+                    end
+                end
+
                 yOffset = yOffset - self.ITEM_ROW_HEIGHT
             end
 
@@ -259,18 +295,31 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
         local specEnchants = specKey and BiSGearCheckEnchantsDB and BiSGearCheckEnchantsDB[specKey]
         local slotEnchants = enchantSlot and specEnchants and specEnchants[enchantSlot]
         if slotEnchants and #slotEnchants > 0 then
-            local enchHeader = self:CreateRow(parent, yOffset, width)
-            enchHeader.text:SetText("  |cff00ccffEnchants:|r")
-            yOffset = yOffset - self.ITEM_ROW_HEIGHT
-
+            -- Filter out enchants from the opposing Shattrath faction
+            local hasVisible = false
             for _, enchant in ipairs(slotEnchants) do
-                local row = self:CreateRow(parent, yOffset, width)
-                row.text:SetText(string.format("    |cffa335ee%s|r", enchant[2]))
-                row._enchantID = enchant[1]
-                row:EnableMouse(true)
-                row:SetScript("OnEnter", self.OnEnchantEnter)
-                row:SetScript("OnLeave", self.OnTooltipLeave)
+                if not self:IsWrongShattFaction(enchant[1]) then
+                    hasVisible = true
+                    break
+                end
+            end
+
+            if hasVisible then
+                local enchHeader = self:CreateRow(parent, yOffset, width)
+                enchHeader.text:SetText("  |cff00ccffEnchants:|r")
                 yOffset = yOffset - self.ITEM_ROW_HEIGHT
+
+                for _, enchant in ipairs(slotEnchants) do
+                    if not self:IsWrongShattFaction(enchant[1]) then
+                        local row = self:CreateRow(parent, yOffset, width)
+                        row.text:SetText(string.format("    |cffa335ee%s|r", enchant[2]))
+                        local lf = self:GetLinkFrame(row)
+                        lf._enchantID = enchant[1]
+                        lf:SetScript("OnEnter", self.OnEnchantEnter)
+                        lf:SetScript("OnLeave", self.OnTooltipLeave)
+                        yOffset = yOffset - self.ITEM_ROW_HEIGHT
+                    end
+                end
             end
         end
     end
