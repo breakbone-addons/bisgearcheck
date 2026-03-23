@@ -5,6 +5,13 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
+## v3.0.4
+
+### Changes
+- Added CurseForge project ID to TOC for automated publishing.
+- Versioned build zip filenames (e.g. BiSGearCheck_3.0.4.zip).
+- Fixed carriage return in version extraction for build workflows.
+
 ## v3.0.3
 
 ### Fixes
