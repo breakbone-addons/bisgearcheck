@@ -64,6 +64,17 @@ BiS rankings appear directly in item tooltips, grouped by data source. Hover ove
 
 Switch between all characters on your account from the character selector dropdown. View another character's gear on the Compare tab, edit their wishlists, and plan upgrades across your roster. Gear snapshots are saved automatically. Set a minimum level threshold or ignore specific characters to keep the dropdown clean.
 
+## Settings
+
+Configure tooltip display, enable or disable individual data sources for the addon UI and tooltips, and manage character filters.
+
+<img src="art/screenshot-settings.png" alt="Settings Panel" width="380"/>
+
+- Toggle BiS tooltip injection and class-only filtering
+- Per-source enable/disable for addon UI and tooltips
+- Minimum character level threshold for the multi-character dropdown
+- Character ignore list
+
 ## Usage
 
 | Action | How |
