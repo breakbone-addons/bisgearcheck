@@ -4,6 +4,7 @@
 ## Author: Breakbone - Dreamscythe
 ## Version: 3.0.3
 ## X-License: All Rights Reserved
+## X-Curse-Project-ID: 1492057
 ## SavedVariables: BiSGearCheckSaved
 ## SavedVariablesPerCharacter: BiSGearCheckChar
 
