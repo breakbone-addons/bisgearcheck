@@ -22,25 +22,23 @@ jobs:
       - name: Rename zip and fix timestamps
         id: package
         run: |
-          # Rename packager output to clean name
-          for f in .release/*.zip; do
-            mv "$f" .release/BiSGearCheck.zip
-            break
-          done
-
           # Extract version from the packaged TOC
           cd .release
           mkdir -p _tmp
           cd _tmp
-          unzip -o ../BiSGearCheck.zip
+          unzip -o ../BiSGearCheck-*.zip
           VERSION=$(grep '## Version:' BiSGearCheck/BiSGearCheck.toc | sed 's/## Version: *//')
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
           # Fix file timestamps inside the zip to avoid future-dated files
           find . -exec touch -t "$(date +%Y%m%d%H%M.%S)" {} +
-          zip -r ../BiSGearCheck.zip .
+
+          ZIPNAME="BiSGearCheck_${VERSION}.zip"
+          zip -r "../$ZIPNAME" .
           cd ..
           rm -rf _tmp
+          # Remove original packager zip
+          rm -f BiSGearCheck-*.zip
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -50,7 +48,7 @@ jobs:
           body: |
             ## Download
 
-            Download **BiSGearCheck.zip** below. Do not download the "Source code" archives.
+            Download **BiSGearCheck_${{ steps.package.outputs.version }}.zip** below. Do not download the "Source code" archives.
 
             Extract the `BiSGearCheck` folder into your WoW AddOns directory:
             ```
@@ -58,7 +56,7 @@ jobs:
             ```
 
             Built from `${{ github.ref_name }}` at ${{ github.sha }}.
-          files: .release/BiSGearCheck.zip
+          files: .release/BiSGearCheck_${{ steps.package.outputs.version }}.zip
           fail_on_unmatched_files: true
           make_latest: true
         env:

@@ -22,27 +22,23 @@ jobs:
       - name: Rename zip and fix timestamps
         id: package
         run: |
-          ZIPNAME="BiSGearCheck-Build-${{ github.run_number }}.zip"
-
-          # Rename packager output to clean name with build number
-          for f in .release/*.zip; do
-            mv "$f" ".release/$ZIPNAME"
-            break
-          done
-
           # Extract version from the packaged TOC
           cd .release
           mkdir -p _tmp
           cd _tmp
-          unzip -o "../$ZIPNAME"
+          unzip -o ../BiSGearCheck-*.zip
           VERSION=$(grep '## Version:' BiSGearCheck/BiSGearCheck.toc | sed 's/## Version: *//')
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
           # Fix file timestamps inside the zip to avoid future-dated files
           find . -exec touch -t "$(date +%Y%m%d%H%M.%S)" {} +
+
+          ZIPNAME="BiSGearCheck_${VERSION}-Build-${{ github.run_number }}.zip"
           zip -r "../$ZIPNAME" .
           cd ..
           rm -rf _tmp
+          # Remove original packager zip
+          rm -f BiSGearCheck-*.zip
 
       - name: Create GitHub Pre-Release
         uses: softprops/action-gh-release@v2
@@ -55,7 +51,7 @@ jobs:
 
             This is a development build for testing. For the latest stable version, see the [Latest Release](https://github.com/${{ github.repository }}/releases/latest).
 
-            Download **BiSGearCheck-Build-${{ github.run_number }}.zip** below. Do not download the "Source code" archives.
+            Download **BiSGearCheck_${{ steps.package.outputs.version }}-Build-${{ github.run_number }}.zip** below. Do not download the "Source code" archives.
 
             Extract the `BiSGearCheck` folder into your WoW AddOns directory:
             ```
@@ -63,7 +59,7 @@ jobs:
             ```
 
             Built from `${{ github.ref_name }}` at ${{ github.sha }}.
-          files: .release/BiSGearCheck-Build-${{ github.run_number }}.zip
+          files: .release/BiSGearCheck_${{ steps.package.outputs.version }}-Build-${{ github.run_number }}.zip
           fail_on_unmatched_files: true
           make_latest: false
         env:
