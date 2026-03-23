@@ -111,6 +111,7 @@ BiSGearCheckEnchantLinks = {
     [2675] = { "spell", 28004 },  -- Battlemaster
     [2666] = { "spell", 27968 },  -- Major Intellect
     [2668] = { "spell", 27972 },  -- Potency
+    [2674] = { "spell", 28003 },  -- Spellsurge
     [3225] = { "spell", 42974 },  -- Executioner
     [2646] = { "spell", 42620 },  -- Greater Agility
 
@@ -398,12 +399,12 @@ BiSGearCheckGemsDB["DruidBalance"] = {
 BiSGearCheckEnchantsDB["DruidBalance"] = {
     Head     = { { 3002, "Glyph of Power" } },
     Shoulder = { { 2995, "Greater Inscription of the Orb" }, { 2982, "Greater Inscription of Discipline" } },
-    Back     = { { 2621, "Enchant Cloak - Subtlety" } },
-    Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
-    Wrist    = { { 2650, "Enchant Bracer - Spellpower" } },
-    Hands    = { { 2937, "Enchant Gloves - Major Spellpower" } },
+    Back     = { { 2621, "Enchant Cloak - Subtlety" }, { 2938, "Enchant Cloak - Spell Penetration" } },
+    Chest    = { { 2661, "Enchant Chest - Exceptional Stats" }, { 2679, "Enchant Chest - Restore Mana Prime" } },
+    Wrist    = { { 2650, "Enchant Bracer - Spellpower" }, { 2654, "Enchant Bracer - Major Intellect" } },
+    Hands    = { { 2937, "Enchant Gloves - Major Spellpower" }, { 2935, "Enchant Gloves - Spell Strike" } },
     Legs     = { { 2748, "Runic Spellthread" } },
-    Feet     = { { 2940, "Enchant Boots - Boar's Speed" } },
+    Feet     = { { 2940, "Enchant Boots - Boar's Speed" }, { 2656, "Enchant Boots - Vitality" } },
     Weapon   = { { 2671, "Enchant Weapon - Sunfire" }, { 2669, "Enchant Weapon - Major Spellpower" } },
 }
 
@@ -416,13 +417,13 @@ BiSGearCheckGemsDB["DruidFeralDPS"] = {
 BiSGearCheckEnchantsDB["DruidFeralDPS"] = {
     Head     = { { 3003, "Glyph of Ferocity" } },
     Shoulder = { { 2986, "Greater Inscription of Vengeance" }, { 2997, "Greater Inscription of the Blade" } },
-    Back     = { { 2657, "Enchant Cloak - Greater Agility" } },
+    Back     = { { 2657, "Enchant Cloak - Greater Agility" }, { 2621, "Enchant Cloak - Subtlety" } },
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
-    Wrist    = { { 2606, "Enchant Bracer - Assault" } },
-    Hands    = { { 2618, "Enchant Gloves - Superior Agility" } },
+    Wrist    = { { 2606, "Enchant Bracer - Assault" }, { 2647, "Enchant Bracer - Brawn" } },
+    Hands    = { { 2618, "Enchant Gloves - Superior Agility" }, { 2563, "Enchant Gloves - Major Strength" } },
     Legs     = { { 3012, "Nethercobra Leg Armor" } },
-    Feet     = { { 2939, "Enchant Boots - Cat's Swiftness" } },
-    Weapon   = { { 2670, "Enchant 2H Weapon - Major Agility" } },
+    Feet     = { { 2939, "Enchant Boots - Cat's Swiftness" }, { 2940, "Enchant Boots - Boar's Speed" } },
+    Weapon   = { { 2670, "Enchant 2H Weapon - Major Agility" }, { 2667, "Enchant Weapon - Savagery" } },
 }
 
 BiSGearCheckGemsDB["DruidFeralTank"] = {
@@ -433,13 +434,13 @@ BiSGearCheckGemsDB["DruidFeralTank"] = {
 }
 BiSGearCheckEnchantsDB["DruidFeralTank"] = {
     Head     = { { 3003, "Glyph of Ferocity" } },
-    Shoulder = { { 2986, "Greater Inscription of Vengeance" } },
-    Back     = { { 2657, "Enchant Cloak - Greater Agility" } },
-    Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
-    Wrist    = { { 2649, "Enchant Bracer - Fortitude" } },
-    Hands    = { { 2613, "Enchant Gloves - Threat" } },
+    Shoulder = { { 2986, "Greater Inscription of Vengeance" }, { 2997, "Greater Inscription of the Blade" } },
+    Back     = { { 2657, "Enchant Cloak - Greater Agility" }, { 2662, "Enchant Cloak - Major Armor" } },
+    Chest    = { { 2661, "Enchant Chest - Exceptional Stats" }, { 2659, "Enchant Chest - Exceptional Health" } },
+    Wrist    = { { 2649, "Enchant Bracer - Fortitude" }, { 2606, "Enchant Bracer - Assault" } },
+    Hands    = { { 2613, "Enchant Gloves - Threat" }, { 2618, "Enchant Gloves - Superior Agility" } },
     Legs     = { { 3013, "Nethercleft Leg Armor" }, { 3012, "Nethercobra Leg Armor" } },
-    Feet     = { { 2940, "Enchant Boots - Boar's Speed" } },
+    Feet     = { { 2940, "Enchant Boots - Boar's Speed" }, { 2939, "Enchant Boots - Cat's Swiftness" } },
     Weapon   = { { 2670, "Enchant 2H Weapon - Major Agility" } },
 }
 
@@ -452,13 +453,13 @@ BiSGearCheckGemsDB["DruidRestoration"] = {
 BiSGearCheckEnchantsDB["DruidRestoration"] = {
     Head     = { { 3001, "Glyph of Renewal" } },
     Shoulder = { { 2980, "Greater Inscription of Faith" }, { 2982, "Greater Inscription of Discipline" } },
-    Back     = { { 2621, "Enchant Cloak - Subtlety" } },
-    Chest    = { { 2665, "Enchant Chest - Major Spirit" }, { 2661, "Enchant Chest - Exceptional Stats" } },
-    Wrist    = { { 2617, "Enchant Bracer - Superior Healing" } },
-    Hands    = { { 2612, "Enchant Gloves - Major Healing" } },
-    Legs     = { { 2746, "Golden Spellthread" } },
-    Feet     = { { 2940, "Enchant Boots - Boar's Speed" } },
-    Weapon   = { { 2669, "Enchant Weapon - Major Healing" } },
+    Back     = { { 2621, "Enchant Cloak - Subtlety" }, { 2664, "Enchant Cloak - Major Resistance" } },
+    Chest    = { { 2665, "Enchant Chest - Major Spirit" }, { 2661, "Enchant Chest - Exceptional Stats" }, { 2679, "Enchant Chest - Restore Mana Prime" } },
+    Wrist    = { { 2617, "Enchant Bracer - Superior Healing" }, { 2650, "Enchant Bracer - Spellpower" }, { 2654, "Enchant Bracer - Major Intellect" } },
+    Hands    = { { 2612, "Enchant Gloves - Major Healing" }, { 2937, "Enchant Gloves - Major Spellpower" } },
+    Legs     = { { 2746, "Golden Spellthread" }, { 2748, "Runic Spellthread" } },
+    Feet     = { { 2940, "Enchant Boots - Boar's Speed" }, { 2656, "Enchant Boots - Vitality" } },
+    Weapon   = { { 2669, "Enchant Weapon - Major Healing" }, { 2674, "Enchant Weapon - Spellsurge" } },
 }
 
 -- ============================================================
@@ -477,11 +478,11 @@ BiSGearCheckEnchantsDB["HunterBM"] = {
     Back     = { { 2657, "Enchant Cloak - Greater Agility" } },
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
     Wrist    = { { 2606, "Enchant Bracer - Assault" } },
-    Hands    = { { 2618, "Enchant Gloves - Superior Agility" } },
+    Hands    = { { 2618, "Enchant Gloves - Superior Agility" }, { 2946, "Enchant Gloves - Assault" } },
     Legs     = { { 3012, "Nethercobra Leg Armor" } },
-    Feet     = { { 2939, "Enchant Boots - Cat's Swiftness" } },
+    Feet     = { { 2939, "Enchant Boots - Cat's Swiftness" }, { 2940, "Enchant Boots - Boar's Speed" } },
     Weapon   = { { 2646, "Enchant Weapon - Greater Agility" } },
-    Ranged   = { { 2724, "Stabilized Eternium Scope" } },
+    Ranged   = { { 2724, "Stabilized Eternium Scope" }, { 2723, "Khorium Scope" } },
 }
 
 BiSGearCheckGemsDB["HunterMM"] = {
@@ -496,11 +497,11 @@ BiSGearCheckEnchantsDB["HunterMM"] = {
     Back     = { { 2657, "Enchant Cloak - Greater Agility" } },
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
     Wrist    = { { 2606, "Enchant Bracer - Assault" } },
-    Hands    = { { 2618, "Enchant Gloves - Superior Agility" } },
+    Hands    = { { 2618, "Enchant Gloves - Superior Agility" }, { 2946, "Enchant Gloves - Assault" } },
     Legs     = { { 3012, "Nethercobra Leg Armor" } },
-    Feet     = { { 2939, "Enchant Boots - Cat's Swiftness" } },
+    Feet     = { { 2939, "Enchant Boots - Cat's Swiftness" }, { 2940, "Enchant Boots - Boar's Speed" } },
     Weapon   = { { 2646, "Enchant Weapon - Greater Agility" } },
-    Ranged   = { { 2724, "Stabilized Eternium Scope" } },
+    Ranged   = { { 2724, "Stabilized Eternium Scope" }, { 2723, "Khorium Scope" } },
 }
 
 BiSGearCheckGemsDB["HunterSV"] = {
@@ -515,11 +516,11 @@ BiSGearCheckEnchantsDB["HunterSV"] = {
     Back     = { { 2657, "Enchant Cloak - Greater Agility" } },
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
     Wrist    = { { 2606, "Enchant Bracer - Assault" } },
-    Hands    = { { 2618, "Enchant Gloves - Superior Agility" } },
+    Hands    = { { 2618, "Enchant Gloves - Superior Agility" }, { 2946, "Enchant Gloves - Assault" } },
     Legs     = { { 3012, "Nethercobra Leg Armor" } },
-    Feet     = { { 2939, "Enchant Boots - Cat's Swiftness" } },
+    Feet     = { { 2939, "Enchant Boots - Cat's Swiftness" }, { 2940, "Enchant Boots - Boar's Speed" } },
     Weapon   = { { 2646, "Enchant Weapon - Greater Agility" } },
-    Ranged   = { { 2724, "Stabilized Eternium Scope" } },
+    Ranged   = { { 2724, "Stabilized Eternium Scope" }, { 2723, "Khorium Scope" } },
 }
 
 -- ============================================================
@@ -535,10 +536,10 @@ BiSGearCheckGemsDB["MageArcane"] = {
 BiSGearCheckEnchantsDB["MageArcane"] = {
     Head     = { { 3002, "Glyph of Power" } },
     Shoulder = { { 2982, "Greater Inscription of Discipline" }, { 2995, "Greater Inscription of the Orb" } },
-    Back     = { { 2621, "Enchant Cloak - Subtlety" } },
+    Back     = { { 2621, "Enchant Cloak - Subtlety" }, { 2938, "Enchant Cloak - Spell Penetration" } },
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
-    Wrist    = { { 2650, "Enchant Bracer - Spellpower" } },
-    Hands    = { { 2937, "Enchant Gloves - Major Spellpower" } },
+    Wrist    = { { 2650, "Enchant Bracer - Spellpower" }, { 2654, "Enchant Bracer - Major Intellect" } },
+    Hands    = { { 2937, "Enchant Gloves - Major Spellpower" }, { 2935, "Enchant Gloves - Spell Strike" } },
     Legs     = { { 2748, "Runic Spellthread" } },
     Feet     = { { 2940, "Enchant Boots - Boar's Speed" } },
     Weapon   = { { 2671, "Enchant Weapon - Sunfire" }, { 2669, "Enchant Weapon - Major Spellpower" } },
@@ -553,13 +554,13 @@ BiSGearCheckGemsDB["MageFire"] = {
 BiSGearCheckEnchantsDB["MageFire"] = {
     Head     = { { 3002, "Glyph of Power" } },
     Shoulder = { { 2982, "Greater Inscription of Discipline" }, { 2995, "Greater Inscription of the Orb" } },
-    Back     = { { 2621, "Enchant Cloak - Subtlety" } },
+    Back     = { { 2621, "Enchant Cloak - Subtlety" }, { 2938, "Enchant Cloak - Spell Penetration" } },
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
-    Wrist    = { { 2650, "Enchant Bracer - Spellpower" } },
-    Hands    = { { 2937, "Enchant Gloves - Major Spellpower" } },
+    Wrist    = { { 2650, "Enchant Bracer - Spellpower" }, { 2654, "Enchant Bracer - Major Intellect" } },
+    Hands    = { { 2937, "Enchant Gloves - Major Spellpower" }, { 2935, "Enchant Gloves - Spell Strike" } },
     Legs     = { { 2748, "Runic Spellthread" } },
     Feet     = { { 2940, "Enchant Boots - Boar's Speed" } },
-    Weapon   = { { 2671, "Enchant Weapon - Sunfire" } },
+    Weapon   = { { 2671, "Enchant Weapon - Sunfire" }, { 2669, "Enchant Weapon - Major Spellpower" } },
 }
 
 BiSGearCheckGemsDB["MageFrost"] = {
@@ -571,10 +572,10 @@ BiSGearCheckGemsDB["MageFrost"] = {
 BiSGearCheckEnchantsDB["MageFrost"] = {
     Head     = { { 3002, "Glyph of Power" } },
     Shoulder = { { 2982, "Greater Inscription of Discipline" }, { 2995, "Greater Inscription of the Orb" } },
-    Back     = { { 2621, "Enchant Cloak - Subtlety" } },
+    Back     = { { 2621, "Enchant Cloak - Subtlety" }, { 2938, "Enchant Cloak - Spell Penetration" } },
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
-    Wrist    = { { 2650, "Enchant Bracer - Spellpower" } },
-    Hands    = { { 2937, "Enchant Gloves - Major Spellpower" } },
+    Wrist    = { { 2650, "Enchant Bracer - Spellpower" }, { 2654, "Enchant Bracer - Major Intellect" } },
+    Hands    = { { 2937, "Enchant Gloves - Major Spellpower" }, { 2935, "Enchant Gloves - Spell Strike" } },
     Legs     = { { 2748, "Runic Spellthread" } },
     Feet     = { { 2940, "Enchant Boots - Boar's Speed" } },
     Weapon   = { { 2672, "Enchant Weapon - Soulfrost" }, { 2669, "Enchant Weapon - Major Spellpower" } },
@@ -593,12 +594,12 @@ BiSGearCheckGemsDB["PaladinHoly"] = {
 BiSGearCheckEnchantsDB["PaladinHoly"] = {
     Head     = { { 3001, "Glyph of Renewal" } },
     Shoulder = { { 2980, "Greater Inscription of Faith" }, { 2982, "Greater Inscription of Discipline" } },
-    Back     = { { 2664, "Enchant Cloak - Major Resistance" } },
-    Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
-    Wrist    = { { 2654, "Enchant Bracer - Major Intellect" } },
+    Back     = { { 2621, "Enchant Cloak - Subtlety" }, { 2664, "Enchant Cloak - Major Resistance" } },
+    Chest    = { { 2661, "Enchant Chest - Exceptional Stats" }, { 2665, "Enchant Chest - Major Spirit" }, { 2679, "Enchant Chest - Restore Mana Prime" } },
+    Wrist    = { { 2617, "Enchant Bracer - Superior Healing" }, { 2650, "Enchant Bracer - Spellpower" }, { 2654, "Enchant Bracer - Major Intellect" } },
     Hands    = { { 2612, "Enchant Gloves - Major Healing" } },
-    Legs     = { { 2746, "Golden Spellthread" } },
-    Feet     = { { 2940, "Enchant Boots - Boar's Speed" } },
+    Legs     = { { 2746, "Golden Spellthread" }, { 2748, "Runic Spellthread" } },
+    Feet     = { { 2940, "Enchant Boots - Boar's Speed" }, { 2656, "Enchant Boots - Vitality" } },
     Weapon   = { { 2666, "Enchant Weapon - Major Intellect" }, { 2669, "Enchant Weapon - Major Healing" } },
     Shield   = { { 2654, "Enchant Shield - Intellect" } },
 }
@@ -612,12 +613,12 @@ BiSGearCheckGemsDB["PaladinProtection"] = {
 BiSGearCheckEnchantsDB["PaladinProtection"] = {
     Head     = { { 2999, "Arcanum of the Defender" } },
     Shoulder = { { 2978, "Greater Inscription of Warding" }, { 2993, "Greater Inscription of the Knight" } },
-    Back     = { { 2622, "Enchant Cloak - Dodge" } },
-    Chest    = { { 2659, "Enchant Chest - Exceptional Health" } },
-    Wrist    = { { 2650, "Enchant Bracer - Spellpower" } },
-    Hands    = { { 2613, "Enchant Gloves - Threat" } },
+    Back     = { { 2622, "Enchant Cloak - Dodge" }, { 2662, "Enchant Cloak - Major Armor" } },
+    Chest    = { { 2659, "Enchant Chest - Exceptional Health" }, { 2661, "Enchant Chest - Exceptional Stats" } },
+    Wrist    = { { 2650, "Enchant Bracer - Spellpower" }, { 2649, "Enchant Bracer - Fortitude" }, { 2648, "Enchant Bracer - Major Defense" } },
+    Hands    = { { 2613, "Enchant Gloves - Threat" }, { 2937, "Enchant Gloves - Major Spellpower" } },
     Legs     = { { 3013, "Nethercleft Leg Armor" }, { 2748, "Runic Spellthread" } },
-    Feet     = { { 2649, "Enchant Boots - Fortitude" } },
+    Feet     = { { 2649, "Enchant Boots - Fortitude" }, { 2940, "Enchant Boots - Boar's Speed" } },
     Weapon   = { { 2669, "Enchant Weapon - Major Spellpower" } },
     Shield   = { { 2653, "Enchant Shield - Major Stamina" } },
 }
@@ -631,13 +632,13 @@ BiSGearCheckGemsDB["PaladinRetribution"] = {
 BiSGearCheckEnchantsDB["PaladinRetribution"] = {
     Head     = { { 3003, "Glyph of Ferocity" } },
     Shoulder = { { 2986, "Greater Inscription of Vengeance" }, { 2997, "Greater Inscription of the Blade" } },
-    Back     = { { 2657, "Enchant Cloak - Greater Agility" } },
+    Back     = { { 2657, "Enchant Cloak - Greater Agility" }, { 2621, "Enchant Cloak - Subtlety" } },
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
-    Wrist    = { { 2647, "Enchant Bracer - Brawn" } },
-    Hands    = { { 2563, "Enchant Gloves - Major Strength" } },
+    Wrist    = { { 2647, "Enchant Bracer - Brawn" }, { 2606, "Enchant Bracer - Assault" } },
+    Hands    = { { 2563, "Enchant Gloves - Major Strength" }, { 2618, "Enchant Gloves - Superior Agility" } },
     Legs     = { { 3012, "Nethercobra Leg Armor" } },
-    Feet     = { { 2657, "Enchant Boots - Dexterity" } },
-    Weapon   = { { 2673, "Enchant Weapon - Mongoose" } },
+    Feet     = { { 2657, "Enchant Boots - Dexterity" }, { 2940, "Enchant Boots - Boar's Speed" } },
+    Weapon   = { { 2673, "Enchant Weapon - Mongoose" }, { 2667, "Enchant Weapon - Savagery" } },
 }
 
 -- ============================================================
@@ -653,12 +654,12 @@ BiSGearCheckGemsDB["PriestHoly"] = {
 BiSGearCheckEnchantsDB["PriestHoly"] = {
     Head     = { { 3001, "Glyph of Renewal" } },
     Shoulder = { { 2980, "Greater Inscription of Faith" }, { 2982, "Greater Inscription of Discipline" } },
-    Back     = { { 2664, "Enchant Cloak - Major Resistance" } },
-    Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
-    Wrist    = { { 2617, "Enchant Bracer - Superior Healing" } },
+    Back     = { { 2621, "Enchant Cloak - Subtlety" }, { 2664, "Enchant Cloak - Major Resistance" } },
+    Chest    = { { 2661, "Enchant Chest - Exceptional Stats" }, { 2665, "Enchant Chest - Major Spirit" }, { 2679, "Enchant Chest - Restore Mana Prime" } },
+    Wrist    = { { 2617, "Enchant Bracer - Superior Healing" }, { 2650, "Enchant Bracer - Spellpower" }, { 2654, "Enchant Bracer - Major Intellect" } },
     Hands    = { { 2612, "Enchant Gloves - Major Healing" } },
-    Legs     = { { 2746, "Golden Spellthread" } },
-    Feet     = { { 2940, "Enchant Boots - Boar's Speed" } },
+    Legs     = { { 2746, "Golden Spellthread" }, { 2748, "Runic Spellthread" } },
+    Feet     = { { 2940, "Enchant Boots - Boar's Speed" }, { 2656, "Enchant Boots - Vitality" } },
     Weapon   = { { 2669, "Enchant Weapon - Major Healing" } },
 }
 
@@ -671,13 +672,13 @@ BiSGearCheckGemsDB["PriestShadow"] = {
 BiSGearCheckEnchantsDB["PriestShadow"] = {
     Head     = { { 3002, "Glyph of Power" } },
     Shoulder = { { 2982, "Greater Inscription of Discipline" }, { 2995, "Greater Inscription of the Orb" } },
-    Back     = { { 2621, "Enchant Cloak - Subtlety" } },
+    Back     = { { 2621, "Enchant Cloak - Subtlety" }, { 2938, "Enchant Cloak - Spell Penetration" } },
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
-    Wrist    = { { 2650, "Enchant Bracer - Spellpower" } },
-    Hands    = { { 2937, "Enchant Gloves - Major Spellpower" } },
+    Wrist    = { { 2650, "Enchant Bracer - Spellpower" }, { 2654, "Enchant Bracer - Major Intellect" } },
+    Hands    = { { 2937, "Enchant Gloves - Major Spellpower" }, { 2935, "Enchant Gloves - Spell Strike" } },
     Legs     = { { 2748, "Runic Spellthread" } },
     Feet     = { { 2940, "Enchant Boots - Boar's Speed" } },
-    Weapon   = { { 2672, "Enchant Weapon - Soulfrost" } },
+    Weapon   = { { 2672, "Enchant Weapon - Soulfrost" }, { 2669, "Enchant Weapon - Major Spellpower" } },
 }
 
 -- ============================================================
@@ -693,12 +694,12 @@ BiSGearCheckGemsDB["RogueAssassination"] = {
 BiSGearCheckEnchantsDB["RogueAssassination"] = {
     Head     = { { 3003, "Glyph of Ferocity" } },
     Shoulder = { { 2986, "Greater Inscription of Vengeance" }, { 2997, "Greater Inscription of the Blade" } },
-    Back     = { { 2657, "Enchant Cloak - Greater Agility" } },
+    Back     = { { 2657, "Enchant Cloak - Greater Agility" }, { 2621, "Enchant Cloak - Subtlety" } },
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
     Wrist    = { { 2606, "Enchant Bracer - Assault" } },
-    Hands    = { { 2618, "Enchant Gloves - Superior Agility" } },
+    Hands    = { { 2618, "Enchant Gloves - Superior Agility" }, { 2946, "Enchant Gloves - Assault" } },
     Legs     = { { 3012, "Nethercobra Leg Armor" } },
-    Feet     = { { 2939, "Enchant Boots - Cat's Swiftness" } },
+    Feet     = { { 2939, "Enchant Boots - Cat's Swiftness" }, { 2940, "Enchant Boots - Boar's Speed" } },
     Weapon   = { { 2673, "Enchant Weapon - Mongoose" } },
 }
 
@@ -711,12 +712,12 @@ BiSGearCheckGemsDB["RogueCombat"] = {
 BiSGearCheckEnchantsDB["RogueCombat"] = {
     Head     = { { 3003, "Glyph of Ferocity" } },
     Shoulder = { { 2986, "Greater Inscription of Vengeance" }, { 2997, "Greater Inscription of the Blade" } },
-    Back     = { { 2657, "Enchant Cloak - Greater Agility" } },
+    Back     = { { 2657, "Enchant Cloak - Greater Agility" }, { 2621, "Enchant Cloak - Subtlety" } },
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
     Wrist    = { { 2606, "Enchant Bracer - Assault" } },
-    Hands    = { { 2618, "Enchant Gloves - Superior Agility" } },
+    Hands    = { { 2618, "Enchant Gloves - Superior Agility" }, { 2946, "Enchant Gloves - Assault" } },
     Legs     = { { 3012, "Nethercobra Leg Armor" } },
-    Feet     = { { 2939, "Enchant Boots - Cat's Swiftness" } },
+    Feet     = { { 2939, "Enchant Boots - Cat's Swiftness" }, { 2940, "Enchant Boots - Boar's Speed" } },
     Weapon   = { { 2673, "Enchant Weapon - Mongoose" } },
 }
 
@@ -729,12 +730,12 @@ BiSGearCheckGemsDB["RogueSubtlety"] = {
 BiSGearCheckEnchantsDB["RogueSubtlety"] = {
     Head     = { { 3003, "Glyph of Ferocity" } },
     Shoulder = { { 2986, "Greater Inscription of Vengeance" }, { 2997, "Greater Inscription of the Blade" } },
-    Back     = { { 2657, "Enchant Cloak - Greater Agility" } },
+    Back     = { { 2657, "Enchant Cloak - Greater Agility" }, { 2621, "Enchant Cloak - Subtlety" } },
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
     Wrist    = { { 2606, "Enchant Bracer - Assault" } },
-    Hands    = { { 2618, "Enchant Gloves - Superior Agility" } },
+    Hands    = { { 2618, "Enchant Gloves - Superior Agility" }, { 2946, "Enchant Gloves - Assault" } },
     Legs     = { { 3012, "Nethercobra Leg Armor" } },
-    Feet     = { { 2939, "Enchant Boots - Cat's Swiftness" } },
+    Feet     = { { 2939, "Enchant Boots - Cat's Swiftness" }, { 2940, "Enchant Boots - Boar's Speed" } },
     Weapon   = { { 2673, "Enchant Weapon - Mongoose" } },
 }
 
@@ -753,8 +754,8 @@ BiSGearCheckEnchantsDB["ShamanElemental"] = {
     Shoulder = { { 2982, "Greater Inscription of Discipline" }, { 2995, "Greater Inscription of the Orb" } },
     Back     = { { 2938, "Enchant Cloak - Spell Penetration" }, { 2621, "Enchant Cloak - Subtlety" } },
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
-    Wrist    = { { 2650, "Enchant Bracer - Spellpower" } },
-    Hands    = { { 2937, "Enchant Gloves - Major Spellpower" } },
+    Wrist    = { { 2650, "Enchant Bracer - Spellpower" }, { 2654, "Enchant Bracer - Major Intellect" } },
+    Hands    = { { 2937, "Enchant Gloves - Major Spellpower" }, { 2935, "Enchant Gloves - Spell Strike" } },
     Legs     = { { 2748, "Runic Spellthread" } },
     Feet     = { { 2940, "Enchant Boots - Boar's Speed" } },
     Weapon   = { { 2669, "Enchant Weapon - Major Spellpower" } },
@@ -770,12 +771,12 @@ BiSGearCheckGemsDB["ShamanEnhancement"] = {
 BiSGearCheckEnchantsDB["ShamanEnhancement"] = {
     Head     = { { 3003, "Glyph of Ferocity" } },
     Shoulder = { { 2986, "Greater Inscription of Vengeance" }, { 2997, "Greater Inscription of the Blade" } },
-    Back     = { { 2657, "Enchant Cloak - Greater Agility" } },
+    Back     = { { 2657, "Enchant Cloak - Greater Agility" }, { 2621, "Enchant Cloak - Subtlety" } },
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
-    Wrist    = { { 2647, "Enchant Bracer - Brawn" } },
-    Hands    = { { 2563, "Enchant Gloves - Major Strength" } },
+    Wrist    = { { 2647, "Enchant Bracer - Brawn" }, { 2606, "Enchant Bracer - Assault" } },
+    Hands    = { { 2563, "Enchant Gloves - Major Strength" }, { 2618, "Enchant Gloves - Superior Agility" } },
     Legs     = { { 3012, "Nethercobra Leg Armor" } },
-    Feet     = { { 2939, "Enchant Boots - Cat's Swiftness" } },
+    Feet     = { { 2939, "Enchant Boots - Cat's Swiftness" }, { 2940, "Enchant Boots - Boar's Speed" } },
     Weapon   = { { 2673, "Enchant Weapon - Mongoose" } },
 }
 
@@ -789,11 +790,11 @@ BiSGearCheckEnchantsDB["ShamanRestoration"] = {
     Head     = { { 3001, "Glyph of Renewal" } },
     Shoulder = { { 2980, "Greater Inscription of Faith" }, { 2982, "Greater Inscription of Discipline" } },
     Back     = { { 2621, "Enchant Cloak - Subtlety" } },
-    Chest    = { { 2679, "Enchant Chest - Restore Mana Prime" }, { 2661, "Enchant Chest - Exceptional Stats" } },
-    Wrist    = { { 2617, "Enchant Bracer - Superior Healing" } },
+    Chest    = { { 2679, "Enchant Chest - Restore Mana Prime" }, { 2661, "Enchant Chest - Exceptional Stats" }, { 2665, "Enchant Chest - Major Spirit" } },
+    Wrist    = { { 2617, "Enchant Bracer - Superior Healing" }, { 2650, "Enchant Bracer - Spellpower" }, { 2654, "Enchant Bracer - Major Intellect" } },
     Hands    = { { 2612, "Enchant Gloves - Major Healing" } },
-    Legs     = { { 2746, "Golden Spellthread" } },
-    Feet     = { { 2940, "Enchant Boots - Boar's Speed" } },
+    Legs     = { { 2746, "Golden Spellthread" }, { 2748, "Runic Spellthread" } },
+    Feet     = { { 2940, "Enchant Boots - Boar's Speed" }, { 2656, "Enchant Boots - Vitality" } },
     Weapon   = { { 2669, "Enchant Weapon - Major Healing" } },
     Shield   = { { 2654, "Enchant Shield - Intellect" } },
 }
@@ -811,13 +812,13 @@ BiSGearCheckGemsDB["WarlockAffliction"] = {
 BiSGearCheckEnchantsDB["WarlockAffliction"] = {
     Head     = { { 3002, "Glyph of Power" } },
     Shoulder = { { 2982, "Greater Inscription of Discipline" }, { 2995, "Greater Inscription of the Orb" } },
-    Back     = { { 2621, "Enchant Cloak - Subtlety" } },
+    Back     = { { 2621, "Enchant Cloak - Subtlety" }, { 2938, "Enchant Cloak - Spell Penetration" } },
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
-    Wrist    = { { 2650, "Enchant Bracer - Spellpower" } },
-    Hands    = { { 2937, "Enchant Gloves - Major Spellpower" } },
+    Wrist    = { { 2650, "Enchant Bracer - Spellpower" }, { 2654, "Enchant Bracer - Major Intellect" } },
+    Hands    = { { 2937, "Enchant Gloves - Major Spellpower" }, { 2935, "Enchant Gloves - Spell Strike" } },
     Legs     = { { 2748, "Runic Spellthread" } },
     Feet     = { { 2940, "Enchant Boots - Boar's Speed" } },
-    Weapon   = { { 2672, "Enchant Weapon - Soulfrost" } },
+    Weapon   = { { 2672, "Enchant Weapon - Soulfrost" }, { 2669, "Enchant Weapon - Major Spellpower" } },
 }
 
 BiSGearCheckGemsDB["WarlockDemonology"] = {
@@ -829,13 +830,13 @@ BiSGearCheckGemsDB["WarlockDemonology"] = {
 BiSGearCheckEnchantsDB["WarlockDemonology"] = {
     Head     = { { 3002, "Glyph of Power" } },
     Shoulder = { { 2982, "Greater Inscription of Discipline" }, { 2995, "Greater Inscription of the Orb" } },
-    Back     = { { 2621, "Enchant Cloak - Subtlety" } },
+    Back     = { { 2621, "Enchant Cloak - Subtlety" }, { 2938, "Enchant Cloak - Spell Penetration" } },
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
-    Wrist    = { { 2650, "Enchant Bracer - Spellpower" } },
-    Hands    = { { 2937, "Enchant Gloves - Major Spellpower" } },
+    Wrist    = { { 2650, "Enchant Bracer - Spellpower" }, { 2654, "Enchant Bracer - Major Intellect" } },
+    Hands    = { { 2937, "Enchant Gloves - Major Spellpower" }, { 2935, "Enchant Gloves - Spell Strike" } },
     Legs     = { { 2748, "Runic Spellthread" } },
     Feet     = { { 2940, "Enchant Boots - Boar's Speed" } },
-    Weapon   = { { 2672, "Enchant Weapon - Soulfrost" } },
+    Weapon   = { { 2672, "Enchant Weapon - Soulfrost" }, { 2669, "Enchant Weapon - Major Spellpower" } },
 }
 
 BiSGearCheckGemsDB["WarlockDestruction"] = {
@@ -847,13 +848,13 @@ BiSGearCheckGemsDB["WarlockDestruction"] = {
 BiSGearCheckEnchantsDB["WarlockDestruction"] = {
     Head     = { { 3002, "Glyph of Power" } },
     Shoulder = { { 2982, "Greater Inscription of Discipline" }, { 2995, "Greater Inscription of the Orb" } },
-    Back     = { { 2621, "Enchant Cloak - Subtlety" } },
+    Back     = { { 2621, "Enchant Cloak - Subtlety" }, { 2938, "Enchant Cloak - Spell Penetration" } },
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
-    Wrist    = { { 2650, "Enchant Bracer - Spellpower" } },
-    Hands    = { { 2937, "Enchant Gloves - Major Spellpower" } },
+    Wrist    = { { 2650, "Enchant Bracer - Spellpower" }, { 2654, "Enchant Bracer - Major Intellect" } },
+    Hands    = { { 2937, "Enchant Gloves - Major Spellpower" }, { 2935, "Enchant Gloves - Spell Strike" } },
     Legs     = { { 2748, "Runic Spellthread" } },
     Feet     = { { 2940, "Enchant Boots - Boar's Speed" } },
-    Weapon   = { { 2671, "Enchant Weapon - Sunfire" }, { 2672, "Enchant Weapon - Soulfrost" } },
+    Weapon   = { { 2671, "Enchant Weapon - Sunfire" }, { 2672, "Enchant Weapon - Soulfrost" }, { 2669, "Enchant Weapon - Major Spellpower" } },
 }
 
 -- ============================================================
@@ -869,13 +870,13 @@ BiSGearCheckGemsDB["WarriorArms"] = {
 BiSGearCheckEnchantsDB["WarriorArms"] = {
     Head     = { { 3003, "Glyph of Ferocity" } },
     Shoulder = { { 2986, "Greater Inscription of Vengeance" }, { 2997, "Greater Inscription of the Blade" } },
-    Back     = { { 2657, "Enchant Cloak - Greater Agility" } },
+    Back     = { { 2657, "Enchant Cloak - Greater Agility" }, { 2621, "Enchant Cloak - Subtlety" } },
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
-    Wrist    = { { 2647, "Enchant Bracer - Brawn" } },
-    Hands    = { { 2563, "Enchant Gloves - Major Strength" } },
+    Wrist    = { { 2647, "Enchant Bracer - Brawn" }, { 2606, "Enchant Bracer - Assault" } },
+    Hands    = { { 2563, "Enchant Gloves - Major Strength" }, { 2618, "Enchant Gloves - Superior Agility" } },
     Legs     = { { 3012, "Nethercobra Leg Armor" } },
-    Feet     = { { 2939, "Enchant Boots - Cat's Swiftness" } },
-    Weapon   = { { 2673, "Enchant Weapon - Mongoose" } },
+    Feet     = { { 2939, "Enchant Boots - Cat's Swiftness" }, { 2940, "Enchant Boots - Boar's Speed" } },
+    Weapon   = { { 2673, "Enchant Weapon - Mongoose" }, { 2667, "Enchant Weapon - Savagery" } },
 }
 
 BiSGearCheckGemsDB["WarriorFury"] = {
@@ -887,14 +888,14 @@ BiSGearCheckGemsDB["WarriorFury"] = {
 BiSGearCheckEnchantsDB["WarriorFury"] = {
     Head     = { { 3003, "Glyph of Ferocity" } },
     Shoulder = { { 2986, "Greater Inscription of Vengeance" }, { 2997, "Greater Inscription of the Blade" } },
-    Back     = { { 2657, "Enchant Cloak - Greater Agility" } },
+    Back     = { { 2657, "Enchant Cloak - Greater Agility" }, { 2621, "Enchant Cloak - Subtlety" } },
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" } },
-    Wrist    = { { 2647, "Enchant Bracer - Brawn" } },
-    Hands    = { { 2563, "Enchant Gloves - Major Strength" } },
+    Wrist    = { { 2647, "Enchant Bracer - Brawn" }, { 2606, "Enchant Bracer - Assault" } },
+    Hands    = { { 2563, "Enchant Gloves - Major Strength" }, { 2618, "Enchant Gloves - Superior Agility" } },
     Legs     = { { 3012, "Nethercobra Leg Armor" } },
-    Feet     = { { 2939, "Enchant Boots - Cat's Swiftness" } },
-    Weapon   = { { 2673, "Enchant Weapon - Mongoose" } },
-    Ranged   = { { 2723, "Khorium Scope" } },
+    Feet     = { { 2939, "Enchant Boots - Cat's Swiftness" }, { 2940, "Enchant Boots - Boar's Speed" } },
+    Weapon   = { { 2673, "Enchant Weapon - Mongoose" }, { 2667, "Enchant Weapon - Savagery" } },
+    Ranged   = { { 2723, "Khorium Scope" }, { 2724, "Stabilized Eternium Scope" } },
 }
 
 BiSGearCheckGemsDB["WarriorProtection"] = {
@@ -906,13 +907,13 @@ BiSGearCheckGemsDB["WarriorProtection"] = {
 BiSGearCheckEnchantsDB["WarriorProtection"] = {
     Head     = { { 2999, "Arcanum of the Defender" } },
     Shoulder = { { 2978, "Greater Inscription of Warding" }, { 2986, "Greater Inscription of Vengeance" } },
-    Back     = { { 2657, "Enchant Cloak - Greater Agility" }, { 2622, "Enchant Cloak - Dodge" } },
+    Back     = { { 2657, "Enchant Cloak - Greater Agility" }, { 2622, "Enchant Cloak - Dodge" }, { 2662, "Enchant Cloak - Major Armor" } },
     Chest    = { { 2661, "Enchant Chest - Exceptional Stats" }, { 2659, "Enchant Chest - Exceptional Health" } },
-    Wrist    = { { 2649, "Enchant Bracer - Fortitude" } },
-    Hands    = { { 2613, "Enchant Gloves - Threat" } },
-    Legs     = { { 3013, "Nethercleft Leg Armor" } },
-    Feet     = { { 2940, "Enchant Boots - Boar's Speed" } },
-    Weapon   = { { 2673, "Enchant Weapon - Mongoose" } },
+    Wrist    = { { 2649, "Enchant Bracer - Fortitude" }, { 2648, "Enchant Bracer - Major Defense" } },
+    Hands    = { { 2613, "Enchant Gloves - Threat" }, { 2618, "Enchant Gloves - Superior Agility" } },
+    Legs     = { { 3013, "Nethercleft Leg Armor" }, { 3011, "Clefthide Leg Armor" } },
+    Feet     = { { 2940, "Enchant Boots - Boar's Speed" }, { 2939, "Enchant Boots - Cat's Swiftness" } },
+    Weapon   = { { 2673, "Enchant Weapon - Mongoose" }, { 2668, "Enchant Weapon - Potency" } },
     Shield   = { { 2653, "Enchant Shield - Major Stamina" } },
-    Ranged   = { { 2723, "Khorium Scope" } },
+    Ranged   = { { 2723, "Khorium Scope" }, { 2724, "Stabilized Eternium Scope" } },
 }

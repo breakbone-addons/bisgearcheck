@@ -5,6 +5,14 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
+## v3.2.0
+
+### Features
+- Lesser warnings: [Lesser Enchant] and [Lesser Gems] shown in yellow instead of red for budget/lower-rank alternatives.
+  - Lesser enchants: lesser shoulder inscriptions (Aldor/Scryer), Silver/Mystic Spellthread, Cobrahide/Clefthide Leg Armor.
+  - Lesser gems: green (Uncommon) quality gems shown as [Lesser Gems] in yellow; white/grey gems remain [Wrong Gems] in red.
+- Broadened enchant recommendations across all 27 specs — most slots now list 2-3 valid alternatives to reduce false [Wrong Enchant] warnings.
+
 ## v3.1.1
 
 ### Fixes

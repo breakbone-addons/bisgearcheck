@@ -167,7 +167,7 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
 
         -- All warnings pinned to right side of same row
         if #warnings > 0 then
-            local warnText = "|cffff4d4d" .. table.concat(warnings, " ") .. "|r"
+            local warnText = table.concat(warnings, " ")
             header.text:SetPoint("RIGHT", header, "RIGHT", -100, 0)
             local wf, wLabel = self:GetWarningLabel(header)
             wLabel:SetText(warnText)
@@ -216,7 +216,7 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
 
                 -- All warnings pinned to right side of same row
                 if #warnings > 0 then
-                    local warnText = "|cffff4d4d" .. table.concat(warnings, " ") .. "|r"
+                    local warnText = table.concat(warnings, " ")
                     row.text:SetPoint("RIGHT", row, "RIGHT", -100, 0)
                     local wf, wLabel = self:GetWarningLabel(row)
                     wLabel:SetText(warnText)

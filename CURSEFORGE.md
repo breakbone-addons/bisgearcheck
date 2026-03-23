@@ -34,6 +34,8 @@ Switch between all characters on your account without logging out. View another 
 
 Equipped gear is checked for missing enchants, wrong enchants, empty sockets, and low-quality gems. Warnings appear pinned to the right of each equipped item row. Hover [Wrong Enchant] to see exactly what's applied. Recommended enchants and gems are shown per slot and per spec, with Aldor/Scryer filtering based on your reputation.
 
+Budget alternatives are recognized: lesser shoulder inscriptions, lesser spellthreads, and lesser leg armors show as [Lesser Enchant] in yellow instead of red. Green-quality gems show as [Lesser Gems] in yellow.
+
 ### Faction-Aware
 
 Alliance and Horde characters see only the items available to their faction. Faction-specific quest rewards, reputation items, and Aldor/Scryer enchants are filtered automatically.

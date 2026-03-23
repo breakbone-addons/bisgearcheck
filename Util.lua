@@ -312,6 +312,26 @@ function BiSGearCheck:IsWrongShattFaction(enchantID)
     end
 end
 
+-- Lesser enchant IDs: cheaper/lower-rank versions of BiS enchants
+-- Keyed by enchantID, value is the enchant slot it applies to
+BiSGearCheck.LesserEnchantIDs = {
+    -- Shoulder: Lesser Inscriptions (Aldor)
+    [2985] = "Shoulder",  -- Lesser Inscription of Discipline
+    [2981] = "Shoulder",  -- Lesser Inscription of Vengeance
+    [2979] = "Shoulder",  -- Lesser Inscription of Faith
+    [2977] = "Shoulder",  -- Lesser Inscription of Warding
+    -- Shoulder: Lesser Inscriptions (Scryer)
+    [2994] = "Shoulder",  -- Lesser Inscription of the Oracle
+    [2996] = "Shoulder",  -- Lesser Inscription of the Orb
+    [2992] = "Shoulder",  -- Lesser Inscription of the Knight
+    -- Legs: Lesser spellthreads
+    [2745] = "Legs",      -- Silver Spellthread
+    [2747] = "Legs",      -- Mystic Spellthread
+    -- Legs: Lesser leg armors
+    [3010] = "Legs",      -- Cobrahide Leg Armor
+    [3011] = "Legs",      -- Clefthide Leg Armor
+}
+
 -- Slots that can have enchants (used for warnings)
 -- Excludes Neck, Waist, Trinkets (not enchantable in TBC)
 BiSGearCheck.EnchantableSlots = {
@@ -387,9 +407,12 @@ function BiSGearCheck:CountItemSockets(itemLink)
     return count
 end
 
+-- Warning color codes
+local WARN_RED    = "|cffff4d4d"
+local WARN_YELLOW = "|cffffcc00"
+
 -- Build warning list for an equipped item's enchant and gems
--- Returns: warnings (table of strings), wrongEnchantID (number or nil)
--- All warnings are returned as a list; wrongEnchantID is the interactive one
+-- Returns: warnings (table of color-coded strings), wrongEnchantID (number or nil)
 function BiSGearCheck:GetEquipWarnings(itemLink, slotName, specKey)
     if not itemLink or not specKey then return {}, nil end
 
@@ -404,10 +427,16 @@ function BiSGearCheck:GetEquipWarnings(itemLink, slotName, specKey)
         local hasRecommendations = specEnchants and specEnchants[enchantSlot] and #specEnchants[enchantSlot] > 0
         if hasRecommendations then
             if not enchantID or enchantID == 0 then
-                warnings[#warnings + 1] = "[No Enchant]"
+                warnings[#warnings + 1] = WARN_RED .. "[No Enchant]|r"
             elseif not self:IsEnchantRecommended(specKey, slotName, enchantID) then
                 wrongEnchantID = enchantID
-                warnings[#warnings + 1] = "[Wrong Enchant]"
+                -- Check if this is a lesser version rather than completely wrong
+                local lesserSlot = self.LesserEnchantIDs[enchantID]
+                if lesserSlot and lesserSlot == enchantSlot then
+                    warnings[#warnings + 1] = WARN_YELLOW .. "[Lesser Enchant]|r"
+                else
+                    warnings[#warnings + 1] = WARN_RED .. "[Wrong Enchant]|r"
+                end
             end
         end
     end
@@ -415,15 +444,18 @@ function BiSGearCheck:GetEquipWarnings(itemLink, slotName, specKey)
     -- Gem check: filled gems from item link, empty sockets from tooltip
     local gems = { gem1, gem2, gem3, gem4 }
     local filledCount = 0
-    local lowQualityCount = 0
+    local wrongGemCount = 0
+    local lesserGemCount = 0
     for i = 1, 4 do
         local gemID = gems[i]
         if gemID and gemID > 0 then
             filledCount = filledCount + 1
             local _, _, quality = GetItemInfo(gemID)
             if quality then
-                if quality < 3 then
-                    lowQualityCount = lowQualityCount + 1
+                if quality == 2 then
+                    lesserGemCount = lesserGemCount + 1  -- Green (Uncommon)
+                elseif quality < 2 then
+                    wrongGemCount = wrongGemCount + 1    -- White/Grey
                 end
             else
                 C_Item.RequestLoadItemDataByID(gemID)
@@ -437,13 +469,15 @@ function BiSGearCheck:GetEquipWarnings(itemLink, slotName, specKey)
     if filledCount + emptySockets > 0 then
         if emptySockets > 0 then
             if emptySockets == 1 then
-                warnings[#warnings + 1] = "[Empty Socket]"
+                warnings[#warnings + 1] = WARN_RED .. "[Empty Socket]|r"
             else
-                warnings[#warnings + 1] = "[" .. emptySockets .. " Empty Sockets]"
+                warnings[#warnings + 1] = WARN_RED .. "[" .. emptySockets .. " Empty Sockets]|r"
             end
         end
-        if lowQualityCount > 0 then
-            warnings[#warnings + 1] = "[Wrong Gems]"
+        if wrongGemCount > 0 then
+            warnings[#warnings + 1] = WARN_RED .. "[Wrong Gems]|r"
+        elseif lesserGemCount > 0 then
+            warnings[#warnings + 1] = WARN_YELLOW .. "[Lesser Gems]|r"
         end
     end
 
