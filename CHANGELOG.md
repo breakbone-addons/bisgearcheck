@@ -5,6 +5,14 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
+## v3.0.2
+
+### Fixes
+- Fixed Resto Druid BiS shoulders listing Mantle of Malorne (feral) instead of Shoulderguards of Malorne (restoration).
+- Fixed Cloak of the Fallen God appearing in the Neck slot for Resto Druid, Holy Paladin, and Resto Shaman. Replaced with correct item Amulet of the Fallen God.
+- Corrected SourceDB name for item 29100 (Mantle of Malorne, was mislabeled as Shoulderguards).
+- Added missing SourceDB entries for Shoulderguards of Malorne and Amulet of the Fallen God.
+
 ## v3.0.1
 
 ### Fixes
