@@ -84,7 +84,14 @@ BiSGearCheck.ClassSpecs = {
 -- Phase 0 = Pre-Raid, 1-5 = content phases.
 BiSGearCheck.DataSources = {
     { key = "wowtbcgg",    label = "WowTBC.gg",    phases = { [1] = "BiSGearCheckDB_WowTBCgg" } },
-    { key = "bistooltip",  label = "BiS-Tooltip",   phases = { [1] = "BiSGearCheckDB_Phase1" } },
+    { key = "bistooltip",  label = "BiS-Tooltip",   phases = {
+        [0] = "BiSGearCheckDB_PreRaid",
+        [1] = "BiSGearCheckDB_Phase1",
+        [2] = "BiSGearCheckDB_Phase2",
+        [3] = "BiSGearCheckDB_Phase3",
+        [4] = "BiSGearCheckDB_Phase4",
+        [5] = "BiSGearCheckDB_Phase5",
+    }},
     { key = "atlasloot",   label = "AtlasLoot",     phases = { [1] = "BiSGearCheckDB_AtlasLoot" } },
     { key = "wowsims",     label = "WoWSims",       phases = { [1] = "BiSGearCheckDB_WoWSims" } },
     { key = "tmb",          label = "ThatsMyBis",    phases = { [1] = "BiSGearCheckDB_TMB" } },

@@ -458,7 +458,6 @@ function BiSGearCheck:SetupBisListBar(f)
     UIDropDownMenu_Initialize(bislistSpecDropdown, BislistSpecInit)
     UIDropDownMenu_SetText(bislistSpecDropdown, "Select Spec")
 
-    --[[ PHASE DROPDOWN DISABLED — phase data not yet shipping
     local CURRENT_CONTENT_PHASE = 1
     local PHASE_OPTIONS = {
         { value = 0, label = "Pre-Raid" },
@@ -500,7 +499,6 @@ function BiSGearCheck:SetupBisListBar(f)
     local savedPhase = BiSGearCheck.phaseFilter or 1
     UIDropDownMenu_SetText(phaseDropdown, PHASE_OPTIONS[savedPhase + 1].label)
     f.phaseDropdown = phaseDropdown
-    --]] -- END PHASE DROPDOWN DISABLED
 
     f.bislistBar = bislistBar
     f.bislistSourceDropdown = bislistSourceDropdown

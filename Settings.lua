@@ -134,7 +134,6 @@ end)
 -- ============================================================
 -- Section: Content Phase (disabled until phase data is finalized)
 -- ============================================================
---[[ PHASE SELECTION DISABLED
 local phaseHeader, phaseLine = CreateSectionHeader(classCheck, "Content Phase", 4, -16)
 
 local phaseDesc = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
@@ -167,7 +166,6 @@ end
 UIDropDownMenu_Initialize(settingsPhaseDropdown, PhaseDropdownInit)
 -- Set initial text (BiSGearCheckSaved may not exist yet at load time; OnShow refreshes it)
 UIDropDownMenu_SetText(settingsPhaseDropdown, "Phase 1")
---]] -- END PHASE SELECTION DISABLED
 
 -- ============================================================
 -- Helper: adaptive checkbox list (flat <=5, scrollable >5)
@@ -442,10 +440,9 @@ panel:SetScript("OnShow", function(self)
     showBiSCheck:SetChecked(BiSGearCheckSaved.tooltip.showBiS)
     classCheck:SetChecked(BiSGearCheckSaved.tooltip.showOnlyMyClass)
 
-    -- PHASE SELECTION DISABLED
-    -- local currentPhase = BiSGearCheckSaved.phaseFilter or 1
-    -- UIDropDownMenu_SetText(settingsPhaseDropdown, PHASE_OPTIONS[currentPhase + 1].label)
-    -- UIDropDownMenu_SetSelectedValue(settingsPhaseDropdown, currentPhase)
+    local currentPhase = BiSGearCheckSaved.phaseFilter or 1
+    UIDropDownMenu_SetText(settingsPhaseDropdown, PHASE_OPTIONS[currentPhase + 1].label)
+    UIDropDownMenu_SetSelectedValue(settingsPhaseDropdown, currentPhase)
 
     for _, row in ipairs(sourceTableRows) do
         local s = BiSGearCheckSaved.sourceSettings[row.key]
