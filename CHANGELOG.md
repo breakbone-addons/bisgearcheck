@@ -5,6 +5,13 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
+## Unreleased
+
+### Features
+- **Minimum Level Threshold**: New setting to specify the minimum character level required for a character to be registered in the multi-character system. Characters below this level are not saved on login and are hidden from the character selector dropdown. Default: 70 (TBC max level). Configurable via slider in Settings (range 1-70).
+- **Character Ignore List**: New setting to completely ignore specific characters, preventing them from being tracked regardless of level. Ignored characters are not updated on login and are hidden from the character selector dropdown. Manageable via checkboxes in Settings. Characters can be un-ignored at any time.
+- Filtered characters retain their saved data — changing the level threshold or un-ignoring a character restores visibility without data loss.
+
 ## v3.2.0
 
 ### Features
