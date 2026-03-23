@@ -5,6 +5,11 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
+## v3.1.1
+
+### Fixes
+- Added Nethercleft Leg Armor as a recommended leg enchant for Protection Paladin (was only listing Runic Spellthread).
+
 ## v3.1.0
 
 ### Features
