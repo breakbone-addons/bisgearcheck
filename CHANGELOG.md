@@ -5,6 +5,10 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
+## v3.3.2
+
+- Added About section to Settings.
+
 ## v3.3.1
 
 ### Improvements

@@ -423,9 +423,49 @@ ignoreDesc:SetText("Ignored characters won't appear in the dropdown or be update
 
 local ignoreList = CreateCheckboxList(scrollChild, ignoreDesc, "BiSGearCheckIgnoreList")
 
+-- ============================================================
+-- Section: About
+-- ============================================================
+
+local aboutHeader, aboutLine = CreateSectionHeader(ignoreList.wrapper, "About", 0, -16)
+
+local getMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
+local version = getMetadata("BiSGearCheck", "Version") or "?"
+local aboutVersion = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+aboutVersion:SetPoint("TOPLEFT", aboutLine, "BOTTOMLEFT", 0, -8)
+aboutVersion:SetText("Version: |cffffd100" .. version .. "|r  March 23, 2026")
+
+local aboutAuthor = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+aboutAuthor:SetPoint("TOPLEFT", aboutVersion, "BOTTOMLEFT", 0, -6)
+aboutAuthor:SetText("Author: |cffffd100Breakbone - Dreamscythe|r")
+
+local function CreateLinkRow(anchor, label, url)
+    local row = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+    row:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -10)
+    row:SetText(label .. "  |cff69ccf0" .. url .. "|r")
+    local btn = CreateFrame("Button", nil, scrollChild, "UIPanelButtonTemplate")
+    btn:SetSize(50, 18)
+    btn:SetPoint("LEFT", row, "RIGHT", 6, 0)
+    btn:SetText("Copy")
+    btn:SetScript("OnClick", function()
+        local editBox = ChatFrame1EditBox or ChatFrame1.editBox
+        if editBox then
+            editBox:Show()
+            editBox:SetText("https://" .. url)
+            editBox:HighlightText()
+            editBox:SetFocus()
+        end
+    end)
+    return row
+end
+
+local aboutCurse = CreateLinkRow(aboutAuthor, "CurseForge:", "curseforge.com/wow/addons/bisgearcheck")
+local aboutGithub = CreateLinkRow(aboutCurse, "GitHub:", "github.com/breakbone-addons/bisgearcheck")
+local aboutCoffee = CreateLinkRow(aboutGithub, "Support:", "buymeacoffee.com/breakbone")
+
 -- Bottom spacer — used to calculate scroll child height
 local bottomSpacer = scrollChild:CreateTexture(nil, "ARTWORK")
-bottomSpacer:SetPoint("TOPLEFT", ignoreList.wrapper, "BOTTOMLEFT", 0, -20)
+bottomSpacer:SetPoint("TOPLEFT", aboutCoffee, "BOTTOMLEFT", 0, -20)
 bottomSpacer:SetSize(1, 1)
 
 local function RefreshIgnoreList()
