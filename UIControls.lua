@@ -328,16 +328,13 @@ function BiSGearCheck:SetupCollapseControls(f)
         if specData and specData.slots then
             for _, items in pairs(specData.slots) do
                 for _, itemID in ipairs(items) do
-                    local sourceInfo = BiSGearCheckSources and BiSGearCheckSources[itemID]
-                    if sourceInfo and sourceInfo.source then
-                        local zone = BiSGearCheck.SourceToZone[sourceInfo.source]
-                        if zone then zoneHasItems[zone] = true end
-                    end
+                    local zone = BiSGearCheck:GetItemZone(itemID)
+                    if zone then zoneHasItems[zone] = true end
                 end
             end
         end
 
-        for _, category in ipairs(BiSGearCheck.ZoneCategories) do
+        for _, category in ipairs(BiSGearCheck:GetZoneCategories()) do
             local hdr = UIDropDownMenu_CreateInfo()
             hdr.text = category.label
             hdr.isTitle = true

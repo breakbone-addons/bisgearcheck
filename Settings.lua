@@ -72,10 +72,13 @@ scrollChild:SetWidth(CONTENT_WIDTH)
 scrollChild:SetHeight(800)
 scrollFrame:SetScrollChild(scrollChild)
 
--- Helper: create a section header with a horizontal rule
-local function CreateSectionHeader(anchor, text, xOffset, yOffset)
+local SECTION_GAP = 16   -- vertical space between the end of one section and the header of the next
+
+-- Helper: create a section header with a horizontal rule.
+-- `prevEnd` is the previous section's end marker (or any anchor frame).
+local function CreateSectionHeader(prevEnd, text)
     local header = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
-    header:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", xOffset, yOffset)
+    header:SetPoint("TOPLEFT", prevEnd, "BOTTOMLEFT", 0, -SECTION_GAP)
     header:SetText("|cffffd100" .. text .. "|r")
 
     local line = scrollChild:CreateTexture(nil, "ARTWORK")
@@ -87,16 +90,25 @@ local function CreateSectionHeader(anchor, text, xOffset, yOffset)
     return header, line
 end
 
+-- Helper: invisible anchor marking the bottom of a section.
+-- Pass the last visible element and its bottom offset.
+local function CreateSectionEnd(lastElement, yOffset)
+    local marker = CreateFrame("Frame", nil, scrollChild)
+    marker:SetSize(1, 1)
+    marker:SetPoint("TOPLEFT", lastElement, "BOTTOMLEFT", 0, yOffset or 0)
+    return marker
+end
+
 -- ============================================================
 -- Section: Tooltips
 -- ============================================================
 
-local tooltipAnchor = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-tooltipAnchor:SetPoint("TOPLEFT", 12, -4)
-tooltipAnchor:SetText("")
-tooltipAnchor:SetHeight(1)
+-- Initial anchor at the top of the scroll content
+local topAnchor = CreateFrame("Frame", nil, scrollChild)
+topAnchor:SetSize(1, 1)
+topAnchor:SetPoint("TOPLEFT", 12, 8)  -- offset so first SECTION_GAP lands at the right spot
 
-local tooltipHeader, tooltipLine = CreateSectionHeader(tooltipAnchor, "Tooltips", 0, -8)
+local tooltipHeader, tooltipLine = CreateSectionHeader(topAnchor, "Tooltips")
 
 local showBiSCheck = CreateFrame("CheckButton", "BiSGearCheckSettingsShowBiS", scrollChild, "InterfaceOptionsCheckButtonTemplate")
 showBiSCheck:SetPoint("TOPLEFT", tooltipLine, "BOTTOMLEFT", -4, -8)
@@ -130,6 +142,8 @@ classCheck:SetScript("OnClick", function(self)
     BiSGearCheck:EnsureTooltipSettings()
     BiSGearCheckSaved.tooltip.showOnlyMyClass = self:GetChecked() and true or false
 end)
+
+local tooltipSectionEnd = CreateSectionEnd(classCheck, 0)
 
 -- ============================================================
 -- Section: Content Phase (disabled until phase data is finalized)
@@ -248,7 +262,7 @@ end
 -- Section: Data Sources
 -- ============================================================
 
-local sourcesHeader, sourcesLine = CreateSectionHeader(classCheck, "Data Sources", 4, -16)
+local sourcesHeader, sourcesLine = CreateSectionHeader(tooltipSectionEnd, "Data Sources")
 
 local sourcesDesc = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
 sourcesDesc:SetPoint("TOPLEFT", sourcesLine, "BOTTOMLEFT", 0, -6)
@@ -310,6 +324,24 @@ for i, srcInfo in ipairs(BiSGearCheck.DataSources) do
     label:SetPoint("LEFT", row, "LEFT", COL_LABEL_X, 0)
     label:SetText(srcInfo.label)
 
+    -- Info icon with tooltip description
+    if srcInfo.desc then
+        local infoBtn = CreateFrame("Button", nil, row)
+        infoBtn:SetSize(14, 14)
+        infoBtn:SetPoint("LEFT", label, "RIGHT", 4, 0)
+        infoBtn:SetNormalTexture("Interface\\FriendsFrame\\InformationIcon")
+        infoBtn:SetHighlightTexture("Interface\\FriendsFrame\\InformationIcon")
+        infoBtn._desc = srcInfo.desc
+        infoBtn._label = srcInfo.label
+        infoBtn:SetScript("OnEnter", function(self)
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            GameTooltip:AddLine(self._label, 1, 0.82, 0)
+            GameTooltip:AddLine(self._desc, 1, 1, 1, true)
+            GameTooltip:Show()
+        end)
+        infoBtn:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    end
+
     local addonCB = CreateFrame("CheckButton", "BiSGearCheckSrcAddon" .. i, row, "UICheckButtonTemplate")
     addonCB:SetSize(24, 24)
     addonCB:SetPoint("LEFT", row, "LEFT", COL_ADDON_X + 8, 0)
@@ -366,11 +398,53 @@ for i, srcInfo in ipairs(BiSGearCheck.DataSources) do
                            specsLabel = specsLabel, itemsLabel = itemsLabel }
 end
 
+local sourcesSectionEnd = CreateSectionEnd(sourceTableWrapper, 0)
+
+-- ============================================================
+-- Section: Zone Filters
+-- ============================================================
+
+local zoneHeader, zoneLine = CreateSectionHeader(sourcesSectionEnd, "Zone and Source Filters")
+
+local classicCheck = CreateFrame("CheckButton", "BiSGearCheckSettingsClassicZones", scrollChild, "UICheckButtonTemplate")
+classicCheck:SetPoint("TOPLEFT", zoneLine, "BOTTOMLEFT", 0, -6)
+_G["BiSGearCheckSettingsClassicZonesText"]:SetText("Include Classic zones (Molten Core, BWL, AQ, Naxx, etc.)")
+classicCheck:SetScript("OnClick", function(self)
+    BiSGearCheckSaved.includeClassicZones = self:GetChecked() and true or false
+    BiSGearCheck:RefreshView()
+end)
+
+local pvpCheck = CreateFrame("CheckButton", "BiSGearCheckSettingsIncludePvP", scrollChild, "UICheckButtonTemplate")
+pvpCheck:SetPoint("TOPLEFT", classicCheck, "BOTTOMLEFT", 0, 0)
+_G["BiSGearCheckSettingsIncludePvPText"]:SetText("Include PvP items (Honor, Arena, Marks)")
+pvpCheck:SetScript("OnClick", function(self)
+    BiSGearCheckSaved.includePvP = self:GetChecked() and true or false
+    BiSGearCheck:RefreshView()
+end)
+
+local worldBossCheck = CreateFrame("CheckButton", "BiSGearCheckSettingsIncludeWorldBoss", scrollChild, "UICheckButtonTemplate")
+worldBossCheck:SetPoint("TOPLEFT", pvpCheck, "BOTTOMLEFT", 0, 0)
+_G["BiSGearCheckSettingsIncludeWorldBossText"]:SetText("Include World Boss items (Doom Lord Kazzak, Doomwalker)")
+worldBossCheck:SetScript("OnClick", function(self)
+    BiSGearCheckSaved.includeWorldBoss = self:GetChecked() and true or false
+    BiSGearCheck:RefreshView()
+end)
+
+local bopCraftedCheck = CreateFrame("CheckButton", "BiSGearCheckSettingsFilterBoPCrafted", scrollChild, "UICheckButtonTemplate")
+bopCraftedCheck:SetPoint("TOPLEFT", worldBossCheck, "BOTTOMLEFT", 0, 0)
+_G["BiSGearCheckSettingsFilterBoPCraftedText"]:SetText("Include BoP crafted items from unknown professions")
+bopCraftedCheck:SetScript("OnClick", function(self)
+    BiSGearCheckSaved.includeBoPCraftedOther = self:GetChecked() and true or false
+    BiSGearCheck:RefreshView()
+end)
+
 -- ============================================================
 -- Section: Character Filters
 -- ============================================================
 
-local charHeader, charLine = CreateSectionHeader(sourceTableWrapper, "Character Filters", 0, -16)
+local zoneSectionEnd = CreateSectionEnd(bopCraftedCheck, 0)
+
+local charHeader, charLine = CreateSectionHeader(zoneSectionEnd, "Character Filters")
 
 local levelLabel = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontNormal")
 levelLabel:SetPoint("TOPLEFT", charLine, "BOTTOMLEFT", 0, -10)
@@ -427,7 +501,9 @@ local ignoreList = CreateCheckboxList(scrollChild, ignoreDesc, "BiSGearCheckIgno
 -- Section: About
 -- ============================================================
 
-local aboutHeader, aboutLine = CreateSectionHeader(ignoreList.wrapper, "About", 0, -16)
+local charSectionEnd = CreateSectionEnd(ignoreList.wrapper, 0)
+
+local aboutHeader, aboutLine = CreateSectionHeader(charSectionEnd, "About")
 
 local getMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
 local version = getMetadata("BiSGearCheck", "Version") or "?"
@@ -524,6 +600,18 @@ panel:SetScript("OnShow", function(self)
 
     showBiSCheck:SetChecked(BiSGearCheckSaved.tooltip.showBiS)
     classCheck:SetChecked(BiSGearCheckSaved.tooltip.showOnlyMyClass)
+
+    if BiSGearCheckSaved.includeClassicZones == nil then BiSGearCheckSaved.includeClassicZones = true end
+    classicCheck:SetChecked(BiSGearCheckSaved.includeClassicZones)
+
+    if BiSGearCheckSaved.includePvP == nil then BiSGearCheckSaved.includePvP = true end
+    pvpCheck:SetChecked(BiSGearCheckSaved.includePvP)
+
+    if BiSGearCheckSaved.includeWorldBoss == nil then BiSGearCheckSaved.includeWorldBoss = true end
+    worldBossCheck:SetChecked(BiSGearCheckSaved.includeWorldBoss)
+
+    if BiSGearCheckSaved.includeBoPCraftedOther == nil then BiSGearCheckSaved.includeBoPCraftedOther = true end
+    bopCraftedCheck:SetChecked(BiSGearCheckSaved.includeBoPCraftedOther)
 
     -- PHASE SELECTION DISABLED
     -- local currentPhase = BiSGearCheckSaved.phaseFilter or 1

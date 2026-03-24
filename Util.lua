@@ -83,12 +83,18 @@ BiSGearCheck.ClassSpecs = {
 -- Each source maps phases to global table names.
 -- Phase 0 = Pre-Raid, 1-5 = content phases.
 BiSGearCheck.DataSources = {
-    { key = "wowtbcgg",    label = "WowTBC.gg",    phases = { [1] = "BiSGearCheckDB_WowTBCgg" } },
-    { key = "bistooltip",  label = "BiS-Tooltip",   phases = { [1] = "BiSGearCheckDB_Phase1" } },
-    { key = "atlasloot",   label = "AtlasLoot",     phases = { [1] = "BiSGearCheckDB_AtlasLoot" } },
-    { key = "wowsims",     label = "WoWSims",       phases = { [1] = "BiSGearCheckDB_WoWSims" } },
-    { key = "tmb",          label = "ThatsMyBis",    phases = { [1] = "BiSGearCheckDB_TMB" } },
-    { key = "wowhead",     label = "Wowhead",       phases = { [1] = "BiSGearCheckDB_Wowhead" } },
+    { key = "wowtbcgg",    label = "WowTBC.gg",    phases = { [1] = "BiSGearCheckDB_WowTBCgg" },
+      desc = "Community-voted BiS lists from wowtbc.gg. Broad coverage across all specs, but rankings reflect community opinion rather than simulated performance." },
+    { key = "bistooltip",  label = "BiS-Tooltip",   phases = { [1] = "BiSGearCheckDB_Phase1" },
+      desc = "BiS rankings from the BiS-Tooltip addon (boegi1's TBC backport). Comprehensive and well-maintained." },
+    { key = "atlasloot",   label = "AtlasLoot",     phases = { [1] = "BiSGearCheckDB_AtlasLoot" },
+      desc = "BiS lists derived from AtlasLoot's loot tables. Good dungeon and raid coverage, but may include items not typically considered BiS by other sources. Missing Rogue Assassination, Rogue Subtlety, and Warlock Demonology." },
+    { key = "wowsims",     label = "WoWSims",       phases = { [1] = "BiSGearCheckDB_WoWSims" },
+      desc = "Simulation-optimized gear sets from WoWSims TBC. Most mathematically rigorous, but missing Druid Restoration, Paladin Holy, Rogue Assassination, Rogue Subtlety, and Shaman Restoration." },
+    { key = "tmb",          label = "ThatsMyBis",    phases = { [1] = "BiSGearCheckDB_TMB" },
+      desc = "Community wishlist aggregates from thatsmybis.com. Reflects what raiders actually want, but limited to raid drops only. No crafted, quest, or dungeon items." },
+    { key = "wowhead",     label = "Wowhead",       phases = { [1] = "BiSGearCheckDB_Wowhead" },
+      desc = "Editorial BiS guides from Wowhead. Curated by guide writers, but may lag behind theorycrafting changes and reflects one author's opinion." },
 }
 
 -- Resolve the global DB table name for a source at a given phase
@@ -322,6 +328,10 @@ BiSGearCheck.SourceToZone = {
     ["Jewelcrafting"]       = "Crafted",
     ["Quest Reward"]        = "Quest",
     ["PvP"]                 = "PvP",
+    ["Vendor & Rep"]              = "Vendor & Rep",
+    ["Badge of Justice"]    = "Vendor & Rep",
+    ["Reputation"]          = "Vendor & Rep",
+    ["Spirit Shards"]       = "Vendor & Rep",
 }
 
 -- Reverse map: zone name -> list of source strings that drop items there
@@ -334,7 +344,18 @@ for src, zone in pairs(BiSGearCheck.SourceToZone) do
 end
 
 -- Categorized zone lists for the dropdown
-BiSGearCheck.ZoneCategories = {
+-- Zone phase mapping: zones available at or before this phase
+BiSGearCheck.ZonePhase = {
+    ["Karazhan"] = 1, ["Gruul's Lair"] = 1, ["Magtheridon's Lair"] = 1,
+    ["Serpentshrine Cavern"] = 2, ["Tempest Keep"] = 2,
+    ["Hyjal Summit"] = 3, ["Black Temple"] = 3,
+    ["Zul'Aman"] = 4, ["Magisters' Terrace"] = 4,
+    ["Sunwell Plateau"] = 5,
+    -- Dungeons are all Phase 1 except Magisters' Terrace
+    -- Classic, Other categories are always available (phase 1)
+}
+
+BiSGearCheck.ZoneCategoriesAll = {
     {
         label = "TBC Raids",
         zones = {
@@ -364,9 +385,65 @@ BiSGearCheck.ZoneCategories = {
     },
     {
         label = "Other",
-        zones = { "Crafted", "Quest", "PvP" },
+        zones = { "Crafted", "Quest", "PvP", "Vendor & Rep" },
     },
 }
+
+-- Returns ZoneCategories filtered to the current phase and settings
+function BiSGearCheck:GetZoneCategories()
+    local phase = self.phaseFilter or 1
+    local includeClassic = BiSGearCheckSaved and BiSGearCheckSaved.includeClassicZones ~= false
+    local filtered = {}
+    for _, category in ipairs(self.ZoneCategoriesAll) do
+        if category.label == "Classic" and not includeClassic then
+            -- Skip Classic category entirely
+        else
+            local zones = {}
+            for _, zone in ipairs(category.zones) do
+                local zonePhase = self.ZonePhase[zone] or 1
+                if zonePhase <= phase then
+                    zones[#zones + 1] = zone
+                end
+            end
+            if #zones > 0 then
+                filtered[#filtered + 1] = { label = category.label, zones = zones }
+            end
+        end
+    end
+    return filtered
+end
+
+-- Check if an item is from a Classic zone (for filtering BiS lists)
+function BiSGearCheck:IsClassicZoneItem(itemID)
+    local zone = self:GetItemZone(itemID)
+    if not zone then return false end
+    -- Check if this zone is in the Classic category
+    for _, category in ipairs(self.ZoneCategoriesAll) do
+        if category.label == "Classic" then
+            for _, z in ipairs(category.zones) do
+                if z == zone then return true end
+            end
+        end
+    end
+    return false
+end
+
+-- Backward compat: static reference used by other code
+BiSGearCheck.ZoneCategories = BiSGearCheck.ZoneCategoriesAll
+
+-- Resolve an item's zone, accounting for PvP vendor items
+function BiSGearCheck:GetItemZone(itemID)
+    local sourceInfo = BiSGearCheckSources and BiSGearCheckSources[itemID]
+    if not sourceInfo or not sourceInfo.source then return nil end
+    -- PvP items sold by vendors should be categorized as PvP
+    if sourceInfo.source == "Vendor & Rep" and sourceInfo.sourceType then
+        local st = sourceInfo.sourceType
+        if st:find("Honor") or st:find("Marks") or st:find("Arena") then
+            return "PvP"
+        end
+    end
+    return self.SourceToZone[sourceInfo.source]
+end
 
 -- Get unique zone names (sorted) for filter dropdown
 function BiSGearCheck:GetZoneList()
@@ -396,10 +473,70 @@ end
 
 -- Check if an item's source matches a zone
 function BiSGearCheck:ItemMatchesZone(itemID, zone)
+    return self:GetItemZone(itemID) == zone
+end
+
+-- Check if an item should be hidden by source filters (PvP, World Boss, BoP crafted)
+function BiSGearCheck:IsItemFilteredBySource(itemID)
+    if not BiSGearCheckSaved then return false end
     local sourceInfo = BiSGearCheckSources and BiSGearCheckSources[itemID]
-    if not sourceInfo or not sourceInfo.source then return false end
-    local itemZone = self.SourceToZone[sourceInfo.source]
-    return itemZone == zone
+
+    -- PvP filter
+    if not BiSGearCheckSaved.includePvP then
+        if sourceInfo then
+            if sourceInfo.source == "PvP" then return true end
+            if sourceInfo.source == "Vendor & Rep" and sourceInfo.sourceType then
+                local st = sourceInfo.sourceType
+                if st:find("Honor") or st:find("Marks") or st:find("Arena") then
+                    return true
+                end
+            end
+        end
+    end
+
+    -- World Boss filter
+    if not BiSGearCheckSaved.includeWorldBoss then
+        if sourceInfo and sourceInfo.source == "World Boss" then return true end
+    end
+
+    -- BoP crafted profession filter
+    if not BiSGearCheckSaved.includeBoPCraftedOther then
+        if sourceInfo and sourceInfo.sourceType then
+            local profession = sourceInfo.source
+            local isCrafted = self.SourceToZone[profession] == "Crafted"
+            if isCrafted then
+                -- Check if item is BoP via GetItemInfo
+                local _, _, _, _, _, _, _, _, _, _, _, _, _, bindType = GetItemInfo(itemID)
+                -- bindType 1 = BoP
+                if bindType == 1 then
+                    if not self:PlayerHasProfession(profession) then
+                        return true
+                    end
+                end
+            end
+        end
+    end
+
+    return false
+end
+
+-- Get the player's professions (cached per session)
+function BiSGearCheck:GetPlayerProfessions()
+    if self._professionCache then return self._professionCache end
+    local profs = {}
+    for i = 1, GetNumSkillLines() do
+        local name, isHeader = GetSkillLineInfo(i)
+        if not isHeader and name then
+            profs[name] = true
+        end
+    end
+    self._professionCache = profs
+    return profs
+end
+
+function BiSGearCheck:PlayerHasProfession(profession)
+    local profs = self:GetPlayerProfessions()
+    return profs[profession] or false
 end
 
 -- Check if an item belongs to a phase at or below the given max phase

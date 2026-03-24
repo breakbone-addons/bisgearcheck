@@ -5,6 +5,14 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
+## v3.4.0
+
+- Added source filters for PvP, World Boss, and BoP crafted items.
+- Added info tooltips to data source names.
+- Zone dropdown now filters by content phase.
+- PvP vendor items now categorized under PvP.
+- Fixed TMB data missing 7 specs.
+
 ## v3.3.2
 
 - Added About section to Settings.

@@ -80,7 +80,7 @@ function BiSGearCheck:RenderResults()
         if self.zoneFilter then
             local hasMatch = false
             for _, upgrade in ipairs(slotResult.upgrades) do
-                if self:ItemMatchesZone(upgrade.id, self.zoneFilter) then
+                if not self:IsItemFilteredBySource(upgrade.id) and self:ItemMatchesZone(upgrade.id, self.zoneFilter) then
                     hasMatch = true
                     break
                 end
@@ -250,8 +250,10 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
 
     if not isCollapsed then
         for _, upgrade in ipairs(slotResult.upgrades) do
-            -- Skip items that don't match the zone filter
-            if self.zoneFilter and not self:ItemMatchesZone(upgrade.id, self.zoneFilter) then
+            -- Skip items filtered by zone, Classic setting, or source filters
+            local hideClassic = BiSGearCheckSaved and BiSGearCheckSaved.includeClassicZones == false and self:IsClassicZoneItem(upgrade.id)
+            local hideSource = self:IsItemFilteredBySource(upgrade.id)
+            if hideClassic or hideSource or (self.zoneFilter and not self:ItemMatchesZone(upgrade.id, self.zoneFilter)) then
                 -- skip
             else
             local row = self:CreateRow(parent, yOffset, width)

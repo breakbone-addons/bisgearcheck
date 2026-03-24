@@ -62,10 +62,10 @@ function BiSGearCheck:RenderWishlist()
     local yOffset = -5
     local contentWidth = self.FRAME_WIDTH - 45
 
-    -- Apply zone filter (reuse buffer)
+    -- Apply zone and source filters (reuse buffer)
     wipe(_wlFilterBuf)
     for _, item in ipairs(items) do
-        if not self.wishlistZoneFilter or self:ItemMatchesZone(item.id, self.wishlistZoneFilter) then
+        if not self:IsItemFilteredBySource(item.id) and (not self.wishlistZoneFilter or self:ItemMatchesZone(item.id, self.wishlistZoneFilter)) then
             _wlFilterBuf[#_wlFilterBuf + 1] = item
         end
     end
@@ -233,7 +233,7 @@ function BiSGearCheck:RenderBisList()
         if self.zoneFilter and #items > 0 then
             local hasMatch = false
             for _, itemID in ipairs(items) do
-                if self:ItemMatchesZone(itemID, self.zoneFilter) then
+                if not self:IsItemFilteredBySource(itemID) and self:ItemMatchesZone(itemID, self.zoneFilter) then
                     hasMatch = true
                     break
                 end
@@ -255,8 +255,10 @@ function BiSGearCheck:RenderBisList()
 
             if not isCollapsed then
                 for rank, itemID in ipairs(items) do
-                    -- Skip items that don't match zone filter
-                    if not self.zoneFilter or self:ItemMatchesZone(itemID, self.zoneFilter) then
+                    -- Skip items filtered by zone, Classic setting, or source filters
+                    local hideClassic = BiSGearCheckSaved and BiSGearCheckSaved.includeClassicZones == false and self:IsClassicZoneItem(itemID)
+                    local hideSource = self:IsItemFilteredBySource(itemID)
+                    if not hideClassic and not hideSource and (not self.zoneFilter or self:ItemMatchesZone(itemID, self.zoneFilter)) then
                     local row = self:CreateRow(scrollChild, yOffset, contentWidth)
 
                     local name, link, quality, _, _, _, _, _, _, icon = GetItemInfo(itemID)
