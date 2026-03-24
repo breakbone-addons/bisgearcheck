@@ -5,6 +5,10 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
+## v3.5.0
+
+- Added inspect snapshot: view and compare gear for inspected players.
+
 ## v3.4.0
 
 - Added source filters for PvP, World Boss, and BoP crafted items.
