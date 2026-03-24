@@ -21,6 +21,7 @@ Data_WoWSims.lua
 Data_TMB.lua
 Data_Wowhead.lua
 Data_GemsEnchants.lua
+Data_ItemPhases.lua
 SourceDB.lua
 Tooltip.lua
 Settings.lua
