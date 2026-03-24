@@ -345,6 +345,21 @@ BiSGearCheckDB_WoWSims["WarlockAffliction"] = {
     class = "WARLOCK",
     spec = "Affliction",
     slots = {
+        ["Head"] = { 28963 },
+        ["Neck"] = { 28530 },
+        ["Shoulders"] = { 28967 },
+        ["Back"] = { 28766 },
+        ["Chest"] = { 28964 },
+        ["Wrist"] = { 24250 },
+        ["Hands"] = { 28968 },
+        ["Waist"] = { 24256 },
+        ["Legs"] = { 24262 },
+        ["Feet"] = { 21870 },
+        ["Rings"] = { 28793, 28753 },
+        ["Trinkets"] = { 27683, 29370 },
+        ["Main Hand"] = { 28802 },
+        ["Offhand"] = { 28734 },
+        ["Ranged"] = { 28673 },
     }
 }
 
@@ -352,6 +367,21 @@ BiSGearCheckDB_WoWSims["WarlockDemonology"] = {
     class = "WARLOCK",
     spec = "Demonology",
     slots = {
+        ["Head"] = { 28963 },
+        ["Neck"] = { 28530 },
+        ["Shoulders"] = { 28967 },
+        ["Back"] = { 28766 },
+        ["Chest"] = { 28964 },
+        ["Wrist"] = { 24250 },
+        ["Hands"] = { 28968 },
+        ["Waist"] = { 24256 },
+        ["Legs"] = { 24262 },
+        ["Feet"] = { 21870 },
+        ["Rings"] = { 28793, 28753 },
+        ["Trinkets"] = { 27683, 29370 },
+        ["Main Hand"] = { 28802 },
+        ["Offhand"] = { 28734 },
+        ["Ranged"] = { 28673 },
     }
 }
 
@@ -359,6 +389,21 @@ BiSGearCheckDB_WoWSims["WarlockDestruction"] = {
     class = "WARLOCK",
     spec = "Destruction",
     slots = {
+        ["Head"] = { 28963 },
+        ["Neck"] = { 28530 },
+        ["Shoulders"] = { 28967 },
+        ["Back"] = { 28766 },
+        ["Chest"] = { 28964 },
+        ["Wrist"] = { 24250 },
+        ["Hands"] = { 28968 },
+        ["Waist"] = { 24256 },
+        ["Legs"] = { 24262 },
+        ["Feet"] = { 21870 },
+        ["Rings"] = { 28793, 28753 },
+        ["Trinkets"] = { 27683, 29370 },
+        ["Main Hand"] = { 28802 },
+        ["Offhand"] = { 28734 },
+        ["Ranged"] = { 28673 },
     }
 }
 
