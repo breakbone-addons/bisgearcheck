@@ -5,6 +5,16 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
+## v3.3.1
+
+### Improvements
+- Data Sources settings table now shows Specs and Items counts per source.
+- Added item phase data from WoWSims (4,513 items).
+- Filled in WoWSims P1 data for Warlock, Paladin Protection/Retribution, and Enhancement Shaman.
+
+### Fixes
+- Fixed WoWSims showing Phase 2-4 items as Phase 1 data.
+
 ## v3.3.0
 
 ### Features

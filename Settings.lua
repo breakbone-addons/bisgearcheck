@@ -263,8 +263,10 @@ sourcesReloadBtn:SetScript("OnClick", function() ReloadUI() end)
 
 -- Column layout constants
 local COL_LABEL_X = 4
-local COL_ADDON_X = 200
-local COL_TOOLTIP_X = 280
+local COL_ADDON_X = 130
+local COL_TOOLTIP_X = 195
+local COL_SPECS_X = 262
+local COL_ITEMS_X = 310
 local TABLE_ROW_HEIGHT = 24
 
 -- Table header row
@@ -283,6 +285,14 @@ hdrAddon:SetText("|cffffd100Addon|r")
 local hdrTooltip = sourceTableHeader:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 hdrTooltip:SetPoint("LEFT", sourceTableHeader, "LEFT", COL_TOOLTIP_X, 0)
 hdrTooltip:SetText("|cffffd100Tooltip|r")
+
+local hdrSpecs = sourceTableHeader:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+hdrSpecs:SetPoint("LEFT", sourceTableHeader, "LEFT", COL_SPECS_X, 0)
+hdrSpecs:SetText("|cffffd100Specs|r")
+
+local hdrItems = sourceTableHeader:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+hdrItems:SetPoint("LEFT", sourceTableHeader, "LEFT", COL_ITEMS_X, 0)
+hdrItems:SetText("|cffffd100Items|r")
 
 -- Table rows
 local sourceTableRows = {}
@@ -320,7 +330,40 @@ for i, srcInfo in ipairs(BiSGearCheck.DataSources) do
         BiSGearCheck:OnSourceSettingsChanged()
     end)
 
-    sourceTableRows[i] = { addonCB = addonCB, tooltipCB = tooltipCB, key = srcInfo.key }
+    -- Stats columns: specs with data & unique item count
+    local specsLabel = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    specsLabel:SetPoint("LEFT", row, "LEFT", COL_SPECS_X, 0)
+
+    local itemsLabel = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    itemsLabel:SetPoint("LEFT", row, "LEFT", COL_ITEMS_X, 0)
+
+    -- Count specs and unique items from the loaded DB
+    local phase = BiSGearCheck.phaseFilter or 1
+    local dbName = BiSGearCheck:GetSourceDBName(srcInfo, phase)
+    local db = dbName and _G[dbName]
+    local specCount, uniqueItems = 0, {}
+    if db then
+        for _, specData in pairs(db) do
+            if specData.slots then
+                local hasItems = false
+                for _, items in pairs(specData.slots) do
+                    for _, itemID in ipairs(items) do
+                        uniqueItems[itemID] = true
+                        hasItems = true
+                    end
+                end
+                if hasItems then specCount = specCount + 1 end
+            end
+        end
+    end
+    local itemCount = 0
+    for _ in pairs(uniqueItems) do itemCount = itemCount + 1 end
+
+    specsLabel:SetText(specCount > 0 and tostring(specCount) or "-")
+    itemsLabel:SetText(itemCount > 0 and tostring(itemCount) or "-")
+
+    sourceTableRows[i] = { addonCB = addonCB, tooltipCB = tooltipCB, key = srcInfo.key,
+                           specsLabel = specsLabel, itemsLabel = itemsLabel }
 end
 
 -- ============================================================
