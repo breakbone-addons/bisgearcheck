@@ -153,6 +153,114 @@ function BiSGearCheck:SnapshotEquippedGear()
     charData.selectedSpec = self.selectedSpec
 end
 
+-- ============================================================
+-- INSPECT SNAPSHOT
+-- ============================================================
+
+-- Capture gear from an inspected player and store as a snapshot character
+-- The inspected unit is "target" (you inspect your current target)
+function BiSGearCheck:SnapshotInspectedGear()
+    -- Find the inspected unit: check target first, then mouseover
+    local unit
+    if UnitExists("target") and CanInspect("target") then
+        unit = "target"
+    elseif UnitExists("mouseover") and CanInspect("mouseover") then
+        unit = "mouseover"
+    else
+        return nil
+    end
+
+    -- Don't capture self-inspections
+    if UnitIsUnit(unit, "player") then return nil end
+
+    local name, realm = UnitName(unit)
+    if not name then return nil end
+    if not realm or realm == "" then
+        realm = GetRealmName()
+    end
+    local charKey = name .. "-" .. realm
+
+    -- Double-check: don't overwrite own character data
+    if charKey == self.playerKey then return nil end
+
+    local _, classToken = UnitClass(unit)
+    local level = UnitLevel(unit) or 0
+    local faction = UnitFactionGroup(unit) or self.playerFaction
+
+    -- Build equipped gear snapshot
+    local equipped = {}
+    local itemCount = 0
+    for slotName, invSlots in pairs(self.SlotToInvSlot) do
+        equipped[slotName] = {}
+        for _, invSlotID in ipairs(invSlots) do
+            local itemLink = GetInventoryItemLink(unit, invSlotID)
+            if itemLink then
+                local itemID = tonumber(itemLink:match("item:(%d+)"))
+                if itemID then
+                    table.insert(equipped[slotName], {
+                        id = itemID,
+                        link = itemLink,
+                        invSlot = invSlotID,
+                    })
+                    itemCount = itemCount + 1
+                end
+            end
+        end
+    end
+
+    -- Don't save if we got no items (inspect data not ready)
+    if itemCount == 0 then return nil end
+
+    -- Store or update character entry
+    if not BiSGearCheckSaved.characters[charKey] then
+        BiSGearCheckSaved.characters[charKey] = {
+            class = classToken,
+            faction = faction,
+            level = level,
+            wishlists = { ["Default"] = {} },
+            activeWishlist = "Default",
+            inspected = true,
+        }
+    else
+        local charData = BiSGearCheckSaved.characters[charKey]
+        charData.class = classToken
+        charData.faction = faction
+        charData.level = level
+        charData.inspected = true
+    end
+
+    BiSGearCheckSaved.characters[charKey].equipped = equipped
+
+    -- Try to guess spec from gear (use class default for now)
+    local specs = self.ClassSpecs[classToken]
+    if specs and #specs > 0 and not BiSGearCheckSaved.characters[charKey].selectedSpec then
+        BiSGearCheckSaved.characters[charKey].selectedSpec = specs[1].key
+    end
+
+    return charKey
+end
+
+-- Check if a character is an inspected snapshot
+function BiSGearCheck:IsInspectedCharacter(charKey)
+    local charData = self:GetCharacterData(charKey)
+    return charData and charData.inspected == true
+end
+
+-- Remove an inspected character from saved data
+function BiSGearCheck:RemoveInspectedCharacter(charKey)
+    if not BiSGearCheckSaved or not BiSGearCheckSaved.characters then return end
+    -- Never delete own character
+    if charKey == self.playerKey then return end
+    local charData = BiSGearCheckSaved.characters[charKey]
+    if charData and charData.inspected then
+        BiSGearCheckSaved.characters[charKey] = nil
+        -- If we were viewing this character, switch back to self
+        if self.viewingCharKey == charKey then
+            self:SetViewingCharacter(self.playerKey)
+        end
+    end
+end
+
 -- Get character data (for any character on the account)
 function BiSGearCheck:GetCharacterData(charKey)
     if not charKey or not BiSGearCheckSaved or not BiSGearCheckSaved.characters then
@@ -166,9 +274,15 @@ function BiSGearCheck:GetCharacterKeys()
     local keys = {}
     if BiSGearCheckSaved and BiSGearCheckSaved.characters then
         local minLevel = BiSGearCheckSaved.minCharLevel or 70
+        local showInspected = BiSGearCheckSaved.showInspectedInDropdown ~= false
         for key, charData in pairs(BiSGearCheckSaved.characters) do
-            if not self:IsCharacterIgnored(key) and (charData.level or 70) >= minLevel then
-                table.insert(keys, key)
+            local dominated = self:IsCharacterIgnored(key)
+            if not dominated and (charData.level or 70) >= minLevel then
+                if charData.inspected and not showInspected then
+                    -- skip inspected characters when setting is off
+                else
+                    table.insert(keys, key)
+                end
             end
         end
     end

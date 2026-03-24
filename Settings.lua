@@ -498,12 +498,96 @@ ignoreDesc:SetText("Ignored characters won't appear in the dropdown or be update
 local ignoreList = CreateCheckboxList(scrollChild, ignoreDesc, "BiSGearCheckIgnoreList")
 
 -- ============================================================
--- Section: About
+-- Section: Inspected Characters
 -- ============================================================
 
 local charSectionEnd = CreateSectionEnd(ignoreList.wrapper, 0)
 
-local aboutHeader, aboutLine = CreateSectionHeader(charSectionEnd, "About")
+local inspectHeader, inspectLine = CreateSectionHeader(charSectionEnd, "Inspected Characters")
+
+local autoShowCheck = CreateFrame("CheckButton", "BiSGearCheckSettingsAutoShowInspect", scrollChild, "UICheckButtonTemplate")
+autoShowCheck:SetPoint("TOPLEFT", inspectLine, "BOTTOMLEFT", 0, -6)
+_G["BiSGearCheckSettingsAutoShowInspectText"]:SetText("Auto-show Compare tab when inspecting")
+autoShowCheck:SetScript("OnClick", function(self)
+    BiSGearCheckSaved.autoShowOnInspect = self:GetChecked() and true or false
+end)
+
+local showInDropdownCheck = CreateFrame("CheckButton", "BiSGearCheckSettingsShowInspectedDropdown", scrollChild, "UICheckButtonTemplate")
+showInDropdownCheck:SetPoint("TOPLEFT", autoShowCheck, "BOTTOMLEFT", 0, 0)
+_G["BiSGearCheckSettingsShowInspectedDropdownText"]:SetText("Show inspected characters in Character dropdown")
+showInDropdownCheck:SetScript("OnClick", function(self)
+    BiSGearCheckSaved.showInspectedInDropdown = self:GetChecked() and true or false
+end)
+
+local inspectedListLabel = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+inspectedListLabel:SetPoint("TOPLEFT", showInDropdownCheck, "BOTTOMLEFT", 0, -10)
+inspectedListLabel:SetText("Saved Inspections:")
+
+local inspectedListDesc = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+inspectedListDesc:SetPoint("TOPLEFT", inspectedListLabel, "BOTTOMLEFT", 0, -4)
+inspectedListDesc:SetTextColor(0.5, 0.5, 0.5)
+inspectedListDesc:SetWidth(CONTENT_WIDTH)
+inspectedListDesc:SetWordWrap(true)
+inspectedListDesc:SetText("Click Remove to delete an inspected character's saved data.")
+
+-- Remove All button
+local removeAllBtn = CreateFrame("Button", nil, scrollChild, "UIPanelButtonTemplate")
+removeAllBtn:SetSize(80, 20)
+removeAllBtn:SetPoint("TOPLEFT", inspectedListDesc, "BOTTOMLEFT", 0, -6)
+removeAllBtn:SetText("Remove All")
+removeAllBtn:SetScript("OnClick", function()
+    if BiSGearCheckSaved and BiSGearCheckSaved.characters then
+        for key, data in pairs(BiSGearCheckSaved.characters) do
+            if data.inspected then
+                BiSGearCheckSaved.characters[key] = nil
+            end
+        end
+        -- Switch back to self if viewing an inspected char
+        if BiSGearCheck:IsInspectedCharacter(BiSGearCheck.viewingCharKey) then
+            BiSGearCheck:SetViewingCharacter(BiSGearCheck.playerKey)
+        end
+    end
+    panel:Hide()
+    panel:Show()
+end)
+
+-- Scrollable container for inspected character rows
+local inspectedScOuter = CreateFrame("Frame", nil, scrollChild)
+inspectedScOuter:SetPoint("TOPLEFT", removeAllBtn, "BOTTOMLEFT", 0, -4)
+inspectedScOuter:SetSize(CONTENT_WIDTH, SCROLL_VISIBLE_ROWS * ROW_HEIGHT + 8)
+
+local inspectedScBg = inspectedScOuter:CreateTexture(nil, "BACKGROUND")
+inspectedScBg:SetAllPoints()
+inspectedScBg:SetColorTexture(0.05, 0.05, 0.05, 0.5)
+
+local inspectedSF = CreateFrame("ScrollFrame", "BiSGearCheckInspectedScroll", inspectedScOuter, "UIPanelScrollFrameTemplate")
+inspectedSF:SetPoint("TOPLEFT", 4, -4)
+inspectedSF:SetPoint("BOTTOMRIGHT", -24, 4)
+
+local inspectedSCH = CreateFrame("Frame", "BiSGearCheckInspectedScrollChild")
+inspectedSCH:SetWidth(CONTENT_WIDTH - 32)
+inspectedSCH:SetHeight(1)
+inspectedSF:SetScrollChild(inspectedSCH)
+
+-- Wrapper that controls section height (switches between scroll and "no data" message)
+local inspectedWrapper = CreateFrame("Frame", nil, scrollChild)
+inspectedWrapper:SetPoint("TOPLEFT", removeAllBtn, "BOTTOMLEFT", 0, -4)
+inspectedWrapper:SetWidth(CONTENT_WIDTH)
+inspectedWrapper:SetHeight(1)
+
+local inspectedNoData = scrollChild:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+inspectedNoData:SetPoint("TOPLEFT", inspectedWrapper, "TOPLEFT", 4, 0)
+inspectedNoData:SetTextColor(0.5, 0.5, 0.5)
+inspectedNoData:SetText("No inspected characters saved.")
+inspectedNoData:Hide()
+
+-- ============================================================
+-- Section: About
+-- ============================================================
+
+local inspectSectionEnd = CreateSectionEnd(inspectedWrapper, 0)
+
+local aboutHeader, aboutLine = CreateSectionHeader(inspectSectionEnd, "About")
 
 local getMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
 local version = getMetadata("BiSGearCheck", "Version") or "?"
@@ -549,7 +633,13 @@ local function RefreshIgnoreList()
         cb:Hide()
     end
 
-    local charKeys = BiSGearCheck:GetAllCharacterKeys()
+    local allKeys = BiSGearCheck:GetAllCharacterKeys()
+    local charKeys = {}
+    for _, key in ipairs(allKeys) do
+        if not BiSGearCheck:IsInspectedCharacter(key) then
+            charKeys[#charKeys + 1] = key
+        end
+    end
 
     for i, charKey in ipairs(charKeys) do
         local cb = ignoreList.checkboxes[i]
@@ -630,6 +720,82 @@ panel:SetScript("OnShow", function(self)
 
     RefreshIgnoreList()
 
+    -- Inspect settings
+    if BiSGearCheckSaved.autoShowOnInspect == nil then BiSGearCheckSaved.autoShowOnInspect = true end
+    autoShowCheck:SetChecked(BiSGearCheckSaved.autoShowOnInspect)
+
+    if BiSGearCheckSaved.showInspectedInDropdown == nil then BiSGearCheckSaved.showInspectedInDropdown = true end
+    showInDropdownCheck:SetChecked(BiSGearCheckSaved.showInspectedInDropdown)
+
+    BiSGearCheck:RefreshInspectedList()
+end)
+
+function BiSGearCheck:RefreshInspectedList()
+    if not BiSGearCheckSaved then return end
+    for _, child in ipairs({inspectedSCH:GetChildren()}) do child:Hide() end
+    local inspectedKeys = {}
+    if BiSGearCheckSaved.characters then
+        for key, data in pairs(BiSGearCheckSaved.characters) do
+            if data.inspected then
+                table.insert(inspectedKeys, key)
+            end
+        end
+    end
+    table.sort(inspectedKeys)
+
+    if #inspectedKeys == 0 then
+        inspectedScOuter:Hide()
+        inspectedNoData:Show()
+        removeAllBtn:Hide()
+        inspectedWrapper:SetHeight(20)
+    else
+        inspectedNoData:Hide()
+        removeAllBtn:Show()
+        local inspectY = 0
+        for _, charKey in ipairs(inspectedKeys) do
+            local charData = BiSGearCheckSaved.characters[charKey]
+            local row = CreateFrame("Frame", nil, inspectedSCH)
+            row:SetSize(inspectedSCH:GetWidth(), ROW_HEIGHT)
+            row:SetPoint("TOPLEFT", inspectedSCH, "TOPLEFT", 0, -inspectY)
+
+            local classColor = charData and RAID_CLASS_COLORS[charData.class]
+            local charName = charKey:match("^([^%-]+)") or charKey
+            local realm = charKey:match("%-(.+)$") or ""
+            local label = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+            label:SetPoint("LEFT", row, "LEFT", 4, 0)
+            if classColor then
+                label:SetText(string.format("|cff%02x%02x%02x%s|r |cff888888%s L%d|r", classColor.r * 255, classColor.g * 255, classColor.b * 255, charName, realm, charData.level or 0))
+            else
+                label:SetText(charName .. " " .. realm)
+            end
+
+            local removeBtn = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
+            removeBtn:SetSize(60, 18)
+            removeBtn:SetPoint("RIGHT", row, "RIGHT", 0, 0)
+            removeBtn:SetText("Remove")
+            removeBtn._charKey = charKey
+            removeBtn:SetScript("OnClick", function(self)
+                BiSGearCheck:RemoveInspectedCharacter(self._charKey)
+                panel:Hide()
+                panel:Show()
+            end)
+
+            inspectY = inspectY + ROW_HEIGHT
+        end
+        inspectedSCH:SetHeight(math.max(inspectY, 1))
+
+        -- Show scrollable if more than threshold, otherwise shrink to fit
+        if #inspectedKeys > SCROLL_VISIBLE_ROWS then
+            inspectedScOuter:SetHeight(SCROLL_VISIBLE_ROWS * ROW_HEIGHT + 8)
+            inspectedScOuter:Show()
+            inspectedWrapper:SetHeight(SCROLL_VISIBLE_ROWS * ROW_HEIGHT + 8)
+        else
+            inspectedScOuter:SetHeight(inspectY + 8)
+            inspectedScOuter:Show()
+            inspectedWrapper:SetHeight(inspectY + 8)
+        end
+    end
+
     -- Recalculate scroll child height after layout settles
     C_Timer.After(0, function()
         local top = scrollChild:GetTop()
@@ -638,7 +804,7 @@ panel:SetScript("OnShow", function(self)
             scrollChild:SetHeight(top - bottom)
         end
     end)
-end)
+end
 
 -- ============================================================
 -- Public API: open settings (from gear icon or slash command)

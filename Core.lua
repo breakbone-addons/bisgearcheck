@@ -26,6 +26,7 @@ eventFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 eventFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 eventFrame:RegisterEvent("ZONE_CHANGED")
 eventFrame:RegisterEvent("ZONE_CHANGED_INDOORS")
+eventFrame:RegisterEvent("INSPECT_READY")
 
 eventFrame:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_ENTERING_WORLD" then
@@ -50,10 +51,74 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
         if BiSGearCheck.mainFrame and BiSGearCheck.mainFrame:IsShown() then
             BiSGearCheck:Refresh()
         end
+    elseif event == "INSPECT_READY" then
+        BiSGearCheck:OnInspectReady()
     elseif event == "ZONE_CHANGED_NEW_AREA" or event == "ZONE_CHANGED" or event == "ZONE_CHANGED_INDOORS" then
         BiSGearCheck:OnZoneChanged()
     end
 end)
+
+-- ============================================================
+-- INSPECT HANDLER
+-- ============================================================
+
+function BiSGearCheck:OnInspectReady()
+    local charKey = self:SnapshotInspectedGear()
+    if not charKey then return end
+
+    -- Refresh the settings inspect list if it's open
+    if self.RefreshInspectedList then
+        self:RefreshInspectedList()
+    end
+
+    if BiSGearCheckSaved and BiSGearCheckSaved.autoShowOnInspect ~= false then
+        self:CreateUI()
+        self:SetViewingCharacter(charKey)
+        if self.UpdateCharDropdownText then
+            self:UpdateCharDropdownText()
+        end
+        self.viewMode = "comparison"
+        self.mainFrame:Show()
+        self:Refresh()
+    end
+end
+
+-- Hook InspectUnit: delay to let inspect data load
+if InspectUnit then
+    hooksecurefunc("InspectUnit", function(unit)
+        C_Timer.After(0.5, function()
+            BiSGearCheck:OnInspectReady()
+        end)
+    end)
+end
+
+-- Also hook the Blizzard InspectFrame when it loads
+local inspectHooked = false
+local function HookInspectFrame()
+    if inspectHooked then return end
+    local frame = _G["InspectFrame"]
+    if frame then
+        inspectHooked = true
+        frame:HookScript("OnShow", function()
+            C_Timer.After(0.5, function()
+                BiSGearCheck:OnInspectReady()
+            end)
+        end)
+    end
+end
+-- InspectFrame is load-on-demand, so hook when it becomes available
+if IsAddOnLoaded and IsAddOnLoaded("Blizzard_InspectUI") then
+    HookInspectFrame()
+else
+    local hookFrame = CreateFrame("Frame")
+    hookFrame:RegisterEvent("ADDON_LOADED")
+    hookFrame:SetScript("OnEvent", function(self, event, addon)
+        if addon == "Blizzard_InspectUI" then
+            HookInspectFrame()
+            self:UnregisterEvent("ADDON_LOADED")
+        end
+    end)
+end
 
 -- ============================================================
 -- INITIALIZE

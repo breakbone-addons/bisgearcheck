@@ -129,10 +129,14 @@ function BiSGearCheck:SetupCharacterSelector(f)
             local info = UIDropDownMenu_CreateInfo()
             local classColor = charData and RAID_CLASS_COLORS[charData.class]
             local charName = charKey:match("^([^-]+)") or charKey
+            local suffix = ""
+            if charData and charData.inspected then
+                suffix = " |cff888888(Inspected)|r"
+            end
             if classColor then
-                info.text = string.format("|cff%02x%02x%02x%s|r", classColor.r * 255, classColor.g * 255, classColor.b * 255, charName)
+                info.text = string.format("|cff%02x%02x%02x%s|r%s", classColor.r * 255, classColor.g * 255, classColor.b * 255, charName, suffix)
             else
-                info.text = charName
+                info.text = charName .. suffix
             end
             info.value = charKey
             info.func = function(self)
