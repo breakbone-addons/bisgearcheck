@@ -215,6 +215,21 @@ BiSGearCheckDB_WoWSims["PaladinProtection"] = {
     class = "PALADIN",
     spec = "Protection",
     slots = {
+        ["Head"] = { 29068 },
+        ["Neck"] = { 28516 },
+        ["Shoulders"] = { 29070 },
+        ["Back"] = { 27804 },
+        ["Chest"] = { 29066 },
+        ["Wrist"] = { 28502 },
+        ["Hands"] = { 28518 },
+        ["Waist"] = { 28566 },
+        ["Legs"] = { 28621 },
+        ["Feet"] = { 30641 },
+        ["Rings"] = { 29279, 28675 },
+        ["Trinkets"] = { 28528, 23836 },
+        ["Main Hand"] = { 28802 },
+        ["Offhand"] = { 28825 },
+        ["Ranged"] = { 29388 },
     }
 }
 
@@ -222,6 +237,20 @@ BiSGearCheckDB_WoWSims["PaladinRetribution"] = {
     class = "PALADIN",
     spec = "Retribution",
     slots = {
+        ["Head"] = { 29073 },
+        ["Neck"] = { 28745 },
+        ["Shoulders"] = { 29075 },
+        ["Back"] = { 24259 },
+        ["Chest"] = { 29071 },
+        ["Wrist"] = { 28795 },
+        ["Hands"] = { 30644 },
+        ["Waist"] = { 28779 },
+        ["Legs"] = { 30257 },
+        ["Feet"] = { 28608 },
+        ["Rings"] = { 28757, 30834 },
+        ["Trinkets"] = { 29383, 28830 },
+        ["Main Hand"] = { 28429 },
+        ["Ranged"] = { 27484 },
     }
 }
 
@@ -331,6 +360,21 @@ BiSGearCheckDB_WoWSims["ShamanEnhancement"] = {
     class = "SHAMAN",
     spec = "Enhancement",
     slots = {
+        ["Head"] = { 29040 },
+        ["Neck"] = { 29381 },
+        ["Shoulders"] = { 29043 },
+        ["Back"] = { 24259 },
+        ["Chest"] = { 29038 },
+        ["Wrist"] = { 25697 },
+        ["Hands"] = { 29039 },
+        ["Waist"] = { 28656 },
+        ["Legs"] = { 30534 },
+        ["Feet"] = { 28746 },
+        ["Rings"] = { 28757, 29283 },
+        ["Trinkets"] = { 28830, 29383 },
+        ["Main Hand"] = { 28767 },
+        ["Offhand"] = { 27872 },
+        ["Ranged"] = { 27815 },
     }
 }
 
