@@ -24,7 +24,7 @@ StaticPopupDialogs["BISGEARCHECK_NEW_WISHLIST"] = {
             if BiSGearCheck:CreateWishlist(name) then
                 BiSGearCheck:RefreshView()
             else
-                print("|cffff6666BiS Gear Check:|r A wishlist named '" .. name .. "' already exists.")
+                print("|cffff6666BiSGearCheck:|r A wishlist named '" .. name .. "' already exists.")
             end
         end
     end,
@@ -35,7 +35,7 @@ StaticPopupDialogs["BISGEARCHECK_NEW_WISHLIST"] = {
             if BiSGearCheck:CreateWishlist(name) then
                 BiSGearCheck:RefreshView()
             else
-                print("|cffff6666BiS Gear Check:|r A wishlist named '" .. name .. "' already exists.")
+                print("|cffff6666BiSGearCheck:|r A wishlist named '" .. name .. "' already exists.")
             end
         end
         parent:Hide()
@@ -65,7 +65,7 @@ StaticPopupDialogs["BISGEARCHECK_RENAME_WISHLIST"] = {
             if BiSGearCheck:RenameWishlist(name) then
                 BiSGearCheck:RefreshView()
             else
-                print("|cffff6666BiS Gear Check:|r A wishlist named '" .. name .. "' already exists.")
+                print("|cffff6666BiSGearCheck:|r A wishlist named '" .. name .. "' already exists.")
             end
         end
     end,
@@ -76,7 +76,7 @@ StaticPopupDialogs["BISGEARCHECK_RENAME_WISHLIST"] = {
             if BiSGearCheck:RenameWishlist(name) then
                 BiSGearCheck:RefreshView()
             else
-                print("|cffff6666BiS Gear Check:|r A wishlist named '" .. name .. "' already exists.")
+                print("|cffff6666BiSGearCheck:|r A wishlist named '" .. name .. "' already exists.")
             end
         end
         parent:Hide()

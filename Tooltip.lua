@@ -183,12 +183,12 @@ local CONFLICTING_ADDONS = {
 
 -- Static popup dialog definition
 StaticPopupDialogs["BISGEARCHECK_TOOLTIP_CONFLICT"] = {
-    text = "BiS Gear Check has detected that |cff00ccff%s|r is also adding BiS rankings to item tooltips.\n\nWhich would you like to use?",
-    button1 = "BiS Gear Check",
+    text = "BiSGearCheck has detected that |cff00ccff%s|r is also adding BiS rankings to item tooltips.\n\nWhich would you like to use?",
+    button1 = "BiSGearCheck",
     button2 = "Keep Both",
     button3 = "%s",
     OnAccept = function()
-        -- Use BiS Gear Check only — disable the conflicting addon's tooltips
+        -- Use BiSGearCheck only — disable the conflicting addon's tooltips
         BiSGearCheck:EnsureTooltipSettings()
         BiSGearCheckSaved.tooltip.showBiS = true
         BiSGearCheckSaved.tooltip.conflictResolved = BiSGearCheck._conflictAddon
@@ -205,7 +205,7 @@ StaticPopupDialogs["BISGEARCHECK_TOOLTIP_CONFLICT"] = {
         BiSGearCheck:InstallTooltipHooks()
     end,
     OnAlt = function()
-        -- Use the other addon only — disable BiS Gear Check tooltips
+        -- Use the other addon only — disable BiSGearCheck tooltips
         BiSGearCheck:EnsureTooltipSettings()
         BiSGearCheckSaved.tooltip.showBiS = false
         BiSGearCheckSaved.tooltip.conflictResolved = BiSGearCheck._conflictAddon
@@ -242,7 +242,7 @@ function BiSGearCheck:CheckTooltipConflict()
                 -- Set button3 text dynamically
                 StaticPopupDialogs["BISGEARCHECK_TOOLTIP_CONFLICT"].button3 = conflict.label
                 StaticPopupDialogs["BISGEARCHECK_TOOLTIP_CONFLICT"].text =
-                    "BiS Gear Check has detected that |cff00ccff" .. conflict.label ..
+                    "BiSGearCheck has detected that |cff00ccff" .. conflict.label ..
                     "|r is also adding BiS rankings to item tooltips.\n\nWhich would you like to use?"
                 StaticPopup_Show("BISGEARCHECK_TOOLTIP_CONFLICT")
             end

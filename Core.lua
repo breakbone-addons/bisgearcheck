@@ -26,7 +26,6 @@ eventFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 eventFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 eventFrame:RegisterEvent("ZONE_CHANGED")
 eventFrame:RegisterEvent("ZONE_CHANGED_INDOORS")
-eventFrame:RegisterEvent("INSPECT_READY")
 
 eventFrame:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_ENTERING_WORLD" then
@@ -52,7 +51,9 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
             BiSGearCheck:Refresh()
         end
     elseif event == "INSPECT_READY" then
-        BiSGearCheck:OnInspectReady()
+        if BiSGearCheck.expectingInspect then
+            BiSGearCheck:OnInspectReady()
+        end
     elseif event == "ZONE_CHANGED_NEW_AREA" or event == "ZONE_CHANGED" or event == "ZONE_CHANGED_INDOORS" then
         BiSGearCheck:OnZoneChanged()
     end
@@ -63,6 +64,10 @@ end)
 -- ============================================================
 
 function BiSGearCheck:OnInspectReady()
+    -- Stop listening once we've handled it
+    eventFrame:UnregisterEvent("INSPECT_READY")
+    self.expectingInspect = false
+
     local charKey = self:SnapshotInspectedGear()
     if not charKey then return end
 
@@ -83,12 +88,11 @@ function BiSGearCheck:OnInspectReady()
     end
 end
 
--- Hook InspectUnit: delay to let inspect data load
+-- Hook InspectUnit: register INSPECT_READY only when user initiates inspect
 if InspectUnit then
     hooksecurefunc("InspectUnit", function(unit)
-        C_Timer.After(0.5, function()
-            BiSGearCheck:OnInspectReady()
-        end)
+        BiSGearCheck.expectingInspect = true
+        eventFrame:RegisterEvent("INSPECT_READY")
     end)
 end
 
@@ -100,9 +104,10 @@ local function HookInspectFrame()
     if frame then
         inspectHooked = true
         frame:HookScript("OnShow", function()
-            C_Timer.After(0.5, function()
-                BiSGearCheck:OnInspectReady()
-            end)
+            if not BiSGearCheck.expectingInspect then
+                BiSGearCheck.expectingInspect = true
+                eventFrame:RegisterEvent("INSPECT_READY")
+            end
         end)
     end
 end
@@ -220,16 +225,16 @@ function BiSGearCheck:CreateMinimapButton()
 
     local dataObj = ldb:NewDataObject("BiSGearCheck", {
         type = "launcher",
-        text = "BiS Gear Check",
+        text = "BiSGearCheck",
         icon = "Interface\\AddOns\\BiSGearCheck\\minimap-icon",
-        label = "BiS Gear Check",
+        label = "BiSGearCheck",
         OnClick = function(_, button)
             if IsAltKeyDown() then
                 if Settings and Settings.OpenToCategory and BiSGearCheck.settingsCategoryID then
                     Settings.OpenToCategory(BiSGearCheck.settingsCategoryID)
                 elseif InterfaceOptionsFrame_OpenToCategory then
-                    InterfaceOptionsFrame_OpenToCategory("BiS Gear Check")
-                    InterfaceOptionsFrame_OpenToCategory("BiS Gear Check")
+                    InterfaceOptionsFrame_OpenToCategory("BiSGearCheck")
+                    InterfaceOptionsFrame_OpenToCategory("BiSGearCheck")
                 end
                 return
             end
@@ -246,7 +251,7 @@ function BiSGearCheck:CreateMinimapButton()
             end
         end,
         OnTooltipShow = function(tt)
-            tt:AddLine("BiS Gear Check", 0, 0.82, 1)
+            tt:AddLine("BiSGearCheck", 0, 0.82, 1)
             tt:AddLine("Left-click: Compare gear", 1, 1, 1)
             tt:AddLine("Right-click: Wishlist", 1, 1, 1)
             tt:AddLine("Alt-click: Settings", 1, 1, 1)

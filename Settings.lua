@@ -56,7 +56,7 @@ titleBar:SetPoint("TOP", 0, 12)
 
 local titleText = panel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 titleText:SetPoint("TOP", titleBar, "TOP", 0, -14)
-titleText:SetText("BiS Gear Check Settings")
+titleText:SetText("BiSGearCheck Settings")
 
 -- Close button
 local closeBtn = CreateFrame("Button", nil, panel, "UIPanelCloseButton")
@@ -823,11 +823,11 @@ end
 -- ============================================================
 
 local proxy = CreateFrame("Frame", "BiSGearCheckSettingsProxy", UIParent)
-proxy.name = "BiS Gear Check"
+proxy.name = "BiSGearCheck"
 
 local proxyText = proxy:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
 proxyText:SetPoint("TOPLEFT", 16, -16)
-proxyText:SetText("BiS Gear Check")
+proxyText:SetText("BiSGearCheck")
 
 local proxyBtn = CreateFrame("Button", nil, proxy, "UIPanelButtonTemplate")
 proxyBtn:SetSize(160, 26)

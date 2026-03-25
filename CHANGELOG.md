@@ -5,6 +5,10 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
+## v3.5.1
+
+- Fixed inspect window opening from background inspect events.
+
 ## v3.5.0
 
 - Added inspect snapshot: view and compare gear for inspected players.
