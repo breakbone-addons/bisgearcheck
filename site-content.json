@@ -1,0 +1,71 @@
+{
+  "id": "bisgearcheck",
+  "name": "BISGearCheck",
+  "tagline": "Best-in-Slot gear tracking for TBC Anniversary",
+  "description": "Compare your equipped gear against curated Best-in-Slot lists from six community data sources. See exactly which upgrades you need, where they drop, and track them on per-character wishlists — all without leaving the game.",
+  "logo": "art/logo.svg",
+  "reverse": false,
+  "features": [
+    {
+      "title": "Compare Tab",
+      "description": "See your equipped gear ranked against BiS items for your spec, with source locations and one-click wishlist adds."
+    },
+    {
+      "title": "Six Data Sources",
+      "description": "WowTBC.gg, BiS-Tooltip, AtlasLoot, WoWSims, ThatsMyBis, and Wowhead — cross-reference across all of them."
+    },
+    {
+      "title": "Tooltip Integration",
+      "description": "BiS rankings appear on item tooltips in bags, chat links, vendors, and the auction house."
+    },
+    {
+      "title": "Wishlists",
+      "description": "Multiple wishlists per character with zone filtering and auto-filter for your current dungeon or raid."
+    },
+    {
+      "title": "Multi-Character",
+      "description": "Switch between your characters to compare gear across your roster."
+    },
+    {
+      "title": "Faction-Aware",
+      "description": "Automatically filters out items not available to your faction."
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "art/screenshot-compare.png",
+      "alt": "BISGearCheck Compare tab showing equipped vs BiS gear",
+      "caption": "Compare your equipped gear against Best-in-Slot lists"
+    },
+    {
+      "file": "art/screenshot-bis-lists.png",
+      "alt": "BISGearCheck BiS Lists tab with zone filter",
+      "caption": "Browse full BiS lists filtered by zone and data source"
+    },
+    {
+      "file": "art/screenshot-tooltip.png",
+      "alt": "BISGearCheck tooltip integration showing BiS rankings",
+      "caption": "Tooltip integration shows BiS status on any item"
+    },
+    {
+      "file": "art/screenshot-wishlist.png",
+      "alt": "BISGearCheck Wishlists tab",
+      "caption": "Track the items you need with per-character wishlists"
+    },
+    {
+      "file": "art/screenshot-settings.png",
+      "alt": "BISGearCheck Settings panel",
+      "caption": "Granular settings for data sources, tooltips, and more"
+    }
+  ],
+  "links": [
+    {
+      "label": "GitHub",
+      "href": "https://github.com/breakbone-addons/bisgearcheck"
+    },
+    {
+      "label": "CurseForge",
+      "href": "https://www.curseforge.com/wow/addons/bisgearcheck"
+    }
+  ]
+}
