@@ -6,25 +6,25 @@
 
 See every upgrade available for your spec, ranked by slot. Your currently equipped item is shown with its rank, and every item ranked higher is listed with its source -- boss name, dungeon, quest, or vendor. Automatically refreshes when you swap gear.
 
-<img src="https://raw.githubusercontent.com/breakbone-addons/bisgearcheck/main/art/screenshot-compare.png" alt="Compare Tab" width="500"/>
+<img src="https://breakbone-addons.com/images/bisgearcheck-screenshot-compare.png" alt="Compare Tab" width="500"/>
 
 ### BiS Lists Browser
 
 Browse the full BiS list for any spec across all classes. Switch between data sources to compare rankings. Filter by zone to focus on a specific dungeon or raid. Class-colored headers make it easy to find what you're looking for.
 
-<img src="https://raw.githubusercontent.com/breakbone-addons/bisgearcheck/main/art/screenshot-bis-lists.png" alt="BiS Lists" width="500"/>
+<img src="https://breakbone-addons.com/images/bisgearcheck-screenshot-bis-lists.png" alt="BiS Lists" width="500"/>
 
 ### Wishlists
 
 Track the items you're chasing. Create multiple named wishlists, add upgrades directly from the comparison view, and filter by dungeon or raid zone. Auto-filter mode automatically shows items for your current zone when you enter a dungeon or raid.
 
-<img src="https://raw.githubusercontent.com/breakbone-addons/bisgearcheck/main/art/screenshot-wishlist.png" alt="Wishlist" width="500"/>
+<img src="https://breakbone-addons.com/images/bisgearcheck-screenshot-wishlist.png" alt="Wishlist" width="500"/>
 
 ### Tooltip Integration
 
 BiS rankings appear directly in item tooltips, grouped by data source. Hover over any item in your bags, in chat, or on a vendor and see which specs rank it and at what position, with class-colored spec names. Each enabled source gets its own section so you can compare rankings across sources at a glance.
 
-<img src="https://raw.githubusercontent.com/breakbone-addons/bisgearcheck/main/art/screenshot-tooltip.png" alt="Tooltip Integration" width="300"/>
+<img src="https://breakbone-addons.com/images/bisgearcheck-screenshot-tooltip.png" alt="Tooltip Integration" width="300"/>
 
 ### Multi-Character Support
 
@@ -51,7 +51,7 @@ Alliance and Horde characters see only the items available to their faction. Fac
 
 Each source can be independently enabled for the main addon UI and/or tooltips in the Settings panel. Switch between sources at any time to compare rankings.
 
-<img src="https://raw.githubusercontent.com/breakbone-addons/bisgearcheck/main/art/screenshot-settings.png" alt="Settings" width="500"/>
+<img src="https://breakbone-addons.com/images/bisgearcheck-screenshot-settings.png" alt="Settings" width="500"/>
 
 ## Usage
 
