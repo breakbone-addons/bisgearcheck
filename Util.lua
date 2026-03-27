@@ -95,6 +95,8 @@ BiSGearCheck.DataSources = {
       desc = "Community wishlist aggregates from thatsmybis.com. Reflects what raiders actually want, but limited to raid drops only. No crafted, quest, or dungeon items." },
     { key = "wowhead",     label = "Wowhead",       phases = { [1] = "BiSGearCheckDB_Wowhead" },
       desc = "Editorial BiS guides from Wowhead. Curated by guide writers, but may lag behind theorycrafting changes and reflects one author's opinion." },
+    { key = "epscore",     label = "EP Score",      phases = { [1] = "BiSGearCheckDB_EPScore" },
+      desc = "Items ranked by Equivalence Points using per-spec stat weights from WoWSims. Accounts for hit cap, talents, and party buffs. Rankings update when settings change." },
 }
 
 -- Resolve the global DB table name for a source at a given phase

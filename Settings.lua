@@ -622,6 +622,8 @@ draeneiCB:SetPoint("TOPLEFT", epBuffsLabel, "BOTTOMLEFT", 0, -4)
 _G["BiSGearCheckSettingsDraeneiText"]:SetText("Draenei in party (+1% hit)")
 draeneiCB:SetScript("OnClick", function(self)
     BiSGearCheckSaved.ep.hasDraenei = self:GetChecked() and true or false
+    BiSGearCheck:BuildEPRankedList()
+    BiSGearCheck:BuildTooltipIndex()
 end)
 
 local totemCB = CreateFrame("CheckButton", "BiSGearCheckSettingsTotemOfWrath", scrollChild, "UICheckButtonTemplate")
@@ -629,6 +631,8 @@ totemCB:SetPoint("TOPLEFT", draeneiCB, "BOTTOMLEFT", 0, 0)
 _G["BiSGearCheckSettingsTotemOfWrathText"]:SetText("Totem of Wrath (+3% spell hit)")
 totemCB:SetScript("OnClick", function(self)
     BiSGearCheckSaved.ep.hasTotemOfWrath = self:GetChecked() and true or false
+    BiSGearCheck:BuildEPRankedList()
+    BiSGearCheck:BuildTooltipIndex()
 end)
 
 local iffCB = CreateFrame("CheckButton", "BiSGearCheckSettingsImpFF", scrollChild, "UICheckButtonTemplate")
@@ -636,6 +640,8 @@ iffCB:SetPoint("TOPLEFT", totemCB, "BOTTOMLEFT", 0, 0)
 _G["BiSGearCheckSettingsImpFFText"]:SetText("Improved Faerie Fire (+3% melee hit)")
 iffCB:SetScript("OnClick", function(self)
     BiSGearCheckSaved.ep.hasImpFaerieFire = self:GetChecked() and true or false
+    BiSGearCheck:BuildEPRankedList()
+    BiSGearCheck:BuildTooltipIndex()
 end)
 
 local epSectionEnd = CreateSectionEnd(iffCB, 0)

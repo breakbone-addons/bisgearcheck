@@ -146,3 +146,82 @@ function BiSGearCheck:GetUpgradePercent(newItemID, currentItemID, specKey)
     end
     return (diff / currentEP) * 100
 end
+
+-- ============================================================
+-- EP-RANKED BIS LIST BUILDER
+-- ============================================================
+-- Builds BiSGearCheckDB_EPScore by collecting all known items per slot
+-- from all loaded data sources, scoring them with EP, and ranking.
+
+function BiSGearCheck:BuildEPRankedList()
+    if not BiSGearCheckEPWeights or not BiSGearCheckItemStats then return end
+
+    local db = {}
+    _G["BiSGearCheckDB_EPScore"] = db
+
+    -- For each spec that has EP weights
+    for specKey, specData in pairs(BiSGearCheckEPWeights) do
+        -- Collect all items per slot from all loaded sources
+        local slotItems = {}  -- [slotName] = { [itemID] = true }
+
+        for _, src in ipairs(self.DataSources) do
+            if src.key ~= "epscore" then
+                local phase = self.phaseFilter or 1
+                local dbName = self:GetSourceDBName(src, phase)
+                local sourceDB = dbName and _G[dbName]
+                if sourceDB and sourceDB[specKey] and sourceDB[specKey].slots then
+                    for slotName, items in pairs(sourceDB[specKey].slots) do
+                        if not slotItems[slotName] then
+                            slotItems[slotName] = {}
+                        end
+                        for _, itemID in ipairs(items) do
+                            slotItems[slotName][itemID] = true
+                        end
+                    end
+                end
+            end
+        end
+
+        -- Score and sort each slot
+        local slots = {}
+        for slotName, itemSet in pairs(slotItems) do
+            local scored = {}
+            for itemID in pairs(itemSet) do
+                local ep = self:ScoreItem(itemID, specKey)
+                if ep and ep > 0 then
+                    scored[#scored + 1] = { id = itemID, ep = ep }
+                end
+            end
+            table.sort(scored, function(a, b) return a.ep > b.ep end)
+
+            local ranked = {}
+            for _, entry in ipairs(scored) do
+                ranked[#ranked + 1] = entry.id
+            end
+            if #ranked > 0 then
+                slots[slotName] = ranked
+            end
+        end
+
+        -- Determine class and spec label
+        local classToken, specLabel
+        for cls, specList in pairs(self.ClassSpecs or {}) do
+            for _, info in ipairs(specList) do
+                if info.key == specKey then
+                    classToken = cls
+                    specLabel = info.label
+                    break
+                end
+            end
+            if classToken then break end
+        end
+
+        if classToken and next(slots) then
+            db[specKey] = {
+                class = classToken,
+                spec = specLabel or specKey,
+                slots = slots,
+            }
+        end
+    end
+end
