@@ -487,7 +487,7 @@ function BiSGearCheck:GetSourceFilterReason(itemID)
     if not BiSGearCheckSaved.includePvP then
         if sourceInfo then
             if sourceInfo.source == "PvP" then return "PvP" end
-            if sourceInfo.source == "Vendor & Rep" and sourceInfo.sourceType then
+            if sourceInfo.sourceType then
                 local st = sourceInfo.sourceType
                 if st:find("Honor") or st:find("Marks") or st:find("Arena") then
                     return "PvP"
@@ -529,7 +529,7 @@ function BiSGearCheck:IsItemFilteredBySource(itemID)
     if not BiSGearCheckSaved.includePvP then
         if sourceInfo then
             if sourceInfo.source == "PvP" then return true end
-            if sourceInfo.source == "Vendor & Rep" and sourceInfo.sourceType then
+            if sourceInfo.sourceType then
                 local st = sourceInfo.sourceType
                 if st:find("Honor") or st:find("Marks") or st:find("Arena") then
                     return true
