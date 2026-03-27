@@ -476,6 +476,48 @@ function BiSGearCheck:ItemMatchesZone(itemID, zone)
     return self:GetItemZone(itemID) == zone
 end
 
+-- Return the specific filter reason if an item is hidden by source filters, or nil
+function BiSGearCheck:GetSourceFilterReason(itemID)
+    if not BiSGearCheckSaved then return nil end
+    local sourceInfo = BiSGearCheckSources and BiSGearCheckSources[itemID]
+
+    -- PvP filter
+    if not BiSGearCheckSaved.includePvP then
+        if sourceInfo then
+            if sourceInfo.source == "PvP" then return "PvP" end
+            if sourceInfo.source == "Vendor & Rep" and sourceInfo.sourceType then
+                local st = sourceInfo.sourceType
+                if st:find("Honor") or st:find("Marks") or st:find("Arena") then
+                    return "PvP"
+                end
+            end
+        end
+    end
+
+    -- World Boss filter
+    if not BiSGearCheckSaved.includeWorldBoss then
+        if sourceInfo and sourceInfo.source == "World Boss" then return "World Boss" end
+    end
+
+    -- BoP crafted profession filter
+    if not BiSGearCheckSaved.includeBoPCraftedOther then
+        if sourceInfo and sourceInfo.sourceType then
+            local profession = sourceInfo.source
+            local isCrafted = self.SourceToZone[profession] == "Crafted"
+            if isCrafted then
+                local _, _, _, _, _, _, _, _, _, _, _, _, _, bindType = GetItemInfo(itemID)
+                if bindType == 1 then
+                    if not self:PlayerHasProfession(profession) then
+                        return "BoP Crafted"
+                    end
+                end
+            end
+        end
+    end
+
+    return nil
+end
+
 -- Check if an item should be hidden by source filters (PvP, World Boss, BoP crafted)
 function BiSGearCheck:IsItemFilteredBySource(itemID)
     if not BiSGearCheckSaved then return false end
