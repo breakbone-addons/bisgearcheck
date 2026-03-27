@@ -5,6 +5,11 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
+## v3.5.3
+
+- Trinkets and Rings no longer suggest items ranked below your lowest-ranked equipped piece.
+- Sections with all upgrades hidden by filters now show "X items filtered"; hover for a breakdown by filter type (Classic, PvP, World Boss, BoP Crafted, Zone filter).
+
 ## v3.5.2
 
 - Fixed inspect window opening from background inspect events.

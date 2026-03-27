@@ -249,13 +249,22 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
     end
 
     if not isCollapsed then
+        local shownUpgrades = 0
+        local hiddenCounts = {}
         for _, upgrade in ipairs(slotResult.upgrades) do
-            -- Skip items filtered by zone, Classic setting, or source filters
-            local hideClassic = BiSGearCheckSaved and BiSGearCheckSaved.includeClassicZones == false and self:IsClassicZoneItem(upgrade.id)
-            local hideSource = self:IsItemFilteredBySource(upgrade.id)
-            if hideClassic or hideSource or (self.zoneFilter and not self:ItemMatchesZone(upgrade.id, self.zoneFilter)) then
-                -- skip
+            -- Determine filter reason (first match wins)
+            local filterReason
+            if self.zoneFilter and not self:ItemMatchesZone(upgrade.id, self.zoneFilter) then
+                filterReason = "Zone filter"
+            elseif BiSGearCheckSaved and BiSGearCheckSaved.includeClassicZones == false and self:IsClassicZoneItem(upgrade.id) then
+                filterReason = "Classic"
             else
+                filterReason = self:GetSourceFilterReason(upgrade.id)
+            end
+            if filterReason then
+                hiddenCounts[filterReason] = (hiddenCounts[filterReason] or 0) + 1
+            else
+            shownUpgrades = shownUpgrades + 1
             local row = self:CreateRow(parent, yOffset, width)
 
             -- Re-query item info at render time in case it loaded since comparison
@@ -299,6 +308,18 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
 
             yOffset = yOffset - self.ITEM_ROW_HEIGHT
             end -- end zone filter else
+        end
+
+        local totalHidden = 0
+        for _, count in pairs(hiddenCounts) do totalHidden = totalHidden + count end
+        if totalHidden > 0 then
+            local row = self:CreateRow(parent, yOffset, width)
+            row.text:SetText(string.format("  |cff999999%d item%s filtered|r", totalHidden, totalHidden == 1 and "" or "s"))
+            row._hiddenCounts = hiddenCounts
+            row:EnableMouse(true)
+            row:SetScript("OnEnter", self.OnFilteredRowEnter)
+            row:SetScript("OnLeave", self.OnTooltipLeave)
+            yOffset = yOffset - self.ITEM_ROW_HEIGHT
         end
 
         -- Enchant recommendations for this slot
