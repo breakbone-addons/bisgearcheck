@@ -182,14 +182,17 @@ function BiSGearCheck:BuildEPRankedList()
             end
         end
 
-        -- Score and sort each slot
+        -- Score and sort each slot, filtering by phase
+        local maxPhase = self.phaseFilter or 1
         local slots = {}
         for slotName, itemSet in pairs(slotItems) do
             local scored = {}
             for itemID in pairs(itemSet) do
-                local ep = self:ScoreItem(itemID, specKey)
-                if ep and ep > 0 then
-                    scored[#scored + 1] = { id = itemID, ep = ep }
+                if self:ItemInPhase(itemID, maxPhase) then
+                    local ep = self:ScoreItem(itemID, specKey)
+                    if ep and ep > 0 then
+                        scored[#scored + 1] = { id = itemID, ep = ep }
+                    end
                 end
             end
             table.sort(scored, function(a, b) return a.ep > b.ep end)
