@@ -594,6 +594,27 @@ function BiSGearCheck:ItemInPhase(itemID, maxPhase)
     return itemPhase <= maxPhase
 end
 
+-- Unified item filter: returns a reason string if the item should be hidden, nil if it should show.
+-- Checks: zone filter, classic zones, phase, PvP, World Boss, BoP crafted.
+-- Use this everywhere items are displayed to ensure consistent filtering.
+function BiSGearCheck:GetItemFilterReason(itemID, zoneFilter)
+    -- Zone filter
+    if zoneFilter and not self:ItemMatchesZone(itemID, zoneFilter) then
+        return "Zone filter"
+    end
+    -- Classic zones
+    if BiSGearCheckSaved and BiSGearCheckSaved.includeClassicZones == false and self:IsClassicZoneItem(itemID) then
+        return "Classic"
+    end
+    -- Phase filter
+    local maxPhase = self.phaseFilter or 1
+    if not self:ItemInPhase(itemID, maxPhase) then
+        return "Phase"
+    end
+    -- Source filters (PvP, World Boss, BoP crafted)
+    return self:GetSourceFilterReason(itemID)
+end
+
 -- Talent tab index → spec key for classes where ClassSpecs doesn't
 -- map 1:1 with talent tabs (Druid has 4 specs for 3 tabs, Priest
 -- has 2 specs for 3 tabs).

@@ -252,15 +252,7 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
         local shownUpgrades = 0
         local hiddenCounts = {}
         for _, upgrade in ipairs(slotResult.upgrades) do
-            -- Determine filter reason (first match wins)
-            local filterReason
-            if self.zoneFilter and not self:ItemMatchesZone(upgrade.id, self.zoneFilter) then
-                filterReason = "Zone filter"
-            elseif BiSGearCheckSaved and BiSGearCheckSaved.includeClassicZones == false and self:IsClassicZoneItem(upgrade.id) then
-                filterReason = "Classic"
-            else
-                filterReason = self:GetSourceFilterReason(upgrade.id)
-            end
+            local filterReason = self:GetItemFilterReason(upgrade.id, self.zoneFilter)
             if filterReason then
                 hiddenCounts[filterReason] = (hiddenCounts[filterReason] or 0) + 1
             else
