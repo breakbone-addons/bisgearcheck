@@ -182,13 +182,14 @@ function BiSGearCheck:BuildEPRankedList()
             end
         end
 
-        -- Score and sort each slot, filtering by phase
+        -- Score and sort each slot, filtering by phase and source filters
         local maxPhase = self.phaseFilter or 1
         local slots = {}
         for slotName, itemSet in pairs(slotItems) do
             local scored = {}
             for itemID in pairs(itemSet) do
-                if self:ItemInPhase(itemID, maxPhase) then
+                local classicFiltered = BiSGearCheckSaved and BiSGearCheckSaved.includeClassicZones == false and self:IsClassicZoneItem(itemID)
+                if self:ItemInPhase(itemID, maxPhase) and not self:GetSourceFilterReason(itemID) and not classicFiltered then
                     local ep = self:ScoreItem(itemID, specKey)
                     if ep and ep > 0 then
                         scored[#scored + 1] = { id = itemID, ep = ep }
