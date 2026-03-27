@@ -5,9 +5,13 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
-## v3.5.1
+## v3.5.2
 
 - Fixed inspect window opening from background inspect events.
+
+## v3.5.1
+
+- Partial fix for inspect window opening from background inspect events.
 
 ## v3.5.0
 
