@@ -360,6 +360,7 @@ function BiSGearCheck:CreateUI()
     self:SetupWishlistFilterBar(f)
     self:SetupWishlistSelectorBar(f)
     self:SetupBisListBar(f)
+    self:SetupRaidControls(f)
 
     -- ============================================================
     -- SCROLL FRAME
@@ -377,9 +378,12 @@ function BiSGearCheck:CreateUI()
     f.scrollFrame = scrollFrame
     f.scrollChild = scrollChild
 
-    -- Retry refresh when item data has been received
+    -- Retry refresh when item data has been received + raid scan timer
     f._retryElapsed = 0
     f:SetScript("OnUpdate", function(self, elapsed)
+        -- Raid scan timer (runs even when frame is hidden)
+        BiSGearCheck:UpdateRaidScanTimer(elapsed)
+
         f._retryElapsed = f._retryElapsed + elapsed
         if f._retryElapsed < 0.5 then return end
         f._retryElapsed = 0

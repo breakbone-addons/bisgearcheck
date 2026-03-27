@@ -582,12 +582,50 @@ inspectedNoData:SetText("No inspected characters saved.")
 inspectedNoData:Hide()
 
 -- ============================================================
--- Section: About
+-- Section: Raid Scanning
 -- ============================================================
 
 local inspectSectionEnd = CreateSectionEnd(inspectedWrapper, 0)
 
-local aboutHeader, aboutLine = CreateSectionHeader(inspectSectionEnd, "About")
+local raidHeader, raidLine = CreateSectionHeader(inspectSectionEnd, "Raid Scanning")
+
+local raidFilterNote = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+raidFilterNote:SetPoint("TOPLEFT", raidLine, "BOTTOMLEFT", 0, -6)
+raidFilterNote:SetWidth(CONTENT_WIDTH)
+raidFilterNote:SetJustifyH("LEFT")
+raidFilterNote:SetText("|cff888888These filters apply to upgrade suggestions in the Raid tab.|r")
+
+local raidClassicCheck = CreateFrame("CheckButton", "BiSGearCheckSettingsRaidClassicZones", scrollChild, "UICheckButtonTemplate")
+raidClassicCheck:SetPoint("TOPLEFT", raidFilterNote, "BOTTOMLEFT", 0, -4)
+_G["BiSGearCheckSettingsRaidClassicZonesText"]:SetText("Include Classic zones (Molten Core, BWL, AQ, Naxx, etc.)")
+raidClassicCheck:SetScript("OnClick", function(self)
+    BiSGearCheckSaved.raidIncludeClassicZones = self:GetChecked() and true or false
+    BiSGearCheck:RefreshView()
+end)
+
+local raidPvpCheck = CreateFrame("CheckButton", "BiSGearCheckSettingsRaidIncludePvP", scrollChild, "UICheckButtonTemplate")
+raidPvpCheck:SetPoint("TOPLEFT", raidClassicCheck, "BOTTOMLEFT", 0, 0)
+_G["BiSGearCheckSettingsRaidIncludePvPText"]:SetText("Include PvP items (Honor, Arena, Marks)")
+raidPvpCheck:SetScript("OnClick", function(self)
+    BiSGearCheckSaved.raidIncludePvP = self:GetChecked() and true or false
+    BiSGearCheck:RefreshView()
+end)
+
+local raidWorldBossCheck = CreateFrame("CheckButton", "BiSGearCheckSettingsRaidIncludeWorldBoss", scrollChild, "UICheckButtonTemplate")
+raidWorldBossCheck:SetPoint("TOPLEFT", raidPvpCheck, "BOTTOMLEFT", 0, 0)
+_G["BiSGearCheckSettingsRaidIncludeWorldBossText"]:SetText("Include World Boss items (Doom Lord Kazzak, Doomwalker)")
+raidWorldBossCheck:SetScript("OnClick", function(self)
+    BiSGearCheckSaved.raidIncludeWorldBoss = self:GetChecked() and true or false
+    BiSGearCheck:RefreshView()
+end)
+
+local raidSectionEnd = CreateSectionEnd(raidWorldBossCheck, 0)
+
+-- ============================================================
+-- Section: About
+-- ============================================================
+
+local aboutHeader, aboutLine = CreateSectionHeader(raidSectionEnd, "About")
 
 local getMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
 local version = getMetadata("BiSGearCheck", "Version") or "?"
@@ -728,6 +766,12 @@ panel:SetScript("OnShow", function(self)
     showInDropdownCheck:SetChecked(BiSGearCheckSaved.showInspectedInDropdown)
 
     BiSGearCheck:RefreshInspectedList()
+
+    -- Raid scan filter defaults
+    BiSGearCheck:EnsureRaidFilterSettings()
+    raidClassicCheck:SetChecked(BiSGearCheckSaved.raidIncludeClassicZones)
+    raidPvpCheck:SetChecked(BiSGearCheckSaved.raidIncludePvP)
+    raidWorldBossCheck:SetChecked(BiSGearCheckSaved.raidIncludeWorldBoss)
 end)
 
 function BiSGearCheck:RefreshInspectedList()

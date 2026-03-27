@@ -766,9 +766,18 @@ local WARN_YELLOW = "|cffffcc00"
 function BiSGearCheck:GetEquipWarnings(itemLink, slotName, specKey)
     if not itemLink or not specKey then return {}, nil end
 
-    local _, enchantID, gem1, gem2, gem3, gem4 = self:ParseItemLink(itemLink)
+    local itemID, enchantID, gem1, gem2, gem3, gem4 = self:ParseItemLink(itemLink)
     local warnings = {}
     local wrongEnchantID = nil
+
+    -- Mount-speed items left equipped (common raid mistake)
+    local MOUNT_SPEED_ITEMS = {
+        [25653] = true,  -- Riding Crop
+        [11122] = true,  -- Carrot on a Stick
+    }
+    if itemID and MOUNT_SPEED_ITEMS[itemID] then
+        warnings[#warnings + 1] = WARN_RED .. "[Mount Speed Item!]|r"
+    end
 
     -- Enchant check (only for enchantable slots that have spec recommendations)
     if self.EnchantableSlots[slotName] then

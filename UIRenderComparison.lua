@@ -26,6 +26,7 @@ function BiSGearCheck:RenderResults()
     f.filterBar:Hide()
     f.bislistBar:Hide()
     f.wlSelectorBar:Hide()
+    if f.raidBar then f.raidBar:Hide() end
     f.compareWLDropdown:ClearAllPoints()
     f.compareWLDropdown:SetPoint("TOPRIGHT", f, "TOPRIGHT", 5, -88)
     f.compareWLDropdown:Show()

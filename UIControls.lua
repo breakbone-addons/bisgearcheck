@@ -36,6 +36,9 @@ function BiSGearCheck:SetupTabs(f)
     local bisTab = CreateTab(f, "BiS Lists", 3)
     bisTab:SetPoint("LEFT", wlTab, "RIGHT", 2, 0)
 
+    local raidTab = CreateTab(f, "Raid", 4)
+    raidTab:SetPoint("LEFT", bisTab, "RIGHT", 2, 0)
+
     local function SetTabActive(tab)
         tab.bg:SetColorTexture(0.2, 0.2, 0.2, 1)
         tab.label:SetTextColor(1, 0.82, 0)
@@ -47,18 +50,18 @@ function BiSGearCheck:SetupTabs(f)
 
     local function UpdateTabAppearance()
         local mode = BiSGearCheck.viewMode
+        SetTabInactive(compTab)
+        SetTabInactive(wlTab)
+        SetTabInactive(bisTab)
+        SetTabInactive(raidTab)
         if mode == "comparison" then
             SetTabActive(compTab)
-            SetTabInactive(wlTab)
-            SetTabInactive(bisTab)
         elseif mode == "wishlist" then
-            SetTabInactive(compTab)
             SetTabActive(wlTab)
-            SetTabInactive(bisTab)
         elseif mode == "bislist" then
-            SetTabInactive(compTab)
-            SetTabInactive(wlTab)
             SetTabActive(bisTab)
+        elseif mode == "raid" then
+            SetTabActive(raidTab)
         end
     end
 
@@ -76,6 +79,12 @@ function BiSGearCheck:SetupTabs(f)
 
     bisTab:SetScript("OnClick", function()
         BiSGearCheck.viewMode = "bislist"
+        UpdateTabAppearance()
+        BiSGearCheck:RefreshView()
+    end)
+
+    raidTab:SetScript("OnClick", function()
+        BiSGearCheck.viewMode = "raid"
         UpdateTabAppearance()
         BiSGearCheck:RefreshView()
     end)
@@ -108,6 +117,7 @@ function BiSGearCheck:SetupTabs(f)
     f.compTab = compTab
     f.wlTab = wlTab
     f.bisTab = bisTab
+    f.raidTab = raidTab
     f.settingsBtn = settingsBtn
     f.UpdateTabAppearance = UpdateTabAppearance
 end

@@ -26,6 +26,8 @@ eventFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 eventFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 eventFrame:RegisterEvent("ZONE_CHANGED")
 eventFrame:RegisterEvent("ZONE_CHANGED_INDOORS")
+eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
+eventFrame:RegisterEvent("INSPECT_READY")
 
 eventFrame:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_ENTERING_WORLD" then
@@ -51,8 +53,14 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
             BiSGearCheck:Refresh()
         end
     elseif event == "INSPECT_READY" then
-        if BiSGearCheck.expectingInspect then
+        if BiSGearCheck.isRaidScanning then
+            BiSGearCheck:OnRaidScanInspectReady()
+        elseif BiSGearCheck.expectingInspect then
             BiSGearCheck:OnInspectReady()
+        end
+    elseif event == "GROUP_ROSTER_UPDATE" then
+        if BiSGearCheck.isRaidScanning then
+            BiSGearCheck.raidScanRosterChanged = true
         end
     elseif event == "ZONE_CHANGED_NEW_AREA" or event == "ZONE_CHANGED" or event == "ZONE_CHANGED_INDOORS" then
         BiSGearCheck:OnZoneChanged()
@@ -210,6 +218,9 @@ function BiSGearCheck:Initialize()
     self:BuildTooltipIndex()
     self:CheckTooltipConflict()
 
+    -- Restore last raid scan results (if any)
+    self:RestoreLastRaidScan()
+
     -- Register slash commands
     SLASH_BISGEARCHECK1 = "/bisgear"
     SLASH_BISGEARCHECK2 = "/bgc"
@@ -305,6 +316,8 @@ function BiSGearCheck:RefreshView()
         self:RenderWishlist()
     elseif self.viewMode == "bislist" then
         self:RenderBisList()
+    elseif self.viewMode == "raid" then
+        self:RenderRaid()
     else
         self:RenderResults()
     end

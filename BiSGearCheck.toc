@@ -28,9 +28,11 @@ Settings.lua
 Character.lua
 Wishlist.lua
 Comparison.lua
+RaidScan.lua
 Core.lua
 UI.lua
 UIControls.lua
 UIWishlistControls.lua
 UIRenderComparison.lua
 UIRenderLists.lua
+UIRenderRaid.lua
