@@ -582,12 +582,69 @@ inspectedNoData:SetText("No inspected characters saved.")
 inspectedNoData:Hide()
 
 -- ============================================================
--- Section: About
+-- Section: EP Scoring
 -- ============================================================
 
 local inspectSectionEnd = CreateSectionEnd(inspectedWrapper, 0)
 
-local aboutHeader, aboutLine = CreateSectionHeader(inspectSectionEnd, "About")
+local epHeader, epLine = CreateSectionHeader(inspectSectionEnd, "EP Scoring")
+
+local epDesc = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+epDesc:SetPoint("TOPLEFT", epLine, "BOTTOMLEFT", 0, -4)
+epDesc:SetTextColor(0.5, 0.5, 0.5)
+epDesc:SetWidth(CONTENT_WIDTH)
+epDesc:SetWordWrap(true)
+epDesc:SetText("Equivalence Points score items using stat weights per spec. Party buffs affect hit cap calculations.")
+
+BiSGearCheck:EnsureEPSettings()
+
+local epTooltipCB = CreateFrame("CheckButton", "BiSGearCheckSettingsEPTooltip", scrollChild, "UICheckButtonTemplate")
+epTooltipCB:SetPoint("TOPLEFT", epDesc, "BOTTOMLEFT", 0, -6)
+_G["BiSGearCheckSettingsEPTooltipText"]:SetText("Show EP scores in tooltips")
+epTooltipCB:SetScript("OnClick", function(self)
+    BiSGearCheckSaved.ep.showInTooltip = self:GetChecked() and true or false
+end)
+
+local epCompareCB = CreateFrame("CheckButton", "BiSGearCheckSettingsEPCompare", scrollChild, "UICheckButtonTemplate")
+epCompareCB:SetPoint("TOPLEFT", epTooltipCB, "BOTTOMLEFT", 0, 0)
+_G["BiSGearCheckSettingsEPCompareText"]:SetText("Show EP scores in Compare tab")
+epCompareCB:SetScript("OnClick", function(self)
+    BiSGearCheckSaved.ep.showInCompare = self:GetChecked() and true or false
+    BiSGearCheck:RefreshView()
+end)
+
+local epBuffsLabel = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+epBuffsLabel:SetPoint("TOPLEFT", epCompareCB, "BOTTOMLEFT", 0, -10)
+epBuffsLabel:SetText("Party Buffs (affects hit cap):")
+
+local draeneiCB = CreateFrame("CheckButton", "BiSGearCheckSettingsDraenei", scrollChild, "UICheckButtonTemplate")
+draeneiCB:SetPoint("TOPLEFT", epBuffsLabel, "BOTTOMLEFT", 0, -4)
+_G["BiSGearCheckSettingsDraeneiText"]:SetText("Draenei in party (+1% hit)")
+draeneiCB:SetScript("OnClick", function(self)
+    BiSGearCheckSaved.ep.hasDraenei = self:GetChecked() and true or false
+end)
+
+local totemCB = CreateFrame("CheckButton", "BiSGearCheckSettingsTotemOfWrath", scrollChild, "UICheckButtonTemplate")
+totemCB:SetPoint("TOPLEFT", draeneiCB, "BOTTOMLEFT", 0, 0)
+_G["BiSGearCheckSettingsTotemOfWrathText"]:SetText("Totem of Wrath (+3% spell hit)")
+totemCB:SetScript("OnClick", function(self)
+    BiSGearCheckSaved.ep.hasTotemOfWrath = self:GetChecked() and true or false
+end)
+
+local iffCB = CreateFrame("CheckButton", "BiSGearCheckSettingsImpFF", scrollChild, "UICheckButtonTemplate")
+iffCB:SetPoint("TOPLEFT", totemCB, "BOTTOMLEFT", 0, 0)
+_G["BiSGearCheckSettingsImpFFText"]:SetText("Improved Faerie Fire (+3% melee hit)")
+iffCB:SetScript("OnClick", function(self)
+    BiSGearCheckSaved.ep.hasImpFaerieFire = self:GetChecked() and true or false
+end)
+
+local epSectionEnd = CreateSectionEnd(iffCB, 0)
+
+-- ============================================================
+-- Section: About
+-- ============================================================
+
+local aboutHeader, aboutLine = CreateSectionHeader(epSectionEnd, "About")
 
 local getMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
 local version = getMetadata("BiSGearCheck", "Version") or "?"
@@ -728,6 +785,14 @@ panel:SetScript("OnShow", function(self)
     showInDropdownCheck:SetChecked(BiSGearCheckSaved.showInspectedInDropdown)
 
     BiSGearCheck:RefreshInspectedList()
+
+    -- EP Scoring
+    BiSGearCheck:EnsureEPSettings()
+    epTooltipCB:SetChecked(BiSGearCheckSaved.ep.showInTooltip)
+    epCompareCB:SetChecked(BiSGearCheckSaved.ep.showInCompare)
+    draeneiCB:SetChecked(BiSGearCheckSaved.ep.hasDraenei)
+    totemCB:SetChecked(BiSGearCheckSaved.ep.hasTotemOfWrath)
+    iffCB:SetChecked(BiSGearCheckSaved.ep.hasImpFaerieFire)
 end)
 
 function BiSGearCheck:RefreshInspectedList()
