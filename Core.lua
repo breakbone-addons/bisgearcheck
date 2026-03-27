@@ -76,6 +76,14 @@ function BiSGearCheck:OnInspectReady()
         self:RefreshInspectedList()
     end
 
+    -- Only auto-show when a user-initiated inspect frame is visible.
+    -- Other addons (GearScore, Details, etc.) may call InspectUnit in the
+    -- background — we capture their gear data above but should NOT pop
+    -- open the BGC window for those.
+    local inspectFrameOpen = (_G["InspectFrame"] and _G["InspectFrame"]:IsShown())
+                          or (_G["Examiner"] and _G["Examiner"]:IsShown())
+    if not inspectFrameOpen then return end
+
     if BiSGearCheckSaved and BiSGearCheckSaved.autoShowOnInspect ~= false then
         self:CreateUI()
         self:SetViewingCharacter(charKey)
