@@ -8,6 +8,8 @@ Versioning: **MAJOR.MINOR.PATCH**
 ## v3.5.4
 
 - Fixed spec auto-detection for Druid and Priest.
+- Added test suite covering EP scoring, gear comparison, wishlist CRUD, character/inspection management, tooltip indexing, item filtering, and settings initialization.
+- Fixed class-colored text rendering for Lua 5.4 compatibility.
 
 ## v3.5.3
 

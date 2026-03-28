@@ -663,7 +663,7 @@ end
 function BiSGearCheck:ClassColor(classToken, text)
     local color = RAID_CLASS_COLORS[classToken]
     if color then
-        return string.format("|cff%02x%02x%02x%s|r", color.r * 255, color.g * 255, color.b * 255, text)
+        return string.format("|cff%02x%02x%02x%s|r", math.floor(color.r * 255), math.floor(color.g * 255), math.floor(color.b * 255), text)
     end
     return text
 end
