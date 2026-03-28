@@ -5,6 +5,24 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
+## v3.5.6
+
+- Fixed CurseForge packaging to exclude test files from release archives.
+
+## v3.5.5
+
+- Added test suite covering EP scoring, gear comparison, wishlist CRUD, character/inspection management, tooltip indexing, item filtering, and settings initialization.
+- Fixed class-colored text rendering for Lua 5.4 compatibility.
+
+## v3.5.4
+
+- Fixed spec auto-detection for Druid and Priest.
+
+## v3.5.3
+
+- Trinkets and Rings no longer suggest items ranked below your lowest-ranked equipped piece.
+- Sections with all upgrades hidden by filters now show "X items filtered"; hover for a breakdown by filter type (Classic, PvP, World Boss, BoP Crafted, Zone filter).
+
 ## v3.5.2
 
 - Fixed inspect window opening from background inspect events.

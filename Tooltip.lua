@@ -140,6 +140,87 @@ function BiSGearCheck:OnTooltipSetItem(tooltip)
         end
     end
 
+    -- EP scoring section
+    self:EnsureEPSettings()
+    if BiSGearCheckSaved.ep.showInTooltip and self.selectedSpec and numItemID then
+        local epScore = self:ScoreItem(numItemID, self.selectedSpec)
+        if epScore and epScore > 0 then
+            -- Find which slot this item is for (from BiS data entries)
+            local itemSlot
+            if entries and #entries > 0 then
+                itemSlot = entries[1].slot
+            end
+
+            -- Find equipped item EP for comparison
+            local equippedEP = 0
+            local charKey = self:GetViewingCharKey()
+            local charData = charKey and BiSGearCheckSaved and BiSGearCheckSaved.characters
+                and BiSGearCheckSaved.characters[charKey]
+            if charData and charData.equipped and itemSlot then
+                local equippedItems = charData.equipped[itemSlot]
+                if equippedItems then
+                    for _, eqItem in ipairs(equippedItems) do
+                        if eqItem.id then
+                            local eqEP = self:ScoreItem(eqItem.id, self.selectedSpec)
+                            if eqEP > equippedEP then
+                                equippedEP = eqEP
+                            end
+                        end
+                    end
+                end
+            end
+
+            -- Show EP header
+            if not anyShown then
+                tooltip:AddLine(" ")
+            end
+            -- Get spec label from ClassSpecs
+            local specLabel = self.selectedSpec
+            local _, pClass = UnitClass("player")
+            local classSpecs = self.ClassSpecs and self.ClassSpecs[pClass]
+            if classSpecs then
+                for _, specInfo in ipairs(classSpecs) do
+                    if specInfo.key == self.selectedSpec then
+                        specLabel = specInfo.label
+                        break
+                    end
+                end
+            end
+
+            tooltip:AddDoubleLine(
+                "EP Score (" .. specLabel .. ")",
+                string.format("%.1f", epScore),
+                0.6, 0.8, 1.0,
+                0.6, 0.8, 1.0
+            )
+
+            -- Show upgrade indicator if we have equipped data
+            if equippedEP > 0 then
+                local diff = epScore - equippedEP
+                local pct = (diff / equippedEP) * 100
+                local arrow, r, g, b
+                if pct > 1 then
+                    arrow = "|cff00ff00+|r"
+                    r, g, b = 0, 1, 0
+                elseif pct < -1 then
+                    arrow = "|cffff0000-|r"
+                    r, g, b = 1, 0, 0
+                else
+                    arrow = "="
+                    r, g, b = 0.7, 0.7, 0.7
+                end
+                tooltip:AddDoubleLine(
+                    "  vs Equipped",
+                    string.format("%s%.0f%%", pct >= 0 and "+" or "", pct),
+                    0.5, 0.5, 0.5,
+                    r, g, b
+                )
+            end
+
+            anyShown = true
+        end
+    end
+
     if anyShown then
         tooltip:Show()
     end

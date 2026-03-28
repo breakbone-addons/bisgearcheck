@@ -95,6 +95,8 @@ BiSGearCheck.DataSources = {
       desc = "Community wishlist aggregates from thatsmybis.com. Reflects what raiders actually want, but limited to raid drops only. No crafted, quest, or dungeon items." },
     { key = "wowhead",     label = "Wowhead",       phases = { [1] = "BiSGearCheckDB_Wowhead" },
       desc = "Editorial BiS guides from Wowhead. Curated by guide writers, but may lag behind theorycrafting changes and reflects one author's opinion." },
+    { key = "epscore",     label = "EP Score",      phases = { [0] = "BiSGearCheckDB_EPScore", [1] = "BiSGearCheckDB_EPScore", [2] = "BiSGearCheckDB_EPScore", [3] = "BiSGearCheckDB_EPScore", [4] = "BiSGearCheckDB_EPScore", [5] = "BiSGearCheckDB_EPScore" },
+      desc = "Items ranked by Equivalence Points using per-spec stat weights from WoWSims. Accounts for hit cap, talents, and party buffs. Rankings update when settings change." },
 }
 
 -- Resolve the global DB table name for a source at a given phase
@@ -476,6 +478,48 @@ function BiSGearCheck:ItemMatchesZone(itemID, zone)
     return self:GetItemZone(itemID) == zone
 end
 
+-- Return the specific filter reason if an item is hidden by source filters, or nil
+function BiSGearCheck:GetSourceFilterReason(itemID)
+    if not BiSGearCheckSaved then return nil end
+    local sourceInfo = BiSGearCheckSources and BiSGearCheckSources[itemID]
+
+    -- PvP filter
+    if not BiSGearCheckSaved.includePvP then
+        if sourceInfo then
+            if sourceInfo.source == "PvP" then return "PvP" end
+            if sourceInfo.sourceType then
+                local st = sourceInfo.sourceType
+                if st:find("Honor") or st:find("Marks") or st:find("Arena") then
+                    return "PvP"
+                end
+            end
+        end
+    end
+
+    -- World Boss filter
+    if not BiSGearCheckSaved.includeWorldBoss then
+        if sourceInfo and sourceInfo.source == "World Boss" then return "World Boss" end
+    end
+
+    -- BoP crafted profession filter
+    if not BiSGearCheckSaved.includeBoPCraftedOther then
+        if sourceInfo and sourceInfo.sourceType then
+            local profession = sourceInfo.source
+            local isCrafted = self.SourceToZone[profession] == "Crafted"
+            if isCrafted then
+                local _, _, _, _, _, _, _, _, _, _, _, _, _, bindType = GetItemInfo(itemID)
+                if bindType == 1 then
+                    if not self:PlayerHasProfession(profession) then
+                        return "BoP Crafted"
+                    end
+                end
+            end
+        end
+    end
+
+    return nil
+end
+
 -- Check if an item should be hidden by source filters (PvP, World Boss, BoP crafted)
 function BiSGearCheck:IsItemFilteredBySource(itemID)
     if not BiSGearCheckSaved then return false end
@@ -485,7 +529,7 @@ function BiSGearCheck:IsItemFilteredBySource(itemID)
     if not BiSGearCheckSaved.includePvP then
         if sourceInfo then
             if sourceInfo.source == "PvP" then return true end
-            if sourceInfo.source == "Vendor & Rep" and sourceInfo.sourceType then
+            if sourceInfo.sourceType then
                 local st = sourceInfo.sourceType
                 if st:find("Honor") or st:find("Marks") or st:find("Arena") then
                     return true
@@ -550,6 +594,34 @@ function BiSGearCheck:ItemInPhase(itemID, maxPhase)
     return itemPhase <= maxPhase
 end
 
+-- Unified item filter: returns a reason string if the item should be hidden, nil if it should show.
+-- Checks: zone filter, classic zones, phase, PvP, World Boss, BoP crafted.
+-- Use this everywhere items are displayed to ensure consistent filtering.
+function BiSGearCheck:GetItemFilterReason(itemID, zoneFilter)
+    -- Zone filter
+    if zoneFilter and not self:ItemMatchesZone(itemID, zoneFilter) then
+        return "Zone filter"
+    end
+    -- Classic zones
+    if BiSGearCheckSaved and BiSGearCheckSaved.includeClassicZones == false and self:IsClassicZoneItem(itemID) then
+        return "Classic"
+    end
+    -- Phase filter
+    local maxPhase = self.phaseFilter or 1
+    if not self:ItemInPhase(itemID, maxPhase) then
+        return "Phase"
+    end
+    -- Source filters (PvP, World Boss, BoP crafted)
+    return self:GetSourceFilterReason(itemID)
+end
+
+-- Talent tab index → spec key for classes where ClassSpecs doesn't
+-- map 1:1 with talent tabs (Druid has 4 specs for 3 tabs, Priest
+-- has 2 specs for 3 tabs).
+local TalentTabToSpec = {
+    ["DRUID"]  = { "DruidBalance", "DruidFeralDPS", "DruidRestoration" },
+    ["PRIEST"] = { "PriestHoly",   "PriestHoly",    "PriestShadow" },
+}
 -- Try to auto-detect spec from talent points
 function BiSGearCheck:GuessSpec()
     local _, classToken = UnitClass("player")
@@ -574,8 +646,14 @@ function BiSGearCheck:GuessSpec()
         end
     end
 
-    if bestTab > 0 and bestTab <= #specs then
-        return specs[bestTab].key
+    if bestTab > 0 then
+        local tabMap = TalentTabToSpec[classToken]
+        if tabMap and tabMap[bestTab] then
+            return tabMap[bestTab]
+        end
+        if bestTab <= #specs then
+            return specs[bestTab].key
+        end
     end
 
     return specs[1].key
@@ -687,7 +765,7 @@ end
 function BiSGearCheck:ClassColor(classToken, text)
     local color = RAID_CLASS_COLORS[classToken]
     if color then
-        return string.format("|cff%02x%02x%02x%s|r", color.r * 255, color.g * 255, color.b * 255, text)
+        return string.format("|cff%02x%02x%02x%s|r", math.floor(color.r * 255), math.floor(color.g * 255), math.floor(color.b * 255), text)
     end
     return text
 end

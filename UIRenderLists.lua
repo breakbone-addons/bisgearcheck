@@ -257,10 +257,8 @@ function BiSGearCheck:RenderBisList()
 
             if not isCollapsed then
                 for rank, itemID in ipairs(items) do
-                    -- Skip items filtered by zone, Classic setting, or source filters
-                    local hideClassic = BiSGearCheckSaved and BiSGearCheckSaved.includeClassicZones == false and self:IsClassicZoneItem(itemID)
-                    local hideSource = self:IsItemFilteredBySource(itemID)
-                    if not hideClassic and not hideSource and (not self.zoneFilter or self:ItemMatchesZone(itemID, self.zoneFilter)) then
+                    -- Skip items hidden by unified filter (zone, classic, phase, PvP, world boss, BoP crafted)
+                    if not self:GetItemFilterReason(itemID, self.zoneFilter) then
                     local row = self:CreateRow(scrollChild, yOffset, contentWidth)
 
                     local name, link, quality, _, _, _, _, _, _, icon = GetItemInfo(itemID)

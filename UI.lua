@@ -267,6 +267,19 @@ BiSGearCheck.OnEnchantEnter = function(frame)
     GameTooltip:Show()
 end
 
+-- Tooltip for "X items filtered" rows
+BiSGearCheck.OnFilteredRowEnter = function(row)
+    GameTooltip:SetOwner(row, "ANCHOR_RIGHT")
+    GameTooltip:AddLine("Filtered Items")
+    local counts = row._hiddenCounts
+    if counts then
+        for reason, count in pairs(counts) do
+            GameTooltip:AddDoubleLine(reason, count, 0.6, 0.6, 0.6, 1, 1, 1)
+        end
+    end
+    GameTooltip:Show()
+end
+
 -- Hide tooltip (shared by all leave handlers)
 BiSGearCheck.OnTooltipLeave = function()
     GameTooltip:Hide()

@@ -252,13 +252,14 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
     end
 
     if not isCollapsed then
+        local shownUpgrades = 0
+        local hiddenCounts = {}
         for _, upgrade in ipairs(slotResult.upgrades) do
-            -- Skip items filtered by zone, Classic setting, or source filters
-            local hideClassic = BiSGearCheckSaved and BiSGearCheckSaved.includeClassicZones == false and self:IsClassicZoneItem(upgrade.id)
-            local hideSource = self:IsItemFilteredBySource(upgrade.id)
-            if hideClassic or hideSource or (self.zoneFilter and not self:ItemMatchesZone(upgrade.id, self.zoneFilter)) then
-                -- skip
+            local filterReason = self:GetItemFilterReason(upgrade.id, self.zoneFilter)
+            if filterReason then
+                hiddenCounts[filterReason] = (hiddenCounts[filterReason] or 0) + 1
             else
+            shownUpgrades = shownUpgrades + 1
             local row = self:CreateRow(parent, yOffset, width)
 
             -- Re-query item info at render time in case it loaded since comparison
@@ -273,7 +274,32 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
                 end
             end
 
-            row.text:SetText(string.format("  |cff00ccff#%d|r %s %s", upgrade.rank, itemName, sourceText))
+            -- EP upgrade indicator
+            local epText = ""
+            if BiSGearCheckSaved and BiSGearCheckSaved.ep and BiSGearCheckSaved.ep.showInCompare
+                and self.selectedSpec and #slotResult.equipped > 0 then
+                local upgradeEP = self:ScoreItem(upgrade.id, self.selectedSpec)
+                if upgradeEP and upgradeEP > 0 then
+                    -- Find best equipped EP in this slot
+                    local bestEqEP = 0
+                    for _, eq in ipairs(slotResult.equipped) do
+                        if eq.id then
+                            local eqEP = self:ScoreItem(eq.id, self.selectedSpec)
+                            if eqEP > bestEqEP then bestEqEP = eqEP end
+                        end
+                    end
+                    if bestEqEP > 0 then
+                        local pct = ((upgradeEP - bestEqEP) / bestEqEP) * 100
+                        if pct > 1 then
+                            epText = string.format(" |cff00ff00+%.0f%%|r", pct)
+                        elseif pct < -1 then
+                            epText = string.format(" |cffff0000%.0f%%|r", pct)
+                        end
+                    end
+                end
+            end
+
+            row.text:SetText(string.format("  |cff00ccff#%d|r %s %s%s", upgrade.rank, itemName, sourceText, epText))
             row.text:SetPoint("RIGHT", row, "RIGHT", -30, 0)
 
             -- Store data on the row for shared handlers
@@ -302,6 +328,18 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
 
             yOffset = yOffset - self.ITEM_ROW_HEIGHT
             end -- end zone filter else
+        end
+
+        local totalHidden = 0
+        for _, count in pairs(hiddenCounts) do totalHidden = totalHidden + count end
+        if totalHidden > 0 then
+            local row = self:CreateRow(parent, yOffset, width)
+            row.text:SetText(string.format("  |cff999999%d item%s filtered|r", totalHidden, totalHidden == 1 and "" or "s"))
+            row._hiddenCounts = hiddenCounts
+            row:EnableMouse(true)
+            row:SetScript("OnEnter", self.OnFilteredRowEnter)
+            row:SetScript("OnLeave", self.OnTooltipLeave)
+            yOffset = yOffset - self.ITEM_ROW_HEIGHT
         end
 
         -- Enchant recommendations for this slot
