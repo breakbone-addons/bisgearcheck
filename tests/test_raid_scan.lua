@@ -1,0 +1,770 @@
+-- Tests for RaidScan.lua and related spec detection
+-- Scan queue, inspect flow, character analysis, spec guessing, CSV export
+
+local T = {}
+
+-- ============================================================
+-- HELPERS
+-- ============================================================
+
+local function setupBaseState()
+    BiSGearCheckSaved = {
+        characters = {
+            ["TestChar-TestRealm"] = {
+                class = "WARRIOR",
+                faction = "Alliance",
+                level = 70,
+                wishlists = { Default = {} },
+                activeWishlist = "Default",
+                selectedSpec = "WarriorFury",
+            }
+        },
+        minCharLevel = 70,
+        ignoredCharacters = {},
+    }
+    BiSGearCheckChar = { selectedSpec = "WarriorFury" }
+    BiSGearCheck.playerKey = "TestChar-TestRealm"
+    BiSGearCheck.viewingCharKey = "TestChar-TestRealm"
+    BiSGearCheck.playerFaction = "Alliance"
+    BiSGearCheck.selectedSpec = "WarriorFury"
+    BiSGearCheck.activeWishlist = "Default"
+    BiSGearCheck.pendingItems = {}
+    BiSGearCheck.phaseFilter = 1
+    BiSGearCheck.dataSource = "wowtbcgg"
+    -- Stub RefreshView so it doesn't try to render UI
+    BiSGearCheck.RefreshView = function() end
+    BiSGearCheck.Refresh = function() end
+end
+
+-- Build a mock item link from an ID
+local function mockLink(id, name)
+    name = name or ("Item" .. id)
+    return string.format("|Hitem:%d:0:0:0:0:0|h[%s]|h", id, name)
+end
+
+-- Build a simple inventory table for a unit
+local function makeInventory(items)
+    local inv = {}
+    for slotID, id in pairs(items) do
+        inv[slotID] = { id = id, link = mockLink(id) }
+    end
+    return inv
+end
+
+-- Set up a party with N members (excludes player)
+local function setupParty(members)
+    local group = {}
+    for i, m in ipairs(members) do
+        group["party" .. i] = {
+            name = m.name,
+            realm = m.realm or "TestRealm",
+            class = m.class,
+            classDisplay = m.classDisplay or m.class,
+            level = m.level or 70,
+            faction = m.faction or "Alliance",
+            inventory = m.inventory or {},
+            connected = m.connected,
+            visible = m.visible,
+            canInspect = m.canInspect,
+        }
+    end
+    MockWoW.SetGroupMembers(group, false)
+end
+
+-- ============================================================
+-- TESTS: Scan State Management
+-- ============================================================
+
+function T.test_initial_scan_state()
+    setupBaseState()
+    assert_equal("idle", BiSGearCheck.raidScanState)
+    assert_false(BiSGearCheck.isRaidScanning)
+    assert_equal(0, #BiSGearCheck.raidScanQueue)
+end
+
+function T.test_start_scan_sets_scanning_state()
+    setupBaseState()
+    setupParty({
+        { name = "Alice", class = "MAGE", inventory = makeInventory({ [1] = 30000 }) },
+    })
+    BiSGearCheck:StartRaidScan()
+    assert_equal("scanning", BiSGearCheck.raidScanState)
+    assert_true(BiSGearCheck.isRaidScanning)
+end
+
+function T.test_start_scan_builds_queue()
+    setupBaseState()
+    setupParty({
+        { name = "Alice", class = "MAGE", inventory = makeInventory({ [1] = 30000 }) },
+        { name = "Bob", class = "WARRIOR", inventory = makeInventory({ [1] = 30001 }) },
+    })
+    BiSGearCheck:StartRaidScan()
+    assert_equal(2, #BiSGearCheck.raidScanQueue)
+    assert_equal("Alice", BiSGearCheck.raidScanQueue[1].name)
+    assert_equal("Bob", BiSGearCheck.raidScanQueue[2].name)
+end
+
+function T.test_start_scan_clears_previous_results()
+    setupBaseState()
+    BiSGearCheck.raidScanResults = { ["Old-TestRealm"] = { issueCount = 5 } }
+    BiSGearCheck.raidScanSkipped = { { name = "Old" } }
+    setupParty({
+        { name = "Alice", class = "MAGE", inventory = makeInventory({ [1] = 30000 }) },
+    })
+    BiSGearCheck:StartRaidScan()
+    assert_nil(BiSGearCheck.raidScanResults["Old-TestRealm"])
+    -- Skipped list should be fresh (only populated during new scan)
+end
+
+function T.test_cancel_scan()
+    setupBaseState()
+    setupParty({
+        { name = "Alice", class = "MAGE", inventory = makeInventory({ [1] = 30000 }) },
+    })
+    BiSGearCheck:StartRaidScan()
+    BiSGearCheck:CancelRaidScan()
+    assert_equal("idle", BiSGearCheck.raidScanState)
+    assert_false(BiSGearCheck.isRaidScanning)
+end
+
+function T.test_empty_group_finishes_immediately()
+    setupBaseState()
+    MockWoW.SetGroupMembers({}, false)
+    BiSGearCheck:StartRaidScan()
+    -- With no group members (only self), should finish since queue is empty
+    assert_equal("complete", BiSGearCheck.raidScanState)
+end
+
+-- ============================================================
+-- TESTS: ProcessNextScan — skip conditions
+-- ============================================================
+
+function T.test_skip_offline_member()
+    setupBaseState()
+    setupParty({
+        { name = "Offline", class = "MAGE", connected = false,
+          inventory = makeInventory({ [1] = 30000 }) },
+    })
+    BiSGearCheck:StartRaidScan()
+    BiSGearCheck:ProcessNextScan()
+    assert_equal(1, #BiSGearCheck.raidScanSkipped)
+    assert_equal("Offline", BiSGearCheck.raidScanSkipped[1].reason)
+end
+
+function T.test_skip_out_of_range_member()
+    setupBaseState()
+    setupParty({
+        { name = "FarAway", class = "MAGE", visible = false,
+          inventory = makeInventory({ [1] = 30000 }) },
+    })
+    BiSGearCheck:StartRaidScan()
+    BiSGearCheck:ProcessNextScan()
+    assert_equal(1, #BiSGearCheck.raidScanSkipped)
+    assert_equal("Out of range", BiSGearCheck.raidScanSkipped[1].reason)
+end
+
+-- ============================================================
+-- TESTS: SnapshotInspectedGearFromUnit
+-- ============================================================
+
+function T.test_snapshot_from_unit_basic()
+    setupBaseState()
+    MockWoW._groupMembers["party1"] = {
+        name = "Alice",
+        realm = "TestRealm",
+        class = "MAGE",
+        classDisplay = "Mage",
+        level = 70,
+        faction = "Alliance",
+        exists = true,
+        connected = true,
+        visible = true,
+        canInspect = true,
+        inventory = makeInventory({ [1] = 30000, [15] = 30001 }),
+    }
+
+    local charKey = BiSGearCheck:SnapshotInspectedGearFromUnit("party1")
+    assert_equal("Alice-TestRealm", charKey)
+    local data = BiSGearCheckSaved.characters[charKey]
+    assert_not_nil(data)
+    assert_equal("MAGE", data.class)
+    assert_equal(true, data.inspected)
+    assert_not_nil(data.equipped)
+    assert_equal(30000, data.equipped.Head[1].id)
+end
+
+function T.test_snapshot_from_unit_returns_nil_for_self()
+    setupBaseState()
+    -- player unit should return nil
+    local charKey = BiSGearCheck:SnapshotInspectedGearFromUnit("player")
+    assert_nil(charKey)
+end
+
+function T.test_snapshot_from_unit_returns_nil_for_empty_gear()
+    setupBaseState()
+    MockWoW._groupMembers["party1"] = {
+        name = "Naked",
+        realm = "TestRealm",
+        class = "MAGE",
+        classDisplay = "Mage",
+        level = 70,
+        faction = "Alliance",
+        exists = true,
+        inventory = {},  -- no gear
+    }
+
+    local charKey = BiSGearCheck:SnapshotInspectedGearFromUnit("party1")
+    assert_nil(charKey)
+end
+
+-- ============================================================
+-- TESTS: OnRaidScanInspectReady
+-- ============================================================
+
+function T.test_inspect_ready_snapshots_and_advances()
+    setupBaseState()
+    MockWoW._groupMembers["party1"] = {
+        name = "Alice",
+        realm = "TestRealm",
+        class = "MAGE",
+        classDisplay = "Mage",
+        level = 70,
+        faction = "Alliance",
+        exists = true,
+        connected = true,
+        visible = true,
+        canInspect = true,
+        inventory = makeInventory({ [1] = 30000 }),
+    }
+
+    BiSGearCheck:StartRaidScan()
+    -- Simulate ProcessNextScan setting up the inspect
+    BiSGearCheck.raidScanUnit = "party1"
+    BiSGearCheck.raidScanIndex = 1
+
+    BiSGearCheck:OnRaidScanInspectReady()
+    -- Should have analyzed Alice and advanced index
+    assert_not_nil(BiSGearCheck.raidScanResults["Alice-TestRealm"])
+    assert_equal(2, BiSGearCheck.raidScanIndex)
+    assert_nil(BiSGearCheck.raidScanUnit, "should clear raidScanUnit")
+end
+
+function T.test_inspect_ready_skips_on_no_gear()
+    setupBaseState()
+    MockWoW._groupMembers["party1"] = {
+        name = "Naked",
+        realm = "TestRealm",
+        class = "MAGE",
+        classDisplay = "Mage",
+        level = 70,
+        faction = "Alliance",
+        exists = true,
+        inventory = {},
+    }
+
+    BiSGearCheck:StartRaidScan()
+    BiSGearCheck.raidScanUnit = "party1"
+    BiSGearCheck.raidScanQueue = {{ unit = "party1", name = "Naked", realm = "TestRealm", class = "MAGE", charKey = "Naked-TestRealm" }}
+    BiSGearCheck.raidScanIndex = 1
+
+    BiSGearCheck:OnRaidScanInspectReady()
+    assert_nil(BiSGearCheck.raidScanResults["Naked-TestRealm"])
+    assert_equal(1, #BiSGearCheck.raidScanSkipped)
+    assert_equal("No gear data", BiSGearCheck.raidScanSkipped[1].reason)
+end
+
+-- ============================================================
+-- TESTS: Inspect timeout
+-- ============================================================
+
+function T.test_inspect_timeout_skips_member()
+    setupBaseState()
+    setupParty({
+        { name = "Laggy", class = "MAGE", inventory = makeInventory({ [1] = 30000 }) },
+    })
+
+    BiSGearCheck:StartRaidScan()
+    BiSGearCheck.raidScanUnit = "party1"
+    BiSGearCheck.raidScanIndex = 1
+    -- Simulate timeout by setting inspect time far in the past
+    BiSGearCheck.raidScanInspectTime = -100
+
+    MockWoW._gameTime = 10
+    BiSGearCheck:OnRaidScanTimeout()
+
+    assert_equal(1, #BiSGearCheck.raidScanSkipped)
+    assert_equal("Inspect timed out", BiSGearCheck.raidScanSkipped[1].reason)
+    assert_nil(BiSGearCheck.raidScanUnit)
+end
+
+-- ============================================================
+-- TESTS: FinishRaidScan
+-- ============================================================
+
+function T.test_finish_scan_sets_complete_state()
+    setupBaseState()
+    BiSGearCheck.raidScanState = "scanning"
+    BiSGearCheck.isRaidScanning = true
+    BiSGearCheck.raidScanResults = {
+        ["Alice-TestRealm"] = { issueCount = 2, upgrades = {} },
+    }
+
+    BiSGearCheck:FinishRaidScan()
+    assert_equal("complete", BiSGearCheck.raidScanState)
+    assert_false(BiSGearCheck.isRaidScanning)
+end
+
+function T.test_finish_scan_saves_to_saved_vars()
+    setupBaseState()
+    BiSGearCheck.raidScanState = "scanning"
+    BiSGearCheck.isRaidScanning = true
+    BiSGearCheck.raidScanResults = {
+        ["Alice-TestRealm"] = { issueCount = 1, upgrades = {} },
+    }
+    BiSGearCheck.raidScanSkipped = {
+        { name = "Bob", class = "WARRIOR", reason = "Offline" },
+    }
+
+    BiSGearCheck:FinishRaidScan()
+    assert_not_nil(BiSGearCheckSaved.lastRaidScan)
+    assert_equal(1, #BiSGearCheckSaved.lastRaidScan.charKeys)
+    assert_equal(1, #BiSGearCheckSaved.lastRaidScan.skipped)
+end
+
+function T.test_finish_scan_collapses_all_by_default()
+    setupBaseState()
+    BiSGearCheck.raidScanState = "scanning"
+    BiSGearCheck.isRaidScanning = true
+    BiSGearCheck.raidScanResults = {
+        ["Alice-TestRealm"] = { issueCount = 0, upgrades = {} },
+        ["Bob-TestRealm"] = { issueCount = 3, upgrades = {} },
+    }
+
+    BiSGearCheck:FinishRaidScan()
+    assert_true(BiSGearCheck.raidCollapsedChars["Alice-TestRealm"])
+    assert_true(BiSGearCheck.raidCollapsedChars["Bob-TestRealm"])
+end
+
+-- ============================================================
+-- TESTS: GetSortedRaidScanKeys
+-- ============================================================
+
+function T.test_sorted_keys_by_issue_count_desc()
+    setupBaseState()
+    BiSGearCheck.raidScanResults = {
+        ["Alice-TestRealm"] = { issueCount = 1 },
+        ["Bob-TestRealm"] = { issueCount = 5 },
+        ["Charlie-TestRealm"] = { issueCount = 0 },
+    }
+
+    local keys = BiSGearCheck:GetSortedRaidScanKeys()
+    assert_equal("Bob-TestRealm", keys[1])
+    assert_equal("Alice-TestRealm", keys[2])
+    assert_equal("Charlie-TestRealm", keys[3])
+end
+
+function T.test_sorted_keys_alpha_when_tied()
+    setupBaseState()
+    BiSGearCheck.raidScanResults = {
+        ["Charlie-TestRealm"] = { issueCount = 2 },
+        ["Alice-TestRealm"] = { issueCount = 2 },
+    }
+
+    local keys = BiSGearCheck:GetSortedRaidScanKeys()
+    assert_equal("Alice-TestRealm", keys[1])
+    assert_equal("Charlie-TestRealm", keys[2])
+end
+
+-- ============================================================
+-- TESTS: GetRaidScanCount
+-- ============================================================
+
+function T.test_raid_scan_count()
+    setupBaseState()
+    BiSGearCheck.raidScanResults = {
+        ["A-R"] = { issueCount = 0 },
+        ["B-R"] = { issueCount = 0 },
+        ["C-R"] = { issueCount = 0 },
+    }
+    assert_equal(3, BiSGearCheck:GetRaidScanCount())
+end
+
+function T.test_raid_scan_count_empty()
+    setupBaseState()
+    BiSGearCheck.raidScanResults = {}
+    assert_equal(0, BiSGearCheck:GetRaidScanCount())
+end
+
+-- ============================================================
+-- TESTS: Raid Source Filters
+-- ============================================================
+
+function T.test_raid_filter_defaults_initialized()
+    setupBaseState()
+    BiSGearCheck:EnsureRaidFilterSettings()
+    assert_equal(false, BiSGearCheckSaved.raidIncludeClassicZones)
+    assert_equal(false, BiSGearCheckSaved.raidIncludePvP)
+    assert_equal(false, BiSGearCheckSaved.raidIncludeWorldBoss)
+end
+
+function T.test_raid_filter_classic_zone_by_source()
+    setupBaseState()
+    BiSGearCheck:EnsureRaidFilterSettings()
+    -- Item with classic zone source should be filtered by default
+    BiSGearCheckSources = { [12345] = { source = "Dungeon", zone = "Stratholme" } }
+    -- Stub IsClassicZoneItem to return true for this item
+    local orig = BiSGearCheck.IsClassicZoneItem
+    BiSGearCheck.IsClassicZoneItem = function(self, id) return id == 12345 end
+
+    assert_true(BiSGearCheck:IsItemFilteredByRaidSource(12345))
+
+    BiSGearCheck.IsClassicZoneItem = orig
+end
+
+function T.test_raid_filter_pvp_item()
+    setupBaseState()
+    BiSGearCheck:EnsureRaidFilterSettings()
+    BiSGearCheckSources = { [99999] = { source = "PvP" } }
+    assert_true(BiSGearCheck:IsItemFilteredByRaidSource(99999))
+end
+
+function T.test_raid_filter_pvp_included_when_enabled()
+    setupBaseState()
+    BiSGearCheck:EnsureRaidFilterSettings()
+    BiSGearCheckSaved.raidIncludePvP = true
+    BiSGearCheckSources = { [99999] = { source = "PvP" } }
+    assert_false(BiSGearCheck:IsItemFilteredByRaidSource(99999))
+end
+
+function T.test_raid_filter_world_boss()
+    setupBaseState()
+    BiSGearCheck:EnsureRaidFilterSettings()
+    BiSGearCheckSources = { [88888] = { source = "World Boss" } }
+    assert_true(BiSGearCheck:IsItemFilteredByRaidSource(88888))
+end
+
+-- ============================================================
+-- TESTS: SetSpec saves to correct character
+-- ============================================================
+
+function T.test_set_spec_own_char_saves_to_player()
+    setupBaseState()
+    BiSGearCheck:SetSpec("WarriorArms")
+    assert_equal("WarriorArms", BiSGearCheckChar.selectedSpec)
+    assert_equal("WarriorArms", BiSGearCheckSaved.characters["TestChar-TestRealm"].selectedSpec)
+end
+
+function T.test_set_spec_inspected_char_does_not_corrupt_player()
+    setupBaseState()
+    -- Add an inspected druid
+    BiSGearCheckSaved.characters["Druid-TestRealm"] = {
+        class = "DRUID",
+        faction = "Alliance",
+        level = 70,
+        wishlists = { Default = {} },
+        activeWishlist = "Default",
+        inspected = true,
+        selectedSpec = "DruidBalance",
+    }
+    -- Switch to viewing the druid
+    BiSGearCheck.viewingCharKey = "Druid-TestRealm"
+
+    BiSGearCheck:SetSpec("DruidFeralTank")
+
+    -- Druid's spec should be updated
+    assert_equal("DruidFeralTank", BiSGearCheckSaved.characters["Druid-TestRealm"].selectedSpec)
+    -- Player's spec should NOT be changed
+    assert_equal("WarriorFury", BiSGearCheckChar.selectedSpec)
+    assert_equal("WarriorFury", BiSGearCheckSaved.characters["TestChar-TestRealm"].selectedSpec)
+end
+
+-- ============================================================
+-- TESTS: GuessSpecFromTalents
+-- ============================================================
+
+function T.test_talent_guess_elemental_shaman()
+    setupBaseState()
+    -- Elemental shaman: most points in tab 1
+    MockWoW.SetInspectTalents({
+        [1] = {  -- Elemental (most points)
+            [1] = { name = "Convection", rank = 5 },
+            [2] = { name = "Concussion", rank = 5 },
+            [3] = { name = "CallOfFlame", rank = 3 },
+            [4] = { name = "ElementalFocus", rank = 1 },
+            [5] = { name = "Reverberation", rank = 5 },
+            [6] = { name = "CallOfThunder", rank = 1 },
+            [7] = { name = "EyeOfTheStorm", rank = 3 },
+            [8] = { name = "ElementalDevastation", rank = 3 },
+            [9] = { name = "StormReach", rank = 2 },
+            [10] = { name = "ElementalFury", rank = 1 },
+            [11] = { name = "UnrelentingStorm", rank = 3 },
+            [12] = { name = "ElementalPrecision", rank = 3 },
+            [13] = { name = "LightningMastery", rank = 5 },
+            [14] = { name = "ElementalMastery", rank = 1 },
+            [15] = { name = "LightningOverload", rank = 5 },
+            [16] = { name = "TotemOfWrath", rank = 1 },
+        },
+        [2] = {  -- Enhancement (some points)
+            [1] = { name = "AncestralKnowledge", rank = 5 },
+        },
+        [3] = {},  -- Restoration (no points)
+    })
+
+    local spec = BiSGearCheck:GuessSpecFromTalents("SHAMAN")
+    assert_equal("ShamanElemental", spec)
+end
+
+function T.test_talent_guess_resto_shaman()
+    setupBaseState()
+    -- Resto shaman: most points in tab 3
+    MockWoW.SetInspectTalents({
+        [1] = {},  -- Elemental
+        [2] = { [1] = { name = "AncestralKnowledge", rank = 5 } },  -- Enhancement
+        [3] = {  -- Restoration (most points)
+            [1] = { name = "ImprovedHealingWave", rank = 5 },
+            [2] = { name = "TidalFocus", rank = 5 },
+            [3] = { name = "ImprovedReincarnation", rank = 2 },
+            [4] = { name = "AncestralHealing", rank = 3 },
+            [5] = { name = "TotallyPurify", rank = 2 },
+            [6] = { name = "HealingFocus", rank = 5 },
+            [7] = { name = "TidalMastery", rank = 5 },
+            [8] = { name = "NaturesSwiftness", rank = 1 },
+            [9] = { name = "FocusedMind", rank = 3 },
+            [10] = { name = "Purification", rank = 5 },
+            [11] = { name = "ManaTideTotem", rank = 1 },
+            [12] = { name = "NaturesGuardian", rank = 5 },
+            [13] = { name = "ImprovedChainHeal", rank = 2 },
+            [14] = { name = "EarthShield", rank = 1 },
+        },
+    })
+
+    local spec = BiSGearCheck:GuessSpecFromTalents("SHAMAN")
+    assert_equal("ShamanRestoration", spec)
+end
+
+function T.test_talent_guess_druid_feral_tank()
+    setupBaseState()
+    -- Feral tank druid: most points in tab 2, with Survival of the Fittest
+    MockWoW.SetInspectTalents({
+        [1] = {},  -- Balance
+        [2] = {  -- Feral (most points)
+            [1] = { name = "Ferocity", rank = 5 },
+            [2] = { name = "FeralAggression", rank = 5 },
+            [3] = { name = "FeralInstinct", rank = 3 },
+            [4] = { name = "BrutalImpact", rank = 2 },
+            [5] = { name = "ThickHide", rank = 3 },
+            [6] = { name = "FeralSwiftness", rank = 2 },
+            [7] = { name = "FeralCharge", rank = 1 },
+            [8] = { name = "SharpenedClaws", rank = 3 },
+            [9] = { name = "ShreddingAttacks", rank = 2 },
+            [10] = { name = "PredatoryStrikes", rank = 3 },
+            [11] = { name = "PrimalFury", rank = 2 },
+            [12] = { name = "SavageFury", rank = 2 },
+            [13] = { name = "Nurturing", rank = 2 },
+            [14] = { name = "HeartOfTheWild", rank = 5 },
+            [15] = { name = "CatForm", rank = 1 },
+            [16] = { name = "LeaderOfThePack", rank = 1 },
+            [17] = { name = "ImprovedLeader", rank = 2 },
+            [18] = { name = "SurvivalOfTheFittest", rank = 3 },  -- Tank identifier
+            [19] = { name = "Predatory", rank = 3 },
+            [20] = { name = "Mangle", rank = 1 },
+        },
+        [3] = {  -- Restoration (some points)
+            [1] = { name = "MarkOfTheWild", rank = 5 },
+            [2] = { name = "Furor", rank = 5 },
+            [3] = { name = "NaturalShapeshifter", rank = 3 },
+            [4] = { name = "Intensity", rank = 3 },
+            [5] = { name = "OmenOfClarity", rank = 1 },
+        },
+    })
+
+    local spec = BiSGearCheck:GuessSpecFromTalents("DRUID")
+    assert_equal("DruidFeralTank", spec)
+end
+
+function T.test_talent_guess_druid_feral_dps()
+    setupBaseState()
+    -- Feral DPS druid: most points in tab 2, without SotF
+    MockWoW.SetInspectTalents({
+        [1] = {},  -- Balance
+        [2] = {  -- Feral (most points)
+            [1] = { name = "Ferocity", rank = 5 },
+            [2] = { name = "FeralAggression", rank = 5 },
+            [3] = { name = "FeralInstinct", rank = 3 },
+            [4] = { name = "BrutalImpact", rank = 2 },
+            [5] = { name = "ThickHide", rank = 0 },
+            [6] = { name = "FeralSwiftness", rank = 2 },
+            [7] = { name = "FeralCharge", rank = 1 },
+            [8] = { name = "SharpenedClaws", rank = 3 },
+            [9] = { name = "ShreddingAttacks", rank = 2 },
+            [10] = { name = "PredatoryStrikes", rank = 3 },
+            [11] = { name = "PrimalFury", rank = 2 },
+            [12] = { name = "SavageFury", rank = 2 },
+            [13] = { name = "Nurturing", rank = 2 },
+            [14] = { name = "HeartOfTheWild", rank = 5 },
+            [15] = { name = "CatForm", rank = 1 },
+            [16] = { name = "LeaderOfThePack", rank = 1 },
+            [17] = { name = "ImprovedLeader", rank = 2 },
+            [18] = { name = "SurvivalOfTheFittest", rank = 0 },  -- 0 = not tank
+            [19] = { name = "Predatory", rank = 3 },
+            [20] = { name = "Mangle", rank = 1 },
+        },
+        [3] = {},
+    })
+
+    local spec = BiSGearCheck:GuessSpecFromTalents("DRUID")
+    assert_equal("DruidFeralDPS", spec)
+end
+
+function T.test_talent_guess_returns_nil_when_no_data()
+    setupBaseState()
+    MockWoW.SetInspectTalents({})
+    local spec = BiSGearCheck:GuessSpecFromTalents("MAGE")
+    assert_nil(spec, "should return nil when no talent data available")
+end
+
+function T.test_talent_guess_druid_balance()
+    setupBaseState()
+    MockWoW.SetInspectTalents({
+        [1] = {  -- Balance (most points)
+            [1] = { name = "Starlight", rank = 5 },
+            [2] = { name = "NaturesGrasp", rank = 1 },
+            [3] = { name = "ImprovedNaturesGrasp", rank = 4 },
+            [4] = { name = "ControlOfNature", rank = 3 },
+            [5] = { name = "FocusedStarlight", rank = 2 },
+            [6] = { name = "ImprovedMoonfire", rank = 2 },
+            [7] = { name = "Brambles", rank = 3 },
+            [8] = { name = "InsectSwarm", rank = 1 },
+            [9] = { name = "NaturesReach", rank = 2 },
+            [10] = { name = "Vengeance", rank = 5 },
+            [11] = { name = "CelestialFocus", rank = 3 },
+            [12] = { name = "LunarGuidance", rank = 3 },
+            [13] = { name = "NaturesGrace", rank = 1 },
+            [14] = { name = "Moonglow", rank = 3 },
+            [15] = { name = "BalanceOfPower", rank = 2 },
+            [16] = { name = "Moonkin", rank = 1 },
+            [17] = { name = "ImprovedFF", rank = 3 },
+            [18] = { name = "WrathOfCenarius", rank = 5 },
+            [19] = { name = "ForceOfNature", rank = 1 },
+        },
+        [2] = {},  -- Feral
+        [3] = {  -- Restoration (some)
+            [1] = { name = "MarkOfTheWild", rank = 5 },
+        },
+    })
+
+    local spec = BiSGearCheck:GuessSpecFromTalents("DRUID")
+    assert_equal("DruidBalance", spec)
+end
+
+-- ============================================================
+-- TESTS: GuessSpecFromGear (BiS matching fallback)
+-- ============================================================
+
+function T.test_gear_guess_falls_back_to_first_spec()
+    setupBaseState()
+    -- No BiS data loaded, no talents = should pick first spec
+    MockWoW.SetInspectTalents({})
+    local spec = BiSGearCheck:GuessSpecFromGear("WARRIOR", {
+        Head = {{ id = 99999 }},
+    })
+    assert_equal("WarriorArms", spec, "should fall back to first spec when no data")
+end
+
+function T.test_gear_guess_prefers_talents_over_gear()
+    setupBaseState()
+    -- Set up inspect talents that say Enhancement
+    MockWoW.SetInspectTalents({
+        [1] = {},
+        [2] = {  -- Enhancement
+            [1] = { name = "AncestralKnowledge", rank = 5 },
+            [2] = { name = "ShieldSpec", rank = 5 },
+            [3] = { name = "GuardianTotems", rank = 2 },
+            [4] = { name = "Thundering", rank = 5 },
+            [5] = { name = "ImprovedGhostWolf", rank = 2 },
+            [6] = { name = "Enhancing", rank = 2 },
+            [7] = { name = "Shamanistic", rank = 1 },
+            [8] = { name = "FlurryTalent", rank = 5 },
+            [9] = { name = "ImprovedWF", rank = 2 },
+            [10] = { name = "SpiritWeapons", rank = 1 },
+            [11] = { name = "ElementalWeapons", rank = 3 },
+            [12] = { name = "MentalQuickness", rank = 3 },
+            [13] = { name = "WeaponMastery", rank = 5 },
+            [14] = { name = "DualWield", rank = 1 },
+            [15] = { name = "Stormstrike", rank = 1 },
+        },
+        [3] = {},
+    })
+
+    local spec = BiSGearCheck:GuessSpecFromGear("SHAMAN", { Head = {{ id = 1 }} })
+    assert_equal("ShamanEnhancement", spec, "talents should take priority over gear matching")
+end
+
+-- ============================================================
+-- TESTS: CSV Export
+-- ============================================================
+
+function T.test_csv_export_nil_when_no_results()
+    setupBaseState()
+    BiSGearCheck.raidScanResults = {}
+    local csv = BiSGearCheck:GenerateRaidScanCSV()
+    assert_nil(csv)
+end
+
+function T.test_csv_export_has_header()
+    setupBaseState()
+    BiSGearCheck.raidScanResults = {
+        ["TestChar-TestRealm"] = {
+            charKey = "TestChar-TestRealm",
+            specKey = "WarriorFury",
+            issues = {},
+            issueCount = 0,
+            upgrades = {},
+        },
+    }
+
+    local csv = BiSGearCheck:GenerateRaidScanCSV()
+    assert_not_nil(csv)
+    local firstLine = csv:match("^([^\n]+)")
+    assert_true(firstLine:find("Character") ~= nil, "header should contain Character")
+    assert_true(firstLine:find("Spec") ~= nil, "header should contain Spec")
+    assert_true(firstLine:find("Upgrade") ~= nil, "header should contain Upgrade")
+end
+
+-- ============================================================
+-- TESTS: RestoreLastRaidScan
+-- ============================================================
+
+function T.test_restore_last_scan_repopulates_results()
+    setupBaseState()
+    -- Set up a character with equipped gear
+    BiSGearCheckSaved.characters["Alice-TestRealm"] = {
+        class = "MAGE",
+        faction = "Alliance",
+        level = 70,
+        wishlists = { Default = {} },
+        activeWishlist = "Default",
+        inspected = true,
+        selectedSpec = "MageArcane",
+        equipped = { Head = {{ id = 30000, link = mockLink(30000) }} },
+    }
+    BiSGearCheckSaved.lastRaidScan = {
+        time = os.time(),
+        charKeys = { "Alice-TestRealm" },
+        skipped = { { name = "Bob", class = "WARRIOR", reason = "Offline" } },
+    }
+
+    BiSGearCheck:RestoreLastRaidScan()
+    assert_equal("complete", BiSGearCheck.raidScanState)
+    assert_not_nil(BiSGearCheck.raidScanResults["Alice-TestRealm"])
+    assert_equal(1, #BiSGearCheck.raidScanSkipped)
+end
+
+function T.test_restore_last_scan_noop_when_no_data()
+    setupBaseState()
+    BiSGearCheckSaved.lastRaidScan = nil
+    BiSGearCheck:RestoreLastRaidScan()
+    assert_equal("idle", BiSGearCheck.raidScanState)
+end
+
+return T

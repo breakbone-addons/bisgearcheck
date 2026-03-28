@@ -34,6 +34,15 @@ MockWoW._skillLines = {}
 -- Talent tabs: { { points = 41 }, { points = 20 }, { points = 0 } }
 MockWoW._talentTabs = {}
 
+-- Inspect talents: { [tab] = { [index] = { name, rank } } }
+-- Used by GetTalentInfo(tab, i, true, nil, activeSpec)
+MockWoW._inspectTalents = {}
+MockWoW._inspectActiveTalentGroup = 1
+
+-- Group/raid members: { [unitID] = { name, realm, class, classDisplay, level, faction, inventory, connected, visible } }
+MockWoW._groupMembers = {}
+MockWoW._isInRaid = false
+
 -- Loaded addons: { ["AddonName"] = true }
 MockWoW._loadedAddons = {}
 
@@ -55,6 +64,10 @@ function MockWoW.reset()
     MockWoW._factionStandings = {}
     MockWoW._skillLines = {}
     MockWoW._talentTabs = {}
+    MockWoW._inspectTalents = {}
+    MockWoW._inspectActiveTalentGroup = 1
+    MockWoW._groupMembers = {}
+    MockWoW._isInRaid = false
     MockWoW._loadedAddons = {}
 
     -- Reset addon globals
@@ -79,6 +92,7 @@ function MockWoW.reset()
     dofile("Comparison.lua")
     dofile("Wishlist.lua")
     dofile("Character.lua")
+    dofile("RaidScan.lua")
     dofile("Tooltip.lua")
     dofile("Core.lua")
 end
@@ -143,6 +157,8 @@ function UnitName(unit)
     if MockWoW._inspectUnit and (unit == "target" or unit == "mouseover") then
         return MockWoW._inspectUnit.name, MockWoW._inspectUnit.realm
     end
+    local member = MockWoW._groupMembers[unit]
+    if member then return member.name, member.realm end
     return nil
 end
 
@@ -150,13 +166,20 @@ function GetRealmName()
     return MockWoW._playerRealm
 end
 
+-- Helper: resolve unit data from inspect unit or group members
+local function resolveUnit(unit)
+    if MockWoW._inspectUnit and (unit == "target" or unit == "mouseover") then
+        return MockWoW._inspectUnit
+    end
+    return MockWoW._groupMembers[unit]
+end
+
 function UnitClass(unit)
     if unit == "player" then
         return MockWoW._playerClassDisplay, MockWoW._playerClass
     end
-    if MockWoW._inspectUnit and (unit == "target" or unit == "mouseover") then
-        return MockWoW._inspectUnit.classDisplay, MockWoW._inspectUnit.class
-    end
+    local data = resolveUnit(unit)
+    if data then return data.classDisplay or data.class, data.class end
     return nil
 end
 
@@ -164,28 +187,22 @@ function UnitLevel(unit)
     if unit == "player" then
         return MockWoW._playerLevel
     end
-    if MockWoW._inspectUnit and (unit == "target" or unit == "mouseover") then
-        return MockWoW._inspectUnit.level
-    end
-    return 0
+    local data = resolveUnit(unit)
+    return data and data.level or 0
 end
 
 function UnitFactionGroup(unit)
     if unit == "player" then
         return MockWoW._playerFaction
     end
-    if MockWoW._inspectUnit and (unit == "target" or unit == "mouseover") then
-        return MockWoW._inspectUnit.faction
-    end
-    return nil
+    local data = resolveUnit(unit)
+    return data and data.faction
 end
 
 function UnitExists(unit)
     if unit == "player" then return true end
-    if MockWoW._inspectUnit and (unit == "target" or unit == "mouseover") then
-        return MockWoW._inspectUnit.exists ~= false
-    end
-    return false
+    local data = resolveUnit(unit)
+    return data and data.exists ~= false or false
 end
 
 function UnitIsUnit(u1, u2)
@@ -196,11 +213,47 @@ function UnitIsUnit(u1, u2)
     return false
 end
 
+function UnitIsConnected(unit)
+    if unit == "player" then return true end
+    local data = resolveUnit(unit)
+    return data and data.connected ~= false or false
+end
+
+function UnitIsVisible(unit)
+    if unit == "player" then return true end
+    local data = resolveUnit(unit)
+    return data and data.visible ~= false or false
+end
+
 function CanInspect(unit)
-    if MockWoW._inspectUnit and (unit == "target" or unit == "mouseover") then
-        return MockWoW._inspectUnit.canInspect ~= false
+    local data = resolveUnit(unit)
+    return data and data.canInspect ~= false or false
+end
+
+function NotifyInspect(unit)
+    -- In tests, immediately make this unit's inventory available for GetInventoryItemLink
+    MockWoW._currentInspectUnit = unit
+end
+
+function ClearInspectPlayer()
+    MockWoW._currentInspectUnit = nil
+end
+
+function GetNumGroupMembers()
+    local count = 0
+    for _ in pairs(MockWoW._groupMembers) do count = count + 1 end
+    return count
+end
+
+function IsInRaid()
+    return MockWoW._isInRaid
+end
+
+function GetActiveTalentGroup(isInspect)
+    if isInspect then
+        return MockWoW._inspectActiveTalentGroup or 1
     end
-    return false
+    return 1
 end
 
 function GetInventoryItemID(unit, slotID)
@@ -208,8 +261,10 @@ function GetInventoryItemID(unit, slotID)
         local item = MockWoW._inventory[slotID]
         return item and item.id
     end
-    if MockWoW._inspectUnit and MockWoW._inspectUnit.inventory then
-        local item = MockWoW._inspectUnit.inventory[slotID]
+    -- For inspect/group units, check the unit's inventory
+    local data = resolveUnit(unit)
+    if data and data.inventory then
+        local item = data.inventory[slotID]
         return item and item.id
     end
     return nil
@@ -220,8 +275,9 @@ function GetInventoryItemLink(unit, slotID)
         local item = MockWoW._inventory[slotID]
         return item and item.link
     end
-    if MockWoW._inspectUnit and MockWoW._inspectUnit.inventory then
-        local item = MockWoW._inspectUnit.inventory[slotID]
+    local data = resolveUnit(unit)
+    if data and data.inventory then
+        local item = data.inventory[slotID]
         return item and item.link
     end
     return nil
@@ -260,14 +316,44 @@ function GetSkillLineInfo(index)
     return nil
 end
 
-function GetNumTalentTabs()
+function GetNumTalentTabs(isInspect)
+    if isInspect and next(MockWoW._inspectTalents) then
+        local max = 0
+        for tab in pairs(MockWoW._inspectTalents) do
+            if tab > max then max = tab end
+        end
+        return max
+    end
     return #MockWoW._talentTabs
+end
+
+function GetNumTalents(tab, isInspect)
+    -- Doesn't support inspect flag in real client; returns player's count
+    local playerTab = MockWoW._talentTabs[tab]
+    return playerTab and (playerTab.numTalents or 20) or 20
 end
 
 function GetTalentTabInfo(tabIndex)
     local tab = MockWoW._talentTabs[tabIndex]
     if tab then
         return "TabName", "icon", tab.points or 0
+    end
+    return nil
+end
+
+function GetTalentInfo(tab, index, isInspect, isPet, talentGroup)
+    if isInspect and MockWoW._inspectTalents[tab] then
+        local talent = MockWoW._inspectTalents[tab][index]
+        if talent then
+            return talent.name or ("Talent" .. index), "icon", talent.row or 1, talent.column or 1, talent.rank or 0
+        end
+        return nil
+    end
+    -- Player talents (non-inspect)
+    local playerTab = MockWoW._talentTabs[tab]
+    if playerTab and playerTab.talents and playerTab.talents[index] then
+        local t = playerTab.talents[index]
+        return t.name or ("Talent" .. index), "icon", t.row or 1, t.column or 1, t.rank or 0
     end
     return nil
 end
@@ -304,9 +390,17 @@ RAID_CLASS_COLORS = {
     DRUID       = { r = 1.00, g = 0.49, b = 0.04 },
 }
 
+-- WorldFrame stub
+WorldFrame = WorldFrame or {}
+
 -- Frame stub for CreateFrame calls
 local FrameMethods = {}
-FrameMethods.__index = FrameMethods
+FrameMethods.__index = function(t, k)
+    local v = rawget(FrameMethods, k)
+    if v then return v end
+    -- Return no-op for any unimplemented method (SetOwner, SetHyperlink, etc.)
+    return function() end
+end
 function FrameMethods:RegisterEvent() end
 function FrameMethods:UnregisterEvent() end
 function FrameMethods:SetScript() end
@@ -333,6 +427,10 @@ function FrameMethods:IsForbidden() return false end
 function FrameMethods:GetItem() return nil, nil end
 function FrameMethods:AddLine() end
 function FrameMethods:AddDoubleLine() end
+function FrameMethods:NumLines() return 0 end
+function FrameMethods:ClearLines() end
+function FrameMethods:SetHyperlink() end
+function FrameMethods:GetText() return nil end
 
 function CreateFrame(frameType, name, parent, template)
     local f = setmetatable({}, FrameMethods)
@@ -367,6 +465,27 @@ function StaticPopup_Show() end
 -- Settings stub
 Settings = nil
 
+-- DEFAULT_CHAT_FRAME stub (used by RaidScan.lua)
+DEFAULT_CHAT_FRAME = DEFAULT_CHAT_FRAME or { AddMessage = function() end }
+
+-- GetTime stub
+GetTime = GetTime or function() return MockWoW._gameTime or 0 end
+MockWoW._gameTime = 0
+
+-- WoW's time() maps to Lua's os.time() but is a global in WoW
+if not rawget(_G, "time") then
+    time = os.time
+end
+
+-- GameTooltip stub
+GameTooltip = GameTooltip or setmetatable({}, { __index = function() return function() end end })
+
+-- UISpecialFrames
+UISpecialFrames = UISpecialFrames or {}
+
+-- GetSpellInfo stub
+GetSpellInfo = GetSpellInfo or function() return nil end
+
 -- InterfaceOptionsFrame stub
 InterfaceOptionsFrame_OpenToCategory = function() end
 
@@ -394,6 +513,26 @@ function MockWoW.SetInspectUnit(data)
 end
 
 -- ============================================================
+-- Helper: set up group members for raid scan tests
+function MockWoW.SetGroupMembers(members, isRaid)
+    MockWoW._groupMembers = {}
+    MockWoW._isInRaid = isRaid or false
+    for unitID, data in pairs(members) do
+        data.exists = data.exists ~= false
+        data.connected = data.connected ~= false
+        data.visible = data.visible ~= false
+        data.canInspect = data.canInspect ~= false
+        MockWoW._groupMembers[unitID] = data
+    end
+end
+
+-- Helper: set up inspected unit talents
+function MockWoW.SetInspectTalents(talents, activeGroup)
+    MockWoW._inspectTalents = talents or {}
+    MockWoW._inspectActiveTalentGroup = activeGroup or 1
+end
+
+-- ============================================================
 -- INITIAL LOAD: load addon source files
 -- ============================================================
 
@@ -403,5 +542,6 @@ dofile("EPEngine.lua")
 dofile("Comparison.lua")
 dofile("Wishlist.lua")
 dofile("Character.lua")
+dofile("RaidScan.lua")
 dofile("Tooltip.lua")
 dofile("Core.lua")
