@@ -5,6 +5,10 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
+## v3.5.4
+
+- Fixed spec auto-detection for Druid and Priest.
+
 ## v3.5.3
 
 - Trinkets and Rings no longer suggest items ranked below your lowest-ranked equipped piece.
