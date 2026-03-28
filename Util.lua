@@ -592,6 +592,13 @@ function BiSGearCheck:ItemInPhase(itemID, maxPhase)
     return itemPhase <= maxPhase
 end
 
+-- Talent tab index → spec key for classes where ClassSpecs doesn't
+-- map 1:1 with talent tabs (Druid has 4 specs for 3 tabs, Priest
+-- has 2 specs for 3 tabs).
+local TalentTabToSpec = {
+    ["DRUID"]  = { "DruidBalance", "DruidFeralDPS", "DruidRestoration" },
+    ["PRIEST"] = { "PriestHoly",   "PriestHoly",    "PriestShadow" },
+}
 -- Try to auto-detect spec from talent points
 function BiSGearCheck:GuessSpec()
     local _, classToken = UnitClass("player")
@@ -616,8 +623,14 @@ function BiSGearCheck:GuessSpec()
         end
     end
 
-    if bestTab > 0 and bestTab <= #specs then
-        return specs[bestTab].key
+    if bestTab > 0 then
+        local tabMap = TalentTabToSpec[classToken]
+        if tabMap and tabMap[bestTab] then
+            return tabMap[bestTab]
+        end
+        if bestTab <= #specs then
+            return specs[bestTab].key
+        end
     end
 
     return specs[1].key
