@@ -69,14 +69,13 @@ function MockWoW.reset()
     MockWoW._groupMembers = {}
     MockWoW._isInRaid = false
     MockWoW._loadedAddons = {}
+    MockWoW._sentMessages = {}
 
     -- Reset addon globals
     BiSGearCheck = nil
     BiSGearCheckSaved = nil
     BiSGearCheckChar = nil
     BiSGearCheckSources = nil
-    BiSGearCheckEPWeights = nil
-    BiSGearCheckItemStats = nil
     BiSGearCheckItemPhases = nil
     BiSGearCheckEnchantsDB = nil
 
@@ -88,7 +87,7 @@ function MockWoW.reset()
 
     -- Reload addon source files
     dofile("Util.lua")
-    dofile("EPEngine.lua")
+
     dofile("Comparison.lua")
     dofile("Wishlist.lua")
     dofile("Character.lua")
@@ -486,6 +485,22 @@ UISpecialFrames = UISpecialFrames or {}
 -- GetSpellInfo stub
 GetSpellInfo = GetSpellInfo or function() return nil end
 
+-- SendChatMessage stub — captures messages for test verification
+MockWoW._sentMessages = {}
+function SendChatMessage(msg, chatType, language, target)
+    MockWoW._sentMessages[#MockWoW._sentMessages + 1] = {
+        msg = msg,
+        chatType = chatType,
+        language = language,
+        target = target,
+    }
+end
+
+-- EasyMenu stub
+function EasyMenu(menuList, menuFrame, anchor, x, y, displayMode)
+    -- no-op in tests; we test WhisperIssues directly
+end
+
 -- InterfaceOptionsFrame stub
 InterfaceOptionsFrame_OpenToCategory = function() end
 
@@ -538,7 +553,6 @@ end
 
 -- Load source files in TOC order (excluding data files and UI files)
 dofile("Util.lua")
-dofile("EPEngine.lua")
 dofile("Comparison.lua")
 dofile("Wishlist.lua")
 dofile("Character.lua")

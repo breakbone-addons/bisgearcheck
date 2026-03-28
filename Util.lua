@@ -95,8 +95,6 @@ BiSGearCheck.DataSources = {
       desc = "Community wishlist aggregates from thatsmybis.com. Reflects what raiders actually want, but limited to raid drops only. No crafted, quest, or dungeon items." },
     { key = "wowhead",     label = "Wowhead",       phases = { [1] = "BiSGearCheckDB_Wowhead" },
       desc = "Editorial BiS guides from Wowhead. Curated by guide writers, but may lag behind theorycrafting changes and reflects one author's opinion." },
-    { key = "epscore",     label = "EP Score",      phases = { [0] = "BiSGearCheckDB_EPScore", [1] = "BiSGearCheckDB_EPScore", [2] = "BiSGearCheckDB_EPScore", [3] = "BiSGearCheckDB_EPScore", [4] = "BiSGearCheckDB_EPScore", [5] = "BiSGearCheckDB_EPScore" },
-      desc = "Items ranked by Equivalence Points using per-spec stat weights from WoWSims. Accounts for hit cap, talents, and party buffs. Rankings update when settings change." },
 }
 
 -- Resolve the global DB table name for a source at a given phase
@@ -706,24 +704,18 @@ function BiSGearCheck:GuessSpecFromGear(classToken, equipped)
 end
 
 -- Talent-based spec detection for inspected characters.
+-- Classic API: GetTalentInfo(tabIndex, talentIndex [, isInspect])
 -- Returns nil if talent data is unavailable (caller should use gear fallback).
 function BiSGearCheck:GuessSpecFromTalents(classToken)
     local specs = self.ClassSpecs[classToken]
     if not specs then return nil end
 
-    -- Get the inspected unit's active talent group
-    local activeSpec = 1
-    if GetActiveTalentGroup then
-        activeSpec = GetActiveTalentGroup(true) or 1
-    end
-
-    -- Count points per talent tab using the correct 5-arg signature
-    -- GetNumTalents doesn't support inspect, so iterate up to a safe max
+    -- Count points per talent tab
     local bestTab, bestPoints, totalPoints = 0, 0, 0
     for tab = 1, 3 do
         local points = 0
         for i = 1, 40 do
-            local name, _, _, _, rank = GetTalentInfo(tab, i, true, nil, activeSpec)
+            local name, _, _, _, rank = GetTalentInfo(tab, i, true)
             if not name then break end
             points = points + (rank or 0)
         end
@@ -739,10 +731,13 @@ function BiSGearCheck:GuessSpecFromTalents(classToken)
 
     -- Druid special case: Feral DPS vs Feral Tank both live in tab 2
     if classToken == "DRUID" and bestTab == 2 then
-        -- Survival of the Fittest is talent 18 in Feral tab; 2+ points = tank
-        local _, _, _, _, sotfRank = GetTalentInfo(2, 18, true, nil, activeSpec)
-        if sotfRank and sotfRank >= 2 then
-            return "DruidFeralTank"
+        -- Talent indices don't map to tree position, so search by name
+        for i = 1, 40 do
+            local name, _, _, _, rank = GetTalentInfo(2, i, true)
+            if not name then break end
+            if name == "Survival of the Fittest" and rank and rank >= 2 then
+                return "DruidFeralTank"
+            end
         end
         return "DruidFeralDPS"
     end

@@ -479,6 +479,142 @@ function T.test_set_spec_inspected_char_does_not_corrupt_player()
 end
 
 -- ============================================================
+-- TESTS: WhisperIssues
+-- ============================================================
+
+function T.test_whisper_sends_one_per_slot()
+    setupBaseState()
+    MockWoW._sentMessages = {}
+    BiSGearCheck.raidScanResults = {
+        ["Alice-TestRealm"] = {
+            charKey = "Alice-TestRealm",
+            specKey = "MageArcane",
+            issueCount = 3,
+            issues = {
+                { slotName = "Head", itemID = 30000, itemLink = mockLink(30000, "Cool Helm"), warnings = { "|cffff3333[No Enchant]|r" } },
+                { slotName = "Chest", itemID = 30001, itemLink = mockLink(30001, "Nice Robe"), warnings = { "|cffff3333[No Enchant]|r", "|cffffff00[Empty Socket]|r" } },
+            },
+            upgrades = {},
+        },
+    }
+
+    BiSGearCheck:WhisperIssues("Alice-TestRealm")
+    assert_equal(2, #MockWoW._sentMessages, "should send one whisper per slot")
+end
+
+function T.test_whisper_targets_correct_player()
+    setupBaseState()
+    MockWoW._sentMessages = {}
+    BiSGearCheck.raidScanResults = {
+        ["Alice-TestRealm"] = {
+            charKey = "Alice-TestRealm",
+            specKey = "MageArcane",
+            issueCount = 1,
+            issues = {
+                { slotName = "Head", itemLink = mockLink(30000, "Helm"), warnings = { "[No Enchant]" } },
+            },
+            upgrades = {},
+        },
+    }
+
+    BiSGearCheck:WhisperIssues("Alice-TestRealm")
+    assert_equal("Alice", MockWoW._sentMessages[1].target)
+    assert_equal("WHISPER", MockWoW._sentMessages[1].chatType)
+end
+
+function T.test_whisper_message_format()
+    setupBaseState()
+    MockWoW._sentMessages = {}
+    BiSGearCheck.raidScanResults = {
+        ["Bob-TestRealm"] = {
+            charKey = "Bob-TestRealm",
+            specKey = "WarriorFury",
+            issueCount = 1,
+            issues = {
+                { slotName = "Chest", itemLink = mockLink(30001, "Plate Chest"), warnings = { "|cffff3333[No Enchant]|r" } },
+            },
+            upgrades = {},
+        },
+    }
+
+    BiSGearCheck:WhisperIssues("Bob-TestRealm")
+    local msg = MockWoW._sentMessages[1].msg
+    assert_true(msg:find("%[BiSGearCheck%]") ~= nil, "should have addon prefix")
+    assert_true(msg:find("Chest") ~= nil, "should contain slot name")
+    assert_true(msg:find("Plate Chest") ~= nil, "should contain item name")
+    assert_true(msg:find("No Enchant") ~= nil, "should contain warning text")
+end
+
+function T.test_whisper_preserves_color_codes()
+    setupBaseState()
+    MockWoW._sentMessages = {}
+    BiSGearCheck.raidScanResults = {
+        ["Bob-TestRealm"] = {
+            charKey = "Bob-TestRealm",
+            specKey = "WarriorFury",
+            issueCount = 1,
+            issues = {
+                { slotName = "Head", itemLink = mockLink(30000), warnings = { "|cffff3333[No Enchant]|r" } },
+            },
+            upgrades = {},
+        },
+    }
+
+    BiSGearCheck:WhisperIssues("Bob-TestRealm")
+    local msg = MockWoW._sentMessages[1].msg
+    assert_true(msg:find("|cffff3333") ~= nil, "should preserve color codes in warnings")
+end
+
+function T.test_whisper_no_issues_sends_nothing()
+    setupBaseState()
+    MockWoW._sentMessages = {}
+    BiSGearCheck.raidScanResults = {
+        ["Clean-TestRealm"] = {
+            charKey = "Clean-TestRealm",
+            specKey = "MageArcane",
+            issueCount = 0,
+            issues = {},
+            upgrades = {},
+        },
+    }
+
+    BiSGearCheck:WhisperIssues("Clean-TestRealm")
+    assert_equal(0, #MockWoW._sentMessages, "should not whisper when no issues")
+end
+
+function T.test_whisper_no_result_sends_nothing()
+    setupBaseState()
+    MockWoW._sentMessages = {}
+    BiSGearCheck.raidScanResults = {}
+
+    BiSGearCheck:WhisperIssues("Nobody-TestRealm")
+    assert_equal(0, #MockWoW._sentMessages)
+end
+
+function T.test_whisper_multiple_warnings_per_slot()
+    setupBaseState()
+    MockWoW._sentMessages = {}
+    BiSGearCheck.raidScanResults = {
+        ["Alice-TestRealm"] = {
+            charKey = "Alice-TestRealm",
+            specKey = "MageArcane",
+            issueCount = 2,
+            issues = {
+                { slotName = "Chest", itemLink = mockLink(30001, "Robe"),
+                  warnings = { "|cffff3333[No Enchant]|r", "|cffffff00[Empty Socket]|r" } },
+            },
+            upgrades = {},
+        },
+    }
+
+    BiSGearCheck:WhisperIssues("Alice-TestRealm")
+    assert_equal(1, #MockWoW._sentMessages, "multiple warnings on one slot = one whisper")
+    local msg = MockWoW._sentMessages[1].msg
+    assert_true(msg:find("No Enchant") ~= nil)
+    assert_true(msg:find("Empty Socket") ~= nil)
+end
+
+-- ============================================================
 -- TESTS: GuessSpecFromTalents
 -- ============================================================
 
@@ -565,7 +701,7 @@ function T.test_talent_guess_druid_feral_tank()
             [15] = { name = "CatForm", rank = 1 },
             [16] = { name = "LeaderOfThePack", rank = 1 },
             [17] = { name = "ImprovedLeader", rank = 2 },
-            [18] = { name = "SurvivalOfTheFittest", rank = 3 },  -- Tank identifier
+            [18] = { name = "Survival of the Fittest", rank = 3 },  -- Tank identifier
             [19] = { name = "Predatory", rank = 3 },
             [20] = { name = "Mangle", rank = 1 },
         },
@@ -605,7 +741,7 @@ function T.test_talent_guess_druid_feral_dps()
             [15] = { name = "CatForm", rank = 1 },
             [16] = { name = "LeaderOfThePack", rank = 1 },
             [17] = { name = "ImprovedLeader", rank = 2 },
-            [18] = { name = "SurvivalOfTheFittest", rank = 0 },  -- 0 = not tank
+            [18] = { name = "Survival of the Fittest", rank = 0 },  -- 0 = not tank
             [19] = { name = "Predatory", rank = 3 },
             [20] = { name = "Mangle", rank = 1 },
         },

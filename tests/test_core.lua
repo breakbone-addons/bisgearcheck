@@ -157,8 +157,8 @@ function T.test_on_phase_changed_source_fallback()
     BiSGearCheck.phaseFilter = 5
     BiSGearCheck.Refresh = function(self) self._refreshCalled = true end
     BiSGearCheck:OnPhaseChanged()
-    -- Should fall back to epscore (which has all phases)
-    assert_equal("epscore", BiSGearCheck.dataSource)
+    -- No source has phase 5, should keep current source
+    assert_equal("wowtbcgg", BiSGearCheck.dataSource)
 end
 
 -- ============================================================

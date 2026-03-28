@@ -231,9 +231,14 @@ function BiSGearCheck:SnapshotInspectedGear()
 
     BiSGearCheckSaved.characters[charKey].equipped = equipped
 
-    -- Guess spec from equipped gear vs BiS lists
-    BiSGearCheckSaved.characters[charKey].selectedSpec =
-        self:GuessSpecFromGear(classToken, equipped)
+    -- Guess spec from gear (not talents — inspect talent data may be stale
+    -- on this path since we don't know if INSPECT_READY just fired)
+    if not BiSGearCheckSaved.characters[charKey].selectedSpec then
+        local specs = self.ClassSpecs[classToken]
+        if specs and #specs > 0 then
+            BiSGearCheckSaved.characters[charKey].selectedSpec = specs[1].key
+        end
+    end
 
     return charKey
 end

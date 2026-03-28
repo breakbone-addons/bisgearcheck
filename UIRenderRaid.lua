@@ -4,6 +4,48 @@
 BiSGearCheck = BiSGearCheck or {}
 
 -- ============================================================
+-- RAID CHARACTER CONTEXT MENU
+-- ============================================================
+
+local raidContextMenuFrame
+
+function BiSGearCheck:ShowRaidCharContextMenu(charKey)
+    local result = self.raidScanResults[charKey]
+    if not result then return end
+
+    if not raidContextMenuFrame then
+        raidContextMenuFrame = CreateFrame("Frame", "BiSGearCheckRaidContextMenu", UIParent, "UIDropDownMenuTemplate")
+    end
+
+    local name = charKey:match("^([^%-]+)") or charKey
+
+    UIDropDownMenu_Initialize(raidContextMenuFrame, function(self, level)
+        local info = UIDropDownMenu_CreateInfo()
+
+        if result.issueCount > 0 then
+            info.text = "Whisper Issues to " .. name
+            info.notCheckable = true
+            info.func = function()
+                BiSGearCheck:WhisperIssues(charKey)
+            end
+            UIDropDownMenu_AddButton(info, level)
+        else
+            info.text = "No issues to whisper"
+            info.notCheckable = true
+            info.disabled = true
+            UIDropDownMenu_AddButton(info, level)
+        end
+
+        info = UIDropDownMenu_CreateInfo()
+        info.text = "Cancel"
+        info.notCheckable = true
+        UIDropDownMenu_AddButton(info, level)
+    end, "MENU")
+
+    ToggleDropDownMenu(1, nil, raidContextMenuFrame, "cursor", 0, 0)
+end
+
+-- ============================================================
 -- RAID CONTROLS SETUP
 -- ============================================================
 
@@ -302,9 +344,13 @@ function BiSGearCheck:RenderRaidCharacter(parent, charKey, yOffset, width)
 
     header._raidCharKey = charKey
     header:EnableMouse(true)
-    header:SetScript("OnMouseDown", function()
-        BiSGearCheck.raidCollapsedChars[charKey] = not BiSGearCheck.raidCollapsedChars[charKey]
-        BiSGearCheck:RefreshView()
+    header:SetScript("OnMouseDown", function(self, button)
+        if button == "RightButton" then
+            BiSGearCheck:ShowRaidCharContextMenu(charKey)
+        else
+            BiSGearCheck.raidCollapsedChars[charKey] = not BiSGearCheck.raidCollapsedChars[charKey]
+            BiSGearCheck:RefreshView()
+        end
     end)
     yOffset = yOffset - self.SLOT_HEADER_HEIGHT
 

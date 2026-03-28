@@ -23,9 +23,6 @@ Data_Wowhead.lua
 Data_GemsEnchants.lua
 Data_ItemPhases.lua
 SourceDB.lua
-Data_EPWeights.lua
-Data_ItemStats.lua
-EPEngine.lua
 Tooltip.lua
 Settings.lua
 Character.lua

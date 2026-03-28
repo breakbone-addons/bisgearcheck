@@ -776,6 +776,44 @@ function BiSGearCheck:GetRaidScanCount()
     return count
 end
 
+-- ============================================================
+-- WHISPER ISSUES TO A CHARACTER
+-- ============================================================
+
+-- Send one whisper per slot with issues to the scanned character
+function BiSGearCheck:WhisperIssues(charKey)
+    local result = self.raidScanResults[charKey]
+    if not result or result.issueCount == 0 then
+        self:PrintRaidScanMessage("No issues to whisper.")
+        return
+    end
+
+    local name = charKey:match("^([^%-]+)")
+    if not name then return end
+
+    for _, issue in ipairs(result.issues) do
+        local itemName
+        if issue.itemLink then
+            itemName = issue.itemLink
+        elseif issue.itemID then
+            local n = GetItemInfo(issue.itemID)
+            itemName = n or ("Item #" .. issue.itemID)
+        else
+            itemName = "?"
+        end
+
+        local warnText = table.concat(issue.warnings, " ")
+        local msg = string.format("[BiSGearCheck] %s: %s %s",
+            issue.slotName, itemName, warnText)
+        SendChatMessage(msg, "WHISPER", nil, name)
+    end
+
+    self:PrintRaidScanMessage(string.format(
+        "Whispered %d issue%s to %s.",
+        result.issueCount, result.issueCount == 1 and "" or "s", name
+    ))
+end
+
 -- Get sorted list of scanned character keys (by issue count, descending)
 function BiSGearCheck:GetSortedRaidScanKeys()
     local keys = {}

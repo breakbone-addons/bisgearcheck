@@ -274,32 +274,7 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
                 end
             end
 
-            -- EP upgrade indicator
-            local epText = ""
-            if BiSGearCheckSaved and BiSGearCheckSaved.ep and BiSGearCheckSaved.ep.showInCompare
-                and self.selectedSpec and #slotResult.equipped > 0 then
-                local upgradeEP = self:ScoreItem(upgrade.id, self.selectedSpec)
-                if upgradeEP and upgradeEP > 0 then
-                    -- Find best equipped EP in this slot
-                    local bestEqEP = 0
-                    for _, eq in ipairs(slotResult.equipped) do
-                        if eq.id then
-                            local eqEP = self:ScoreItem(eq.id, self.selectedSpec)
-                            if eqEP > bestEqEP then bestEqEP = eqEP end
-                        end
-                    end
-                    if bestEqEP > 0 then
-                        local pct = ((upgradeEP - bestEqEP) / bestEqEP) * 100
-                        if pct > 1 then
-                            epText = string.format(" |cff00ff00+%.0f%%|r", pct)
-                        elseif pct < -1 then
-                            epText = string.format(" |cffff0000%.0f%%|r", pct)
-                        end
-                    end
-                end
-            end
-
-            row.text:SetText(string.format("  |cff00ccff#%d|r %s %s%s", upgrade.rank, itemName, sourceText, epText))
+            row.text:SetText(string.format("  |cff00ccff#%d|r %s %s", upgrade.rank, itemName, sourceText))
             row.text:SetPoint("RIGHT", row, "RIGHT", -30, 0)
 
             -- Store data on the row for shared handlers
