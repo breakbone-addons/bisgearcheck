@@ -40,6 +40,8 @@ function BiSGearCheck:RenderResults()
     UIDropDownMenu_SetText(f.compareWLDropdown, self.activeWishlist)
     f.sourceDropdown:Show()
     f.specDropdown:Show()
+    f.charDropdown:Show()
+    if f.charDropdownLabel then f.charDropdownLabel:Show() end
     if f.phaseDropdown then f.phaseDropdown:Hide() end
     -- Position zone filter on the source/spec row, after the spec dropdown
     f.zoneFilterDropdown:ClearAllPoints()

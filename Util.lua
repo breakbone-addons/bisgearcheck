@@ -581,6 +581,108 @@ function BiSGearCheck:GuessSpec()
     return specs[1].key
 end
 
+-- Guess spec for an inspected character from their talent tree.
+-- Uses the full GetTalentInfo signature: (tab, index, isInspect, isPet, talentGroup)
+-- Falls back to gear-based matching if talent data is unavailable.
+function BiSGearCheck:GuessSpecFromGear(classToken, equipped)
+    local specs = self.ClassSpecs[classToken]
+    if not specs then return nil end
+
+    -- Try talent-based detection first
+    local talentSpec = self:GuessSpecFromTalents(classToken)
+    if talentSpec then return talentSpec end
+
+    -- Fallback: match equipped items against BiS lists
+    if not equipped then return specs[1].key end
+
+    local equippedIDs = {}
+    for _, slotItems in pairs(equipped) do
+        for _, item in ipairs(slotItems) do
+            if item.id then equippedIDs[item.id] = true end
+        end
+    end
+
+    local bestSpec, bestScore = nil, -1
+    for _, specInfo in ipairs(specs) do
+        local score = 0
+        for _, src in ipairs(self.DataSources) do
+            local dbName = self:GetSourceDBName(src, self.phaseFilter or 1)
+            local db = dbName and _G[dbName]
+            if db and db[specInfo.key] and db[specInfo.key].slots then
+                for _, bisItems in pairs(db[specInfo.key].slots) do
+                    for _, bisID in ipairs(bisItems) do
+                        if equippedIDs[bisID] then
+                            score = score + 1
+                        end
+                    end
+                end
+            end
+        end
+        if score > bestScore then
+            bestScore = score
+            bestSpec = specInfo.key
+        end
+    end
+
+    return bestSpec or specs[1].key
+end
+
+-- Talent-based spec detection for inspected characters.
+-- Returns nil if talent data is unavailable (caller should use gear fallback).
+function BiSGearCheck:GuessSpecFromTalents(classToken)
+    local specs = self.ClassSpecs[classToken]
+    if not specs then return nil end
+
+    -- Get the inspected unit's active talent group
+    local activeSpec = 1
+    if GetActiveTalentGroup then
+        activeSpec = GetActiveTalentGroup(true) or 1
+    end
+
+    -- Count points per talent tab using the correct 5-arg signature
+    -- GetNumTalents doesn't support inspect, so iterate up to a safe max
+    local bestTab, bestPoints, totalPoints = 0, 0, 0
+    for tab = 1, 3 do
+        local points = 0
+        for i = 1, 40 do
+            local name, _, _, _, rank = GetTalentInfo(tab, i, true, nil, activeSpec)
+            if not name then break end
+            points = points + (rank or 0)
+        end
+        totalPoints = totalPoints + points
+        if points > bestPoints then
+            bestPoints = points
+            bestTab = tab
+        end
+    end
+
+    -- If we got no talent data at all, signal caller to use gear fallback
+    if totalPoints == 0 then return nil end
+
+    -- Druid special case: Feral DPS vs Feral Tank both live in tab 2
+    if classToken == "DRUID" and bestTab == 2 then
+        -- Survival of the Fittest is talent 18 in Feral tab; 2+ points = tank
+        local _, _, _, _, sotfRank = GetTalentInfo(2, 18, true, nil, activeSpec)
+        if sotfRank and sotfRank >= 2 then
+            return "DruidFeralTank"
+        end
+        return "DruidFeralDPS"
+    end
+
+    -- For Druid non-Feral tabs: Tab 1 = Balance, Tab 3 = Restoration
+    if classToken == "DRUID" then
+        if bestTab == 1 then return "DruidBalance" end
+        if bestTab == 3 then return "DruidRestoration" end
+    end
+
+    -- All other classes: specs map 1:1 to talent tabs
+    if bestTab <= #specs then
+        return specs[bestTab].key
+    end
+
+    return nil
+end
+
 -- Get class-colored text
 function BiSGearCheck:ClassColor(classToken, text)
     local color = RAID_CLASS_COLORS[classToken]

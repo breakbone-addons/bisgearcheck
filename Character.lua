@@ -231,11 +231,75 @@ function BiSGearCheck:SnapshotInspectedGear()
 
     BiSGearCheckSaved.characters[charKey].equipped = equipped
 
-    -- Try to guess spec from gear (use class default for now)
-    local specs = self.ClassSpecs[classToken]
-    if specs and #specs > 0 and not BiSGearCheckSaved.characters[charKey].selectedSpec then
-        BiSGearCheckSaved.characters[charKey].selectedSpec = specs[1].key
+    -- Guess spec from equipped gear vs BiS lists
+    BiSGearCheckSaved.characters[charKey].selectedSpec =
+        self:GuessSpecFromGear(classToken, equipped)
+
+    return charKey
+end
+
+-- Snapshot gear for a specific unit (used by raid scan where we already know the unit)
+function BiSGearCheck:SnapshotInspectedGearFromUnit(unit)
+    if not unit or not UnitExists(unit) then return nil end
+    if UnitIsUnit(unit, "player") then return nil end
+
+    local name, realm = UnitName(unit)
+    if not name then return nil end
+    if not realm or realm == "" then
+        realm = GetRealmName()
     end
+    local charKey = name .. "-" .. realm
+    if charKey == self.playerKey then return nil end
+
+    local _, classToken = UnitClass(unit)
+    local level = UnitLevel(unit) or 0
+    local faction = UnitFactionGroup(unit) or self.playerFaction
+
+    -- Build equipped gear snapshot
+    local equipped = {}
+    local itemCount = 0
+    for slotName, invSlots in pairs(self.SlotToInvSlot) do
+        equipped[slotName] = {}
+        for _, invSlotID in ipairs(invSlots) do
+            local itemLink = GetInventoryItemLink(unit, invSlotID)
+            if itemLink then
+                local itemID = tonumber(itemLink:match("item:(%d+)"))
+                if itemID then
+                    table.insert(equipped[slotName], {
+                        id = itemID,
+                        link = itemLink,
+                        invSlot = invSlotID,
+                    })
+                    itemCount = itemCount + 1
+                end
+            end
+        end
+    end
+
+    if itemCount == 0 then return nil end
+
+    if not BiSGearCheckSaved.characters[charKey] then
+        BiSGearCheckSaved.characters[charKey] = {
+            class = classToken,
+            faction = faction,
+            level = level,
+            wishlists = { ["Default"] = {} },
+            activeWishlist = "Default",
+            inspected = true,
+        }
+    else
+        local charData = BiSGearCheckSaved.characters[charKey]
+        charData.class = classToken
+        charData.faction = faction
+        charData.level = level
+        charData.inspected = true
+    end
+
+    BiSGearCheckSaved.characters[charKey].equipped = equipped
+
+    -- Guess spec from equipped gear vs BiS lists
+    BiSGearCheckSaved.characters[charKey].selectedSpec =
+        self:GuessSpecFromGear(classToken, equipped)
 
     return charKey
 end

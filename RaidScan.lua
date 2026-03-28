@@ -166,10 +166,10 @@ function BiSGearCheck:ProcessNextScan()
         return
     end
 
-    -- Request inspect
+    -- Request inspect (don't set expectingInspect — that's for the normal
+    -- inspect path; the raid scan routes via isRaidScanning instead)
     self.raidScanUnit = unit
     self.raidScanInspectTime = GetTime()
-    self.expectingInspect = true
     NotifyInspect(unit)
 end
 

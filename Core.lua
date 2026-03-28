@@ -55,7 +55,7 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
     elseif event == "INSPECT_READY" then
         if BiSGearCheck.isRaidScanning then
             BiSGearCheck:OnRaidScanInspectReady()
-        elseif BiSGearCheck.expectingInspect then
+        else
             BiSGearCheck:OnInspectReady()
         end
     elseif event == "GROUP_ROSTER_UPDATE" then
@@ -72,8 +72,8 @@ end)
 -- ============================================================
 
 function BiSGearCheck:OnInspectReady()
-    -- Stop listening once we've handled it
-    eventFrame:UnregisterEvent("INSPECT_READY")
+    -- Keep INSPECT_READY registered — addons like Examiner use NotifyInspect
+    -- directly (bypassing InspectUnit), so unregistering would miss future inspects
     self.expectingInspect = false
 
     local charKey = self:SnapshotInspectedGear()
@@ -107,7 +107,9 @@ end
 -- Hook InspectUnit: register INSPECT_READY only when user initiates inspect
 if InspectUnit then
     hooksecurefunc("InspectUnit", function(unit)
-        BiSGearCheck.expectingInspect = true
+        if not BiSGearCheck.isRaidScanning then
+            BiSGearCheck.expectingInspect = true
+        end
         eventFrame:RegisterEvent("INSPECT_READY")
     end)
 end
@@ -120,7 +122,7 @@ local function HookInspectFrame()
     if frame then
         inspectHooked = true
         frame:HookScript("OnShow", function()
-            if not BiSGearCheck.expectingInspect then
+            if not BiSGearCheck.expectingInspect and not BiSGearCheck.isRaidScanning then
                 BiSGearCheck.expectingInspect = true
                 eventFrame:RegisterEvent("INSPECT_READY")
             end
@@ -329,10 +331,15 @@ end
 
 function BiSGearCheck:SetSpec(specKey)
     self.selectedSpec = specKey
-    BiSGearCheckChar.selectedSpec = specKey
-    -- Update snapshot so other characters see the correct spec
     if self:IsViewingOwnCharacter() then
+        -- Persist to player's per-character saved var
+        BiSGearCheckChar.selectedSpec = specKey
         local charData = self:GetCharacterData(self.playerKey)
+        if charData then charData.selectedSpec = specKey end
+    else
+        -- Persist to the inspected character's saved data
+        local charKey = self:GetViewingCharKey()
+        local charData = self:GetCharacterData(charKey)
         if charData then charData.selectedSpec = specKey end
     end
     self:Refresh()
