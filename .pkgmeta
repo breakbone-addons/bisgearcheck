@@ -7,6 +7,9 @@ ignore:
   - .gitignore
   - .pkgmeta
   - art
+  - tests
+  - CLAUDE.md
+  - .claude
 
 externals:
   libs/LibStub:

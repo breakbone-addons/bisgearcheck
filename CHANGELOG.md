@@ -5,6 +5,10 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
+## v3.5.6
+
+- Fixed CurseForge packaging to exclude test files from release archives.
+
 ## v3.5.5
 
 - Added test suite covering EP scoring, gear comparison, wishlist CRUD, character/inspection management, tooltip indexing, item filtering, and settings initialization.
