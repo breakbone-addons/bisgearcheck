@@ -205,10 +205,6 @@ function BiSGearCheck:Initialize()
     -- Track current zone
     self.currentZone = GetRealZoneText() or ""
 
-    -- Build EP-ranked BiS list
-    self:EnsureEPSettings()
-    self:BuildEPRankedList()
-
     -- Initialize tooltip system
     self:EnsureTooltipSettings()
     self:BuildTooltipIndex()

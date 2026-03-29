@@ -5,6 +5,10 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
+## v3.5.7
+
+- Removed EP scoring feature.
+
 ## v3.5.6
 
 - Fixed CurseForge packaging to exclude test files from release archives.

@@ -29,17 +29,6 @@ function T.test_source_has_phase_false()
     assert_false(BiSGearCheck:SourceHasPhase(src, 5))
 end
 
-function T.test_epscore_has_all_phases()
-    local epSrc
-    for _, src in ipairs(BiSGearCheck.DataSources) do
-        if src.key == "epscore" then epSrc = src; break end
-    end
-    assert_not_nil(epSrc)
-    for phase = 0, 5 do
-        assert_true(BiSGearCheck:SourceHasPhase(epSrc, phase), "EP Score should have phase " .. phase)
-    end
-end
-
 -- ============================================================
 -- TESTS: EnsureSourceSettings
 -- ============================================================
@@ -105,7 +94,7 @@ function T.test_get_enabled_data_sources()
         assert_true(src.key ~= "wowtbcgg" and src.key ~= "bistooltip",
             "disabled sources should not appear")
     end
-    assert_equal(5, #enabled, "should have 5 enabled sources")
+    assert_equal(4, #enabled, "should have 4 enabled sources")
 end
 
 function T.test_get_enabled_data_sources_for_phase()

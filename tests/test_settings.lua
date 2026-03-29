@@ -51,27 +51,6 @@ function T.test_tooltip_source_toggle()
 end
 
 -- ============================================================
--- TESTS: EP Settings
--- ============================================================
-
-function T.test_ep_settings_defaults()
-    BiSGearCheckSaved = nil
-    BiSGearCheck:EnsureEPSettings()
-    local ep = BiSGearCheckSaved.ep
-    assert_equal(true, ep.showInTooltip)
-    assert_equal(true, ep.showInCompare)
-    assert_equal(false, ep.hasDraenei)
-    assert_equal(false, ep.hasTotemOfWrath)
-    assert_equal(false, ep.hasImpFaerieFire)
-end
-
-function T.test_ep_settings_preserve()
-    BiSGearCheckSaved = { characters = {}, ep = { hasDraenei = true } }
-    BiSGearCheck:EnsureEPSettings()
-    assert_equal(true, BiSGearCheckSaved.ep.hasDraenei)
-end
-
--- ============================================================
 -- TESTS: Tooltip Settings
 -- ============================================================
 

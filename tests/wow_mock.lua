@@ -62,8 +62,6 @@ function MockWoW.reset()
     BiSGearCheckSaved = nil
     BiSGearCheckChar = nil
     BiSGearCheckSources = nil
-    BiSGearCheckEPWeights = nil
-    BiSGearCheckItemStats = nil
     BiSGearCheckItemPhases = nil
     BiSGearCheckEnchantsDB = nil
 
@@ -75,7 +73,6 @@ function MockWoW.reset()
 
     -- Reload addon source files
     dofile("Util.lua")
-    dofile("EPEngine.lua")
     dofile("Comparison.lua")
     dofile("Wishlist.lua")
     dofile("Character.lua")
@@ -399,7 +396,6 @@ end
 
 -- Load source files in TOC order (excluding data files and UI files)
 dofile("Util.lua")
-dofile("EPEngine.lua")
 dofile("Comparison.lua")
 dofile("Wishlist.lua")
 dofile("Character.lua")
