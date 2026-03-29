@@ -728,14 +728,6 @@ panel:SetScript("OnShow", function(self)
     showInDropdownCheck:SetChecked(BiSGearCheckSaved.showInspectedInDropdown)
 
     BiSGearCheck:RefreshInspectedList()
-
-    -- EP Scoring
-    BiSGearCheck:EnsureEPSettings()
-    epTooltipCB:SetChecked(BiSGearCheckSaved.ep.showInTooltip)
-    epCompareCB:SetChecked(BiSGearCheckSaved.ep.showInCompare)
-    draeneiCB:SetChecked(BiSGearCheckSaved.ep.hasDraenei)
-    totemCB:SetChecked(BiSGearCheckSaved.ep.hasTotemOfWrath)
-    iffCB:SetChecked(BiSGearCheckSaved.ep.hasImpFaerieFire)
 end)
 
 function BiSGearCheck:RefreshInspectedList()
