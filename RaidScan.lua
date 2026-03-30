@@ -117,8 +117,13 @@ function BiSGearCheck:StartRaidScan()
 
     -- Include self in results (no inspect needed)
     if self.playerKey then
+        -- Always detect spec from talents for raid scan, ignoring the
+        -- Compare tab's manual spec selection
+        local savedSpec = self.selectedSpec
+        self.selectedSpec = self:GuessSpec()
         self:SnapshotEquippedGear()
         self:AnalyzeCharacter(self.playerKey)
+        self.selectedSpec = savedSpec
     end
 
     if #self.raidScanQueue == 0 then

@@ -315,6 +315,7 @@ function BiSGearCheck:RenderBisList()
                                 row.text:SetText(string.format("    |cffa335ee%s|r", enchant[2]))
                                 local lf = self:GetLinkFrame(row)
                                 lf._enchantID = enchant[1]
+                                lf._enchantSpellOverride = enchant[3]
                                 lf:SetScript("OnEnter", self.OnEnchantEnter)
                                 lf:SetScript("OnLeave", self.OnTooltipLeave)
                                 yOffset = yOffset - self.ITEM_ROW_HEIGHT
