@@ -328,10 +328,11 @@ function BiSGearCheck:RenderRaidCharacter(parent, charKey, yOffset, width)
                     else
                         itemName = "?"
                     end
+                    local rankTag = issue.bisRank and (" #" .. issue.bisRank) or ""
                     -- Strip color codes from warnings for cleaner tooltip
                     local warnList = table.concat(issue.warnings, " ")
                     GameTooltip:AddDoubleLine(
-                        issue.slotName .. ": " .. itemName,
+                        issue.slotName .. ": " .. itemName .. rankTag,
                         warnList,
                         1, 1, 1, 1, 1, 1
                     )
@@ -368,9 +369,10 @@ function BiSGearCheck:RenderRaidCharacter(parent, charKey, yOffset, width)
         for _, issue in ipairs(result.issues) do
             local row = self:CreateRow(parent, yOffset, width)
             local itemText = issue.itemLink or ("Item #" .. (issue.itemID or "?"))
+            local rankText = issue.bisRank and string.format(" |cff00ccff#%d|r", issue.bisRank) or ""
             local warnText = table.concat(issue.warnings, " ")
-            row.text:SetText(string.format("  |cffffd100%s:|r %s %s",
-                issue.slotName, itemText, warnText))
+            row.text:SetText(string.format("  |cffffd100%s:|r %s%s %s",
+                issue.slotName, itemText, rankText, warnText))
 
             if issue.itemLink then
                 row._itemLink = issue.itemLink

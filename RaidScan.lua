@@ -299,6 +299,18 @@ function BiSGearCheck:AnalyzeCharacter(charKey)
     local totalIssueCount = 0
     local upgrades = {}
 
+    -- Build BiS rank lookup for this spec
+    local db = self:GetActiveDB()
+    local bisRankBySlot = {}  -- bisRankBySlot[slotName][itemID] = rank
+    if db and db[specKey] and db[specKey].slots then
+        for sName, bisItems in pairs(db[specKey].slots) do
+            bisRankBySlot[sName] = {}
+            for rank, bisID in ipairs(bisItems) do
+                bisRankBySlot[sName][bisID] = rank
+            end
+        end
+    end
+
     -- Analyze each slot
     for _, slotName in ipairs(self.SlotOrder) do
         local slotItems = charData.equipped[slotName]
@@ -315,12 +327,19 @@ function BiSGearCheck:AnalyzeCharacter(charKey)
                     end
                 end
 
+                -- BiS rank for this item
+                local bisRank
+                if item.id and bisRankBySlot[slotName] then
+                    bisRank = bisRankBySlot[slotName][item.id]
+                end
+
                 if #slotIssues > 0 then
                     issues[#issues + 1] = {
                         slotName = slotName,
                         itemID = item.id,
                         itemLink = item.link,
                         warnings = slotIssues,
+                        bisRank = bisRank,
                     }
                 end
             end
@@ -781,6 +800,13 @@ end
 -- ============================================================
 
 -- Send one whisper per slot with issues to the scanned character
+-- Strip WoW color escape sequences (|cAARRGGBB ... |r) from a string
+local function StripColorCodes(text)
+    text = text:gsub("|c%x%x%x%x%x%x%x%x", "")
+    text = text:gsub("|r", "")
+    return text
+end
+
 function BiSGearCheck:WhisperIssues(charKey)
     local result = self.raidScanResults[charKey]
     if not result or result.issueCount == 0 then
@@ -788,8 +814,7 @@ function BiSGearCheck:WhisperIssues(charKey)
         return
     end
 
-    local name = charKey:match("^([^%-]+)")
-    if not name then return end
+    local displayName = charKey:match("^([^%-]+)") or charKey
 
     for _, issue in ipairs(result.issues) do
         local itemName
@@ -802,15 +827,16 @@ function BiSGearCheck:WhisperIssues(charKey)
             itemName = "?"
         end
 
-        local warnText = table.concat(issue.warnings, " ")
-        local msg = string.format("[BiSGearCheck] %s: %s %s",
-            issue.slotName, itemName, warnText)
-        SendChatMessage(msg, "WHISPER", nil, name)
+        local rankText = issue.bisRank and ("#" .. issue.bisRank) or ""
+        local warnText = StripColorCodes(table.concat(issue.warnings, " "))
+        local msg = string.format("[BiSGearCheck] %s: %s %s %s",
+            issue.slotName, itemName, rankText, warnText)
+        SendChatMessage(msg, "WHISPER", nil, charKey)
     end
 
     self:PrintRaidScanMessage(string.format(
         "Whispered %d issue%s to %s.",
-        result.issueCount, result.issueCount == 1 and "" or "s", name
+        result.issueCount, result.issueCount == 1 and "" or "s", displayName
     ))
 end
 

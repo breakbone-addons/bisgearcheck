@@ -518,11 +518,35 @@ function T.test_whisper_targets_correct_player()
     }
 
     BiSGearCheck:WhisperIssues("Alice-TestRealm")
-    assert_equal("Alice", MockWoW._sentMessages[1].target)
+    assert_equal("Alice-TestRealm", MockWoW._sentMessages[1].target)
     assert_equal("WHISPER", MockWoW._sentMessages[1].chatType)
 end
 
 function T.test_whisper_message_format()
+    setupBaseState()
+    MockWoW._sentMessages = {}
+    BiSGearCheck.raidScanResults = {
+        ["Bob-TestRealm"] = {
+            charKey = "Bob-TestRealm",
+            specKey = "WarriorFury",
+            issueCount = 1,
+            issues = {
+                { slotName = "Chest", itemLink = mockLink(30001, "Plate Chest"), bisRank = 3, warnings = { "|cffff3333[No Enchant]|r" } },
+            },
+            upgrades = {},
+        },
+    }
+
+    BiSGearCheck:WhisperIssues("Bob-TestRealm")
+    local msg = MockWoW._sentMessages[1].msg
+    assert_true(msg:find("%[BiSGearCheck%]") ~= nil, "should have addon prefix")
+    assert_true(msg:find("Chest") ~= nil, "should contain slot name")
+    assert_true(msg:find("Plate Chest") ~= nil, "should contain item name")
+    assert_true(msg:find("#3") ~= nil, "should contain BiS rank")
+    assert_true(msg:find("No Enchant") ~= nil, "should contain warning text")
+end
+
+function T.test_whisper_omits_rank_when_not_on_list()
     setupBaseState()
     MockWoW._sentMessages = {}
     BiSGearCheck.raidScanResults = {
@@ -539,13 +563,10 @@ function T.test_whisper_message_format()
 
     BiSGearCheck:WhisperIssues("Bob-TestRealm")
     local msg = MockWoW._sentMessages[1].msg
-    assert_true(msg:find("%[BiSGearCheck%]") ~= nil, "should have addon prefix")
-    assert_true(msg:find("Chest") ~= nil, "should contain slot name")
-    assert_true(msg:find("Plate Chest") ~= nil, "should contain item name")
-    assert_true(msg:find("No Enchant") ~= nil, "should contain warning text")
+    assert_true(msg:find("#") == nil, "should not contain rank when bisRank is nil")
 end
 
-function T.test_whisper_preserves_color_codes()
+function T.test_whisper_strips_color_codes()
     setupBaseState()
     MockWoW._sentMessages = {}
     BiSGearCheck.raidScanResults = {
@@ -562,7 +583,8 @@ function T.test_whisper_preserves_color_codes()
 
     BiSGearCheck:WhisperIssues("Bob-TestRealm")
     local msg = MockWoW._sentMessages[1].msg
-    assert_true(msg:find("|cffff3333") ~= nil, "should preserve color codes in warnings")
+    assert_true(msg:find("|c") == nil, "should strip color codes from whisper warnings")
+    assert_true(msg:find("No Enchant") ~= nil, "should keep warning text")
 end
 
 function T.test_whisper_no_issues_sends_nothing()
