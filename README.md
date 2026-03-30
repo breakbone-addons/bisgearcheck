@@ -78,6 +78,10 @@ Inspect your entire raid at once. Scan all members to check for missing enchants
 - Zone filter to focus upgrades on a specific instance
 - Collapse/expand individual characters or all at once
 
+<img src="art/screenshot-raid-scan-csv.png" alt="Raid Scan CSV Export" width="600"/>
+<img src="art/screenshot-raid-scan-report.png" alt="Raid Scan Chat Report" width="450"/>
+<img src="art/screenshot-raid-scan-whisper.png" alt="Raid Scan Whisper Issues" width="450"/>
+
 ## Settings
 
 Configure tooltip display, enable or disable individual data sources for the addon UI and tooltips, and manage character filters.

@@ -62,6 +62,21 @@
       "caption": "Scan your raid for gear issues, BiS rank, and upgrade opportunities"
     },
     {
+      "file": "art/screenshot-raid-scan-csv.png",
+      "alt": "BISGearCheck Raid Scan CSV export",
+      "caption": "Export scan results as CSV for spreadsheet analysis"
+    },
+    {
+      "file": "art/screenshot-raid-scan-report.png",
+      "alt": "BISGearCheck Raid Scan chat report",
+      "caption": "Print a quick issue summary to chat"
+    },
+    {
+      "file": "art/screenshot-raid-scan-whisper.png",
+      "alt": "BISGearCheck Raid Scan whisper issues to a player",
+      "caption": "Right-click to whisper gear issues directly to a player"
+    },
+    {
       "file": "art/screenshot-settings.png",
       "alt": "BISGearCheck Settings panel",
       "caption": "Granular settings for data sources, tooltips, and more"
