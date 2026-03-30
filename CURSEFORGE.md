@@ -36,6 +36,12 @@ Equipped gear is checked for missing enchants, wrong enchants, empty sockets, an
 
 Budget alternatives are recognized: lesser shoulder inscriptions, lesser spellthreads, and lesser leg armors show as [Lesser Enchant] in yellow instead of red. Green-quality gems show as [Lesser Gems] in yellow.
 
+### Raid Scan
+
+Inspect your entire raid at once. Scan all members to check for missing enchants, wrong gems, empty sockets, and mount-speed items left equipped. Each issue shows the item's BiS list position. Right-click any character to whisper their issues directly. Export results as CSV or print a summary to chat.
+
+<img src="https://breakbone-addons.com/images/bisgearcheck-screenshot-raid-scan.png" alt="Raid Scan" width="500"/>
+
 ### Faction-Aware
 
 Alliance and Horde characters see only the items available to their faction. Faction-specific quest rewards, reputation items, and Aldor/Scryer enchants are filtered automatically.

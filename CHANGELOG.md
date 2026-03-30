@@ -5,6 +5,13 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
+## v3.6.0
+
+- Added Raid Scan: inspect your entire raid and see enchant/gem issues, BiS rank of equipped items, and upgrade suggestions per character.
+- Right-click any scanned character to whisper their issues directly.
+- Scan results can be exported as CSV or printed as a text report.
+- Zone and source filters carry over from Compare settings.
+
 ## v3.5.6
 
 - Fixed CurseForge packaging to exclude test files from release archives.

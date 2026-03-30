@@ -64,6 +64,20 @@ BiS rankings appear directly in item tooltips, grouped by data source. Hover ove
 
 Switch between all characters on your account from the character selector dropdown. View another character's gear on the Compare tab, edit their wishlists, and plan upgrades across your roster. Gear snapshots are saved automatically. Set a minimum level threshold or ignore specific characters to keep the dropdown clean.
 
+## Raid Scan
+
+Inspect your entire raid at once. Scan all members to check for missing enchants, wrong gems, empty sockets, and mount-speed items left equipped. Each issue row shows the item's BiS list position so you can see at a glance how close someone's gear is to optimal.
+
+<img src="art/screenshot-raid-scan.png" alt="Raid Scan" width="600"/>
+
+- Scans all raid members in range via inspect
+- Shows enchant, gem, and gear issues per character with BiS rank
+- Upgrade suggestions per slot using the active data source
+- Right-click a character to whisper their issues directly
+- Export results as CSV or print a text report to chat
+- Zone filter to focus upgrades on a specific instance
+- Collapse/expand individual characters or all at once
+
 ## Settings
 
 Configure tooltip display, enable or disable individual data sources for the addon UI and tooltips, and manage character filters.
