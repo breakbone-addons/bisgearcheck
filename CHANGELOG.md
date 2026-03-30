@@ -5,6 +5,13 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
+## v3.6.1
+
+- Fixed enchant tooltip showing Major Spellpower when hovering Major Healing.
+- Fixed weapon slot showing duplicate entries for Main Hand and Twohand.
+- Fixed raid scan using Compare tab spec instead of detecting from talents.
+- Corrected several enchant IDs and tooltip mappings.
+
 ## v3.6.0
 
 - Added Raid Scan: inspect your entire raid and see enchant/gem issues, BiS rank of equipped items, and upgrade suggestions per character.
