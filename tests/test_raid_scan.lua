@@ -531,7 +531,7 @@ function T.test_whisper_message_format()
             specKey = "WarriorFury",
             issueCount = 1,
             issues = {
-                { slotName = "Chest", itemLink = mockLink(30001, "Plate Chest"), bisRank = 3, warnings = { "|cffff3333[No Enchant]|r" } },
+                { slotName = "Chest", itemLink = mockLink(30001, "Plate Chest"), warnings = { "|cffff3333[No Enchant]|r" } },
             },
             upgrades = {},
         },
@@ -542,28 +542,7 @@ function T.test_whisper_message_format()
     assert_true(msg:find("%[BiSGearCheck%]") ~= nil, "should have addon prefix")
     assert_true(msg:find("Chest") ~= nil, "should contain slot name")
     assert_true(msg:find("Plate Chest") ~= nil, "should contain item name")
-    assert_true(msg:find("#3") ~= nil, "should contain BiS rank")
     assert_true(msg:find("No Enchant") ~= nil, "should contain warning text")
-end
-
-function T.test_whisper_omits_rank_when_not_on_list()
-    setupBaseState()
-    MockWoW._sentMessages = {}
-    BiSGearCheck.raidScanResults = {
-        ["Bob-TestRealm"] = {
-            charKey = "Bob-TestRealm",
-            specKey = "WarriorFury",
-            issueCount = 1,
-            issues = {
-                { slotName = "Chest", itemLink = mockLink(30001, "Plate Chest"), warnings = { "|cffff3333[No Enchant]|r" } },
-            },
-            upgrades = {},
-        },
-    }
-
-    BiSGearCheck:WhisperIssues("Bob-TestRealm")
-    local msg = MockWoW._sentMessages[1].msg
-    assert_true(msg:find("#") == nil, "should not contain rank when bisRank is nil")
 end
 
 function T.test_whisper_strips_color_codes()

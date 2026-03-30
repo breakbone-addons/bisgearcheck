@@ -827,10 +827,9 @@ function BiSGearCheck:WhisperIssues(charKey)
             itemName = "?"
         end
 
-        local rankText = issue.bisRank and ("#" .. issue.bisRank) or ""
         local warnText = StripColorCodes(table.concat(issue.warnings, " "))
-        local msg = string.format("[BiSGearCheck] %s: %s %s %s",
-            issue.slotName, itemName, rankText, warnText)
+        local msg = string.format("[BiSGearCheck] %s: %s %s",
+            issue.slotName, itemName, warnText)
         SendChatMessage(msg, "WHISPER", nil, charKey)
     end
 
