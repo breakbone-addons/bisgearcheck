@@ -53,6 +53,7 @@ function BiSGearCheck:ClearScrollContent(scrollChild)
                 row._linkFrame:SetScript("OnEnter", nil)
                 row._linkFrame:SetScript("OnLeave", nil)
                 row._linkFrame._enchantID = nil
+                row._linkFrame._enchantSpellOverride = nil
             end
             if row._warnFrame then
                 row._warnFrame:Hide()
@@ -233,6 +234,12 @@ BiSGearCheck.OnEnchantEnter = function(frame)
     local enchantID = frame._enchantID
     if not enchantID then return end
     GameTooltip:SetOwner(frame, "ANCHOR_RIGHT")
+    -- Direct spell override (for shared enchantIDs like Major Healing / Major Spellpower)
+    if frame._enchantSpellOverride then
+        GameTooltip:SetHyperlink("spell:" .. frame._enchantSpellOverride)
+        GameTooltip:Show()
+        return
+    end
     local linkData = BiSGearCheckEnchantLinks and BiSGearCheckEnchantLinks[enchantID]
     if linkData then
         -- Check for slot-specific override (e.g., same enchantID used on different slots)

@@ -518,7 +518,7 @@ function T.test_whisper_targets_correct_player()
     }
 
     BiSGearCheck:WhisperIssues("Alice-TestRealm")
-    assert_equal("Alice", MockWoW._sentMessages[1].target)
+    assert_equal("Alice-TestRealm", MockWoW._sentMessages[1].target)
     assert_equal("WHISPER", MockWoW._sentMessages[1].chatType)
 end
 
@@ -545,7 +545,7 @@ function T.test_whisper_message_format()
     assert_true(msg:find("No Enchant") ~= nil, "should contain warning text")
 end
 
-function T.test_whisper_preserves_color_codes()
+function T.test_whisper_strips_color_codes()
     setupBaseState()
     MockWoW._sentMessages = {}
     BiSGearCheck.raidScanResults = {
@@ -562,7 +562,8 @@ function T.test_whisper_preserves_color_codes()
 
     BiSGearCheck:WhisperIssues("Bob-TestRealm")
     local msg = MockWoW._sentMessages[1].msg
-    assert_true(msg:find("|cffff3333") ~= nil, "should preserve color codes in warnings")
+    assert_true(msg:find("|c") == nil, "should strip color codes from whisper warnings")
+    assert_true(msg:find("No Enchant") ~= nil, "should keep warning text")
 end
 
 function T.test_whisper_no_issues_sends_nothing()

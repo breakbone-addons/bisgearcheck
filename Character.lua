@@ -4,6 +4,28 @@
 BiSGearCheck = BiSGearCheck or {}
 
 -- ============================================================
+-- WEAPON SLOT DEDUPLICATION
+-- ============================================================
+-- Main Hand and Twohand both map to inventory slot 16.
+-- After snapshotting, clear the slot that doesn't match the item type.
+
+local function DeduplicateWeaponSlots(equipped)
+    local mhItems = equipped["Main Hand"]
+    local thItems = equipped["Twohand"]
+    if not mhItems or not thItems then return end
+    -- Both slots will have the same item(s) from inv slot 16
+    -- Use GetItemInfo to check if it's a 2H weapon
+    if mhItems[1] and mhItems[1].id then
+        local _, _, _, _, _, _, _, _, invType = GetItemInfo(mhItems[1].id)
+        if invType == "INVTYPE_2HWEAPON" then
+            wipe(equipped["Main Hand"])
+        else
+            wipe(equipped["Twohand"])
+        end
+    end
+end
+
+-- ============================================================
 -- CHARACTER KEY HELPER
 -- ============================================================
 
@@ -149,6 +171,7 @@ function BiSGearCheck:SnapshotEquippedGear()
             end
         end
     end
+    DeduplicateWeaponSlots(equipped)
     charData.equipped = equipped
     charData.selectedSpec = self.selectedSpec
 end
@@ -210,6 +233,8 @@ function BiSGearCheck:SnapshotInspectedGear()
 
     -- Don't save if we got no items (inspect data not ready)
     if itemCount == 0 then return nil end
+
+    DeduplicateWeaponSlots(equipped)
 
     -- Store or update character entry
     if not BiSGearCheckSaved.characters[charKey] then
@@ -282,6 +307,8 @@ function BiSGearCheck:SnapshotInspectedGearFromUnit(unit)
     end
 
     if itemCount == 0 then return nil end
+
+    DeduplicateWeaponSlots(equipped)
 
     if not BiSGearCheckSaved.characters[charKey] then
         BiSGearCheckSaved.characters[charKey] = {

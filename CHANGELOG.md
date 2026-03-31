@@ -5,11 +5,25 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
-## v3.5.7
+## v3.6.2
 
-- Fixed Cloak of Eternity (defense cloak) incorrectly appearing in Restoration Druid, Holy Priest, Holy Paladin, and Restoration Shaman BiS lists instead of White Remedy Cape.
+- Fixed Cloak of Eternity (defense cloak) incorrectly appearing in healer BiS lists instead of White Remedy Cape.
 - Fixed inspect events firing excessively from other addons' background inspections.
 - Compare tab now switches back to your character when you inspect yourself.
+
+## v3.6.1
+
+- Fixed enchant tooltip showing Major Spellpower when hovering Major Healing.
+- Fixed weapon slot showing duplicate entries for Main Hand and Twohand.
+- Fixed raid scan using Compare tab spec instead of detecting from talents.
+- Corrected several enchant IDs and tooltip mappings.
+
+## v3.6.0
+
+- Added Raid Scan: inspect your entire raid and see enchant/gem issues, BiS rank of equipped items, and upgrade suggestions per character.
+- Right-click any scanned character to whisper their issues directly.
+- Scan results can be exported as CSV or printed as a text report.
+- Zone and source filters carry over from Compare settings.
 
 ## v3.5.6
 

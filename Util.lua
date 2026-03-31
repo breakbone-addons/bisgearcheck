@@ -672,15 +672,23 @@ function BiSGearCheck:GuessSpecFromGear(classToken, equipped)
     if not equipped then return specs[1].key end
 
     local equippedIDs = {}
+    local equippedEnchantIDs = {}
     for _, slotItems in pairs(equipped) do
         for _, item in ipairs(slotItems) do
             if item.id then equippedIDs[item.id] = true end
+            if item.link then
+                local enchantID = tonumber(item.link:match("item:%d+:(%d+)"))
+                if enchantID and enchantID > 0 then
+                    equippedEnchantIDs[enchantID] = true
+                end
+            end
         end
     end
 
     local bestSpec, bestScore = nil, -1
     for _, specInfo in ipairs(specs) do
         local score = 0
+        -- Score from BiS item matches
         for _, src in ipairs(self.DataSources) do
             local dbName = self:GetSourceDBName(src, self.phaseFilter or 1)
             local db = dbName and _G[dbName]
@@ -690,6 +698,17 @@ function BiSGearCheck:GuessSpecFromGear(classToken, equipped)
                         if equippedIDs[bisID] then
                             score = score + 1
                         end
+                    end
+                end
+            end
+        end
+        -- Score from enchant matches (strong spec signal)
+        local specEnchants = BiSGearCheckEnchantsDB and BiSGearCheckEnchantsDB[specInfo.key]
+        if specEnchants then
+            for _, slotEnchants in pairs(specEnchants) do
+                for _, enchant in ipairs(slotEnchants) do
+                    if equippedEnchantIDs[enchant[1]] then
+                        score = score + 3  -- enchants are strong spec indicators
                     end
                 end
             end

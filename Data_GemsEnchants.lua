@@ -22,7 +22,7 @@
 --     2674 = Spellsurge (mana proc)
 --     2666 = Major Intellect (+30 int)
 --     2668 = Potency (+20 str)
---     2564 = Greater Agility 1H (+15 agi)  [UNVERIFIED - may be gloves]
+--     2564 = Superior Agility (+15 agi) [shared with gloves]
 --     2646 = Greater Agility (+25 agi) [UNVERIFIED - could be weapon or 2H]
 --   Head (applied via items - enchantIDs from SpellItemEnchantment):
 --     3002 = Glyph of Power (+22 SP, +14 hit) - Sha'tar Revered
@@ -55,15 +55,15 @@
 --     2649 = Fortitude (+12 stam)
 --     369 = Major Intellect (+12 int) [spell 34001]
 --     2648 = Major Defense (+12 def rating)
---     2617 = Superior Healing (+16 SP) [UNVERIFIED - listed as +16 SP, actual is +30 healing]
+--     2617 = Superior Healing (+30 healing, +10 SP)
 --     2606 = Assault (+30 AP) [UNVERIFIED]
 --   Hands:
---     2564 = Superior Agility (+15 agi) [UNVERIFIED - same ID as cloak enchant?]
+--     2564 = Superior Agility (+15 agi) [shared with weapon]
 --     2618 = Superior Agility (+15 agi) [alternative ID]
 --     2563 = Major Strength (+15 str) [UNVERIFIED]
 --     2937 = Major Spellpower (+20 SP)
 --     2613 = Threat (+2% threat)
---     2658 = Precise Strikes (+10 hit, +10 crit) [UNVERIFIED - name may differ]
+--     2658 = Surefooted (+10 hit, +10 crit) [shared with boots]
 --     2935 = Spell Strike (+15 hit rating)
 --   Legs:
 --     3012 = Nethercobra Leg Armor (+50 AP, +12 crit)
@@ -80,7 +80,7 @@
 --     2656 = Vitality (+5 hp5 and +5 mp5)
 --     2969 = Boar's Speed alt (+20 AP, minor speed) [UNVERIFIED]
 --   Shield:
---     2653 = Major Stamina (+36 block value) [UNVERIFIED - stats say block value]
+--     2653 = Major Stamina (+18 stam)
 --     2654 = Intellect (+12 int) [spell 27945, different ID from bracer Major Intellect]
 --   Ranged:
 --     2724 = Stabilized Eternium Scope (+28 crit rating)
@@ -105,7 +105,8 @@ BiSGearCheckEnchantLinks = {
     [2673] = { "spell", 27984 },  -- Mongoose
     [2671] = { "spell", 27981 },  -- Sunfire
     [2672] = { "spell", 27982 },  -- Soulfrost
-    [2669] = { "spell", 27975 },  -- Major Spellpower / Major Healing
+    [2669] = { "spell", 27975 },  -- Major Spellpower
+    [2343] = { "spell", 34010 },  -- Major Healing
     [2670] = { "spell", 27977 },  -- Major Agility (2H)
     [2667] = { "spell", 27971 },  -- Savagery (2H)
     [2675] = { "spell", 28004 },  -- Battlemaster
@@ -130,7 +131,7 @@ BiSGearCheckEnchantLinks = {
     [2978] = { "item", 28889 },   -- Greater Inscription of Warding
     [2993] = { "item", 28911 },   -- Greater Inscription of the Knight
     -- Lesser shoulder inscriptions (common "wrong" enchants)
-    [2985] = { "item", 28878 },   -- Inscription of Vengeance
+    [2985] = { "item", 28885 },   -- Inscription of Vengeance
     [2981] = { "item", 28881 },   -- Inscription of Discipline
     [2979] = { "item", 28878 },   -- Inscription of Faith
     [2994] = { "item", 28903 },   -- Inscription of the Orb
@@ -169,7 +170,7 @@ BiSGearCheckEnchantLinks = {
     [2612] = { "spell", 33999 },  -- Major Healing
     [2613] = { "spell", 25072 },  -- Threat
     [2935] = { "spell", 33994 },  -- Spell Strike
-    [2658] = { "spell", 33994 },  -- Precise Strikes (same spell as Spell Strike)
+    [2658] = { "spell", 27954 },  -- Surefooted (+10 hit, +10 crit, minor speed)
     [2946] = { "spell", 33996 },  -- Assault
 
     -- Legs (consumable items - Leg Armors / Spellthreads)
@@ -312,7 +313,7 @@ local ENCHANTS = {
     WRIST_FORTITUDE        = { 2649, "Enchant Bracer - Fortitude" },      -- +12 stam
     WRIST_MAJOR_INTELLECT  = { 369, "Enchant Bracer - Major Intellect" }, -- +12 int [spell 34001]
     WRIST_MAJOR_DEFENSE    = { 2648, "Enchant Bracer - Major Defense" },  -- +12 def
-    WRIST_SUP_HEALING      = { 2617, "Enchant Bracer - Superior Healing" },-- +30 healing [UNVERIFIED - stored as +16 SP]
+    WRIST_SUP_HEALING      = { 2617, "Enchant Bracer - Superior Healing" },-- +30 healing / +10 SP
     WRIST_ASSAULT          = { 2606, "Enchant Bracer - Assault" },         -- +24 AP [UNVERIFIED]
 
     -- Hands
@@ -322,7 +323,7 @@ local ENCHANTS = {
     HANDS_MAJOR_HEALING    = { 2612, "Enchant Gloves - Major Healing" },   -- +35 healing [UNVERIFIED]
     HANDS_THREAT           = { 2613, "Enchant Gloves - Threat" },          -- +2% threat
     HANDS_SPELL_STRIKE     = { 2935, "Enchant Gloves - Spell Strike" },   -- +15 hit [UNVERIFIED]
-    HANDS_PRECISE_STRIKES  = { 2658, "Enchant Gloves - Precise Strikes" },-- +10 hit, +10 crit [UNVERIFIED]
+    -- HANDS_PRECISE_STRIKES removed: "Precise Strikes" is WotLK rename of Spell Strike, not a TBC enchant
     HANDS_ASSAULT          = { 2946, "Enchant Gloves - Assault" },         -- +26 AP [UNVERIFIED]
 
     -- Legs
@@ -341,7 +342,7 @@ local ENCHANTS = {
     FEET_VITALITY          = { 2656, "Enchant Boots - Vitality" },        -- +5 hp5 and mp5
 
     -- Shield
-    SHIELD_MAJOR_STAMINA   = { 2653, "Enchant Shield - Major Stamina" },  -- +18 stam [UNVERIFIED - listed as +36 block]
+    SHIELD_MAJOR_STAMINA   = { 2653, "Enchant Shield - Major Stamina" },  -- +18 stam
     SHIELD_INTELLECT       = { 2654, "Enchant Shield - Intellect" },      -- +12 int [spell 27945]
 
     -- Weapon (references to top-level definitions)
@@ -349,7 +350,7 @@ local ENCHANTS = {
     WEAPON_SUNFIRE         = { 2671, "Enchant Weapon - Sunfire" },
     WEAPON_SOULFROST       = { 2672, "Enchant Weapon - Soulfrost" },
     WEAPON_MAJOR_SPELLPOWER= { 2669, "Enchant Weapon - Major Spellpower" },
-    WEAPON_MAJOR_HEALING   = { 2669, "Enchant Weapon - Major Healing" },   -- [UNVERIFIED - may differ from Major SP]
+    WEAPON_MAJOR_HEALING   = { 2343, "Enchant Weapon - Major Healing" },   -- +81 healing / +27 SP
     WEAPON_SAVAGERY        = { 2667, "Enchant Weapon - Savagery" },
     WEAPON_MAJOR_AGILITY_2H= { 2670, "Enchant 2H Weapon - Major Agility" },
     WEAPON_MAJOR_INTELLECT = { 2666, "Enchant Weapon - Major Intellect" },
@@ -460,7 +461,7 @@ BiSGearCheckEnchantsDB["DruidRestoration"] = {
     Hands    = { { 2612, "Enchant Gloves - Major Healing" }, { 2937, "Enchant Gloves - Major Spellpower" } },
     Legs     = { { 2746, "Golden Spellthread" }, { 2748, "Runic Spellthread" } },
     Feet     = { { 2940, "Enchant Boots - Boar's Speed" }, { 2656, "Enchant Boots - Vitality" } },
-    Weapon   = { { 2669, "Enchant Weapon - Major Healing" }, { 2674, "Enchant Weapon - Spellsurge" } },
+    Weapon   = { { 2343, "Enchant Weapon - Major Healing" }, { 2674, "Enchant Weapon - Spellsurge" } },
 }
 
 -- ============================================================
@@ -601,7 +602,7 @@ BiSGearCheckEnchantsDB["PaladinHoly"] = {
     Hands    = { { 2612, "Enchant Gloves - Major Healing" } },
     Legs     = { { 2746, "Golden Spellthread" }, { 2748, "Runic Spellthread" } },
     Feet     = { { 2940, "Enchant Boots - Boar's Speed" }, { 2656, "Enchant Boots - Vitality" } },
-    Weapon   = { { 2666, "Enchant Weapon - Major Intellect" }, { 2669, "Enchant Weapon - Major Healing" } },
+    Weapon   = { { 2666, "Enchant Weapon - Major Intellect" }, { 2343, "Enchant Weapon - Major Healing" } },
     Shield   = { { 2654, "Enchant Shield - Intellect" } },
 }
 
@@ -661,7 +662,7 @@ BiSGearCheckEnchantsDB["PriestHoly"] = {
     Hands    = { { 2612, "Enchant Gloves - Major Healing" } },
     Legs     = { { 2746, "Golden Spellthread" }, { 2748, "Runic Spellthread" } },
     Feet     = { { 2940, "Enchant Boots - Boar's Speed" }, { 2656, "Enchant Boots - Vitality" } },
-    Weapon   = { { 2669, "Enchant Weapon - Major Healing" } },
+    Weapon   = { { 2343, "Enchant Weapon - Major Healing" } },
 }
 
 BiSGearCheckGemsDB["PriestShadow"] = {
@@ -796,7 +797,7 @@ BiSGearCheckEnchantsDB["ShamanRestoration"] = {
     Hands    = { { 2612, "Enchant Gloves - Major Healing" } },
     Legs     = { { 2746, "Golden Spellthread" }, { 2748, "Runic Spellthread" } },
     Feet     = { { 2940, "Enchant Boots - Boar's Speed" }, { 2656, "Enchant Boots - Vitality" } },
-    Weapon   = { { 2669, "Enchant Weapon - Major Healing" } },
+    Weapon   = { { 2343, "Enchant Weapon - Major Healing" } },
     Shield   = { { 2654, "Enchant Shield - Intellect" } },
 }
 

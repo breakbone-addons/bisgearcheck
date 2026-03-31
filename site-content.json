@@ -27,6 +27,10 @@
       "description": "Switch between your characters to compare gear across your roster."
     },
     {
+      "title": "Raid Scan",
+      "description": "Inspect your entire raid to find missing enchants, wrong gems, and gear upgrades — then whisper issues directly to players."
+    },
+    {
       "title": "Faction-Aware",
       "description": "Automatically filters out items not available to your faction."
     }
@@ -51,6 +55,26 @@
       "file": "art/screenshot-wishlist.png",
       "alt": "BISGearCheck Wishlists tab",
       "caption": "Track the items you need with per-character wishlists"
+    },
+    {
+      "file": "art/screenshot-raid-scan.png",
+      "alt": "BISGearCheck Raid Scan showing issues and upgrades per character",
+      "caption": "Scan your raid for gear issues, BiS rank, and upgrade opportunities"
+    },
+    {
+      "file": "art/screenshot-raid-scan-csv.png",
+      "alt": "BISGearCheck Raid Scan CSV export",
+      "caption": "Export scan results as CSV for spreadsheet analysis"
+    },
+    {
+      "file": "art/screenshot-raid-scan-report.png",
+      "alt": "BISGearCheck Raid Scan chat report",
+      "caption": "Print a quick issue summary to chat"
+    },
+    {
+      "file": "art/screenshot-raid-scan-whisper.png",
+      "alt": "BISGearCheck Raid Scan whisper issues to a player",
+      "caption": "Right-click to whisper gear issues directly to a player"
     },
     {
       "file": "art/screenshot-settings.png",
