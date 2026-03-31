@@ -27,7 +27,6 @@ eventFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 eventFrame:RegisterEvent("ZONE_CHANGED")
 eventFrame:RegisterEvent("ZONE_CHANGED_INDOORS")
 eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
-eventFrame:RegisterEvent("INSPECT_READY")
 
 eventFrame:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_ENTERING_WORLD" then
@@ -72,12 +71,30 @@ end)
 -- ============================================================
 
 function BiSGearCheck:OnInspectReady()
-    -- Keep INSPECT_READY registered — addons like Examiner use NotifyInspect
-    -- directly (bypassing InspectUnit), so unregistering would miss future inspects
+    -- Ignore INSPECT_READY events we didn't initiate (other addons inspecting)
+    if not self.expectingInspect then return end
     self.expectingInspect = false
+    eventFrame:UnregisterEvent("INSPECT_READY")
 
     local charKey = self:SnapshotInspectedGear()
-    if not charKey then return end
+
+    -- Self-inspection: switch back to the player's own character
+    if not charKey then
+        local selfInspect = UnitExists("target") and UnitIsUnit("target", "player")
+        if selfInspect and self.playerKey and self.viewingCharKey ~= self.playerKey then
+            if BiSGearCheckSaved and BiSGearCheckSaved.autoShowOnInspect ~= false then
+                self:CreateUI()
+                self:SetViewingCharacter(self.playerKey)
+                if self.UpdateCharDropdownText then
+                    self:UpdateCharDropdownText()
+                end
+                self.viewMode = "comparison"
+                self.mainFrame:Show()
+                self:Refresh()
+            end
+        end
+        return
+    end
 
     -- Refresh the settings inspect list if it's open
     if self.RefreshInspectedList then
@@ -107,6 +124,16 @@ end
 -- Hook InspectUnit: register INSPECT_READY only when user initiates inspect
 if InspectUnit then
     hooksecurefunc("InspectUnit", function(unit)
+        if not BiSGearCheck.isRaidScanning then
+            BiSGearCheck.expectingInspect = true
+        end
+        eventFrame:RegisterEvent("INSPECT_READY")
+    end)
+end
+
+-- Hook NotifyInspect: addons like Examiner call this directly, bypassing InspectUnit
+if NotifyInspect then
+    hooksecurefunc("NotifyInspect", function(unit)
         if not BiSGearCheck.isRaidScanning then
             BiSGearCheck.expectingInspect = true
         end

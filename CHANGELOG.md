@@ -5,6 +5,12 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
+## v3.5.7
+
+- Fixed Cloak of Eternity (defense cloak) incorrectly appearing in Restoration Druid, Holy Priest, Holy Paladin, and Restoration Shaman BiS lists instead of White Remedy Cape.
+- Fixed inspect events firing excessively from other addons' background inspections.
+- Compare tab now switches back to your character when you inspect yourself.
+
 ## v3.5.6
 
 - Fixed CurseForge packaging to exclude test files from release archives.

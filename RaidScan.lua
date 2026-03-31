@@ -170,6 +170,7 @@ function BiSGearCheck:ProcessNextScan()
     -- inspect path; the raid scan routes via isRaidScanning instead)
     self.raidScanUnit = unit
     self.raidScanInspectTime = GetTime()
+    BiSGearCheckEventFrame:RegisterEvent("INSPECT_READY")
     NotifyInspect(unit)
 end
 
@@ -194,6 +195,7 @@ function BiSGearCheck:OnRaidScanInspectReady()
         end
     end
 
+    BiSGearCheckEventFrame:UnregisterEvent("INSPECT_READY")
     self.raidScanUnit = nil
     self.raidScanIndex = self.raidScanIndex + 1
     self.raidScanTimer = 0 -- wait for SCAN_INTERVAL before next
@@ -213,6 +215,7 @@ function BiSGearCheck:OnRaidScanTimeout()
         }
     end
 
+    BiSGearCheckEventFrame:UnregisterEvent("INSPECT_READY")
     self.raidScanUnit = nil
     self.raidScanIndex = self.raidScanIndex + 1
     self.raidScanTimer = 0
@@ -223,6 +226,7 @@ function BiSGearCheck:FinishRaidScan()
     self.raidScanState = "complete"
     self.isRaidScanning = false
     self.raidScanUnit = nil
+    BiSGearCheckEventFrame:UnregisterEvent("INSPECT_READY")
 
     -- Default to all collapsed
     for charKey in pairs(self.raidScanResults) do
