@@ -469,48 +469,6 @@ function BiSGearCheck:SetupBisListBar(f)
     UIDropDownMenu_Initialize(bislistSpecDropdown, BislistSpecInit)
     UIDropDownMenu_SetText(bislistSpecDropdown, "Select Spec")
 
-    local BISLIST_PHASE_OPTIONS = {
-        { value = 1, label = "Phase 1" },
-        { value = 2, label = "Phase 2" },
-    }
-
-    local phaseDropdown = CreateFrame("Frame", "BiSGearCheckPhaseDropdown", bislistBar, "UIDropDownMenuTemplate")
-    phaseDropdown:SetPoint("TOPLEFT", f, "TOPLEFT", -5, -92)
-    UIDropDownMenu_SetWidth(phaseDropdown, 110)
-
-    local function PhaseDropdownInit(self, level)
-        local currentPhase = BiSGearCheck.phaseFilter or 1
-        for _, opt in ipairs(BISLIST_PHASE_OPTIONS) do
-            local info = UIDropDownMenu_CreateInfo()
-            info.text = opt.label
-            info.value = opt.value
-            info.func = function(self)
-                UIDropDownMenu_SetSelectedValue(phaseDropdown, self.value)
-                for _, o in ipairs(BISLIST_PHASE_OPTIONS) do
-                    if o.value == self.value then
-                        UIDropDownMenu_SetText(phaseDropdown, o.label)
-                        break
-                    end
-                end
-                BiSGearCheckSaved.phaseFilter = self.value
-                BiSGearCheck.phaseFilter = self.value
-                BiSGearCheck:OnPhaseChanged()
-            end
-            info.checked = (opt.value == currentPhase)
-            UIDropDownMenu_AddButton(info, level)
-        end
-    end
-    UIDropDownMenu_Initialize(phaseDropdown, PhaseDropdownInit)
-
-    local savedPhase = BiSGearCheck.phaseFilter or 1
-    for _, opt in ipairs(BISLIST_PHASE_OPTIONS) do
-        if opt.value == savedPhase then
-            UIDropDownMenu_SetText(phaseDropdown, opt.label)
-            break
-        end
-    end
-    f.phaseDropdown = phaseDropdown
-
     f.bislistBar = bislistBar
     f.bislistSourceDropdown = bislistSourceDropdown
     f.bislistSpecDropdown = bislistSpecDropdown

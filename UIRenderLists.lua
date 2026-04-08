@@ -155,22 +155,8 @@ function BiSGearCheck:RenderBisList()
     f.zoneFilterDropdown:SetPoint("TOPRIGHT", f, "TOPRIGHT", 5, -60)
     f.zoneFilterDropdown:Show()
     UIDropDownMenu_SetText(f.zoneFilterDropdown, self.zoneFilter or "All Zones")
-    -- Show phase dropdown (if available) and position collapse/expand after it
-    if f.phaseDropdown then
-        f.phaseDropdown:Show()
-        local savedPhase = self.phaseFilter
-        if savedPhase and savedPhase > 0 then
-            local PHASE_LABELS = { "Phase 1", "Through Phase 2", "Through Phase 3", "Through Phase 4", "Through Phase 5" }
-            UIDropDownMenu_SetText(f.phaseDropdown, PHASE_LABELS[savedPhase])
-        else
-            UIDropDownMenu_SetText(f.phaseDropdown, "All Phases")
-        end
-        f.collapseAllBtn:ClearAllPoints()
-        f.collapseAllBtn:SetPoint("LEFT", f.phaseDropdown, "RIGHT", -15, 2)
-    else
-        f.collapseAllBtn:ClearAllPoints()
-        f.collapseAllBtn:SetPoint("TOPLEFT", f, "TOPLEFT", self.CONTENT_PADDING, -95)
-    end
+    f.collapseAllBtn:ClearAllPoints()
+    f.collapseAllBtn:SetPoint("TOPLEFT", f, "TOPLEFT", 15, -95)
     f.collapseAllBtn:Show()
     f.expandAllBtn:ClearAllPoints()
     f.expandAllBtn:SetPoint("LEFT", f.collapseAllBtn, "RIGHT", 5, 0)

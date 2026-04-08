@@ -5,6 +5,12 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
+## v3.7.0
+
+- Added Phase 2 BiS data from all six sources (SSC/TK, Season 2 PvP, engineering goggles, Ogri'la gear).
+- Added phase selector dropdown in Settings and BiS Lists tab to switch between Phase 1 and Phase 2.
+- Refreshed ThatsMyBis Phase 1 wishlist data with current community rankings.
+
 ## v3.6.2
 
 - Fixed Cloak of Eternity (defense cloak) incorrectly appearing in healer BiS lists instead of White Remedy Cape.
