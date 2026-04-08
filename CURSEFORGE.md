@@ -51,12 +51,14 @@ Alliance and Horde characters see only the items available to their faction. Fac
 
 ## Data Sources
 
-- **WowTBC.gg** -- BiS rankings sourced from wowtbc.gg
-- **BiS-Tooltip** -- BiS rankings from BiS-Tooltip (boegi1's TBC backport) combined with WoWSims presets
-- **AtlasLoot** -- BiS rankings from AtlasLoot data
-- **WoWSims** -- Simulation-derived BiS from WoWSims TBC
-- **ThatsMyBis** -- Community wishlist aggregates from thatsmybis.com
-- **Wowhead** -- BiS rankings from Wowhead editorial guides
+BiS data is available for Phase 1 (Karazhan/Gruul/Mag) and Phase 2 (SSC/TK). Switch phases via the dropdown in Settings or the BiS Lists tab.
+
+- **WowTBC.gg** -- Community-voted BiS lists. Full Phase 1 and Phase 2 coverage across all 27 specs.
+- **BiS-Tooltip** -- BiS rankings from BiS-Tooltip (boegi1's TBC backport) combined with WoWSims presets. Full Phase 1 and Phase 2 coverage across all 27 specs.
+- **AtlasLoot** -- BiS rankings from AtlasLoot loot tables. Phase 2 covers 25 specs (missing Rogue Assassination, Rogue Subtlety for Phase 2).
+- **WoWSims** -- Simulation-optimized gear sets from WoWSims TBC. Most mathematically rigorous but limited Phase 2 coverage (5 specs with explicit presets).
+- **ThatsMyBis** -- Community wishlist aggregates from thatsmybis.com. Phase 2 lists include SSC/TK items where wishlisted, with Phase 1 gear filling remaining slots.
+- **Wowhead** -- Editorial BiS guides from Wowhead. Phase 2 covers 24 specs (missing Rogue Assassination, Rogue Subtlety, Shaman Restoration).
 
 Each source can be independently enabled for the main addon UI and/or tooltips in the Settings panel. Switch between sources at any time to compare rankings.
 

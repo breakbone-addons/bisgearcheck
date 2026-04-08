@@ -469,21 +469,10 @@ function BiSGearCheck:SetupBisListBar(f)
     UIDropDownMenu_Initialize(bislistSpecDropdown, BislistSpecInit)
     UIDropDownMenu_SetText(bislistSpecDropdown, "Select Spec")
 
-    --[[ PHASE DROPDOWN DISABLED — phase data not yet shipping
-    local CURRENT_CONTENT_PHASE = 1
-    local PHASE_OPTIONS = {
-        { value = 0, label = "Pre-Raid" },
+    local BISLIST_PHASE_OPTIONS = {
         { value = 1, label = "Phase 1" },
         { value = 2, label = "Phase 2" },
-        { value = 3, label = "Phase 3" },
-        { value = 4, label = "Phase 4" },
-        { value = 5, label = "Phase 5" },
     }
-    for _, opt in ipairs(PHASE_OPTIONS) do
-        if opt.value == CURRENT_CONTENT_PHASE then
-            opt.label = opt.label .. " (Current)"
-        end
-    end
 
     local phaseDropdown = CreateFrame("Frame", "BiSGearCheckPhaseDropdown", bislistBar, "UIDropDownMenuTemplate")
     phaseDropdown:SetPoint("TOPLEFT", f, "TOPLEFT", -5, -92)
@@ -491,13 +480,18 @@ function BiSGearCheck:SetupBisListBar(f)
 
     local function PhaseDropdownInit(self, level)
         local currentPhase = BiSGearCheck.phaseFilter or 1
-        for _, opt in ipairs(PHASE_OPTIONS) do
+        for _, opt in ipairs(BISLIST_PHASE_OPTIONS) do
             local info = UIDropDownMenu_CreateInfo()
             info.text = opt.label
             info.value = opt.value
             info.func = function(self)
                 UIDropDownMenu_SetSelectedValue(phaseDropdown, self.value)
-                UIDropDownMenu_SetText(phaseDropdown, PHASE_OPTIONS[self.value + 1].label)
+                for _, o in ipairs(BISLIST_PHASE_OPTIONS) do
+                    if o.value == self.value then
+                        UIDropDownMenu_SetText(phaseDropdown, o.label)
+                        break
+                    end
+                end
                 BiSGearCheckSaved.phaseFilter = self.value
                 BiSGearCheck.phaseFilter = self.value
                 BiSGearCheck:OnPhaseChanged()
@@ -509,9 +503,13 @@ function BiSGearCheck:SetupBisListBar(f)
     UIDropDownMenu_Initialize(phaseDropdown, PhaseDropdownInit)
 
     local savedPhase = BiSGearCheck.phaseFilter or 1
-    UIDropDownMenu_SetText(phaseDropdown, PHASE_OPTIONS[savedPhase + 1].label)
+    for _, opt in ipairs(BISLIST_PHASE_OPTIONS) do
+        if opt.value == savedPhase then
+            UIDropDownMenu_SetText(phaseDropdown, opt.label)
+            break
+        end
+    end
     f.phaseDropdown = phaseDropdown
-    --]] -- END PHASE DROPDOWN DISABLED
 
     f.bislistBar = bislistBar
     f.bislistSourceDropdown = bislistSourceDropdown

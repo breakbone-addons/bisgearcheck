@@ -83,18 +83,18 @@ BiSGearCheck.ClassSpecs = {
 -- Each source maps phases to global table names.
 -- Phase 0 = Pre-Raid, 1-5 = content phases.
 BiSGearCheck.DataSources = {
-    { key = "wowtbcgg",    label = "WowTBC.gg",    phases = { [1] = "BiSGearCheckDB_WowTBCgg" },
-      desc = "Community-voted BiS lists from wowtbc.gg. Broad coverage across all specs, but rankings reflect community opinion rather than simulated performance." },
-    { key = "bistooltip",  label = "BiS-Tooltip",   phases = { [1] = "BiSGearCheckDB_Phase1" },
-      desc = "BiS rankings from the BiS-Tooltip addon (boegi1's TBC backport). Comprehensive and well-maintained." },
-    { key = "atlasloot",   label = "AtlasLoot",     phases = { [1] = "BiSGearCheckDB_AtlasLoot" },
-      desc = "BiS lists derived from AtlasLoot's loot tables. Good dungeon and raid coverage, but may include items not typically considered BiS by other sources. Missing Rogue Assassination, Rogue Subtlety, and Warlock Demonology." },
-    { key = "wowsims",     label = "WoWSims",       phases = { [1] = "BiSGearCheckDB_WoWSims" },
-      desc = "Simulation-optimized gear sets from WoWSims TBC. Most mathematically rigorous, but missing Druid Restoration, Paladin Holy, Rogue Assassination, Rogue Subtlety, and Shaman Restoration." },
-    { key = "tmb",          label = "ThatsMyBis",    phases = { [1] = "BiSGearCheckDB_TMB" },
-      desc = "Community wishlist aggregates from thatsmybis.com. Reflects what raiders actually want, but limited to raid drops only. No crafted, quest, or dungeon items." },
-    { key = "wowhead",     label = "Wowhead",       phases = { [1] = "BiSGearCheckDB_Wowhead" },
-      desc = "Editorial BiS guides from Wowhead. Curated by guide writers, but may lag behind theorycrafting changes and reflects one author's opinion." },
+    { key = "wowtbcgg",    label = "WowTBC.gg",    phases = { [1] = "BiSGearCheckDB_WowTBCgg", [2] = "BiSGearCheckDB_WowTBCgg_Phase2" },
+      desc = "Community-voted BiS lists from wowtbc.gg. Broad coverage across all specs, but rankings reflect community opinion rather than simulated performance. Phase 2 covers all 27 specs with SSC/TK gear." },
+    { key = "bistooltip",  label = "BiS-Tooltip",   phases = { [1] = "BiSGearCheckDB_Phase1", [2] = "BiSGearCheckDB_Phase2" },
+      desc = "BiS rankings from the BiS-Tooltip addon (boegi1's TBC backport). Comprehensive and well-maintained. Full Phase 1 and Phase 2 coverage for all 27 specs." },
+    { key = "atlasloot",   label = "AtlasLoot",     phases = { [1] = "BiSGearCheckDB_AtlasLoot", [2] = "BiSGearCheckDB_AtlasLoot_Phase2" },
+      desc = "BiS lists derived from AtlasLoot's loot tables. Good dungeon and raid coverage, but may include items not typically considered BiS by other sources. Phase 2 covers 25 specs. Missing Rogue Assassination and Rogue Subtlety in both phases." },
+    { key = "wowsims",     label = "WoWSims",       phases = { [1] = "BiSGearCheckDB_WoWSims", [2] = "BiSGearCheckDB_WoWSims_Phase2" },
+      desc = "Simulation-optimized gear sets from WoWSims TBC. Most mathematically rigorous. Phase 1 covers 22 specs. Phase 2 has limited coverage (5 specs with explicit presets); other specs fall back to Phase 1 data." },
+    { key = "tmb",          label = "ThatsMyBis",    phases = { [1] = "BiSGearCheckDB_TMB", [2] = "BiSGearCheckDB_TMB_Phase2" },
+      desc = "Community wishlist aggregates from thatsmybis.com. Reflects what raiders actually want. Phase 2 lists include SSC/TK items where wishlisted, with Phase 1 gear filling remaining slots." },
+    { key = "wowhead",     label = "Wowhead",       phases = { [1] = "BiSGearCheckDB_Wowhead", [2] = "BiSGearCheckDB_Wowhead_Phase2" },
+      desc = "Editorial BiS guides from Wowhead. Curated by guide writers. Phase 2 covers 24 specs. Missing Rogue Assassination, Rogue Subtlety, and Shaman Restoration." },
 }
 
 -- Resolve the global DB table name for a source at a given phase

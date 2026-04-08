@@ -7,12 +7,8 @@ BiSGearCheck = BiSGearCheck or {}
 local CURRENT_CONTENT_PHASE = 1
 
 local PHASE_OPTIONS = {
-    { value = 0, label = "Pre-Raid" },
     { value = 1, label = "Phase 1" },
     { value = 2, label = "Phase 2" },
-    { value = 3, label = "Phase 3" },
-    { value = 4, label = "Phase 4" },
-    { value = 5, label = "Phase 5" },
 }
 
 -- Tag the current phase label
@@ -146,9 +142,8 @@ end)
 local tooltipSectionEnd = CreateSectionEnd(classCheck, 0)
 
 -- ============================================================
--- Section: Content Phase (disabled until phase data is finalized)
+-- Section: Content Phase
 -- ============================================================
---[[ PHASE SELECTION DISABLED
 local phaseHeader, phaseLine = CreateSectionHeader(classCheck, "Content Phase", 4, -16)
 
 local phaseDesc = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
@@ -169,7 +164,13 @@ local function PhaseDropdownInit(self, level)
         info.value = opt.value
         info.func = function(self)
             UIDropDownMenu_SetSelectedValue(settingsPhaseDropdown, self.value)
-            UIDropDownMenu_SetText(settingsPhaseDropdown, PHASE_OPTIONS[self.value + 1].label)
+            -- Find the label for the selected value
+            for _, o in ipairs(PHASE_OPTIONS) do
+                if o.value == self.value then
+                    UIDropDownMenu_SetText(settingsPhaseDropdown, o.label)
+                    break
+                end
+            end
             BiSGearCheckSaved.phaseFilter = self.value
             BiSGearCheck.phaseFilter = self.value
             BiSGearCheck:OnPhaseChanged()
@@ -181,7 +182,6 @@ end
 UIDropDownMenu_Initialize(settingsPhaseDropdown, PhaseDropdownInit)
 -- Set initial text (BiSGearCheckSaved may not exist yet at load time; OnShow refreshes it)
 UIDropDownMenu_SetText(settingsPhaseDropdown, "Phase 1")
---]] -- END PHASE SELECTION DISABLED
 
 -- ============================================================
 -- Helper: adaptive checkbox list (flat <=5, scrollable >5)

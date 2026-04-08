@@ -1,0 +1,596 @@
+-- BiSGearCheck Data_WowTBCgg_Phase2.lua
+-- WowTBC.gg Phase 2 (T5) BiS data
+-- Auto-generated from wowtbc.gg Gatsby page-data
+
+BiSGearCheckDB_WowTBCgg_Phase2 = {}
+
+BiSGearCheckDB_WowTBCgg_Phase2["DruidBalance"] = {
+    class = "DRUID",
+    spec = "Balance",
+    slots = {
+        ["Head"] = { 30233 },
+        ["Neck"] = { 30015 },
+        ["Shoulders"] = { 30235 },
+        ["Back"] = { 28797 },
+        ["Chest"] = { 30231 },
+        ["Wrist"] = { 29918 },
+        ["Hands"] = { 30232 },
+        ["Waist"] = { 30038 },
+        ["Legs"] = { 24262 },
+        ["Feet"] = { 30037 },
+        ["Rings"] = { 28753, 29302 },
+        ["Trinkets"] = { 29370, 27683 },
+        ["Main Hand"] = { 29988 },
+        ["Offhand"] = { 2812 },
+        ["Ranged"] = { 32387 },
+    }
+}
+
+BiSGearCheckDB_WowTBCgg_Phase2["DruidFeralDPS"] = {
+    class = "DRUID",
+    spec = "Feral DPS",
+    slots = {
+        ["Head"] = { 8345 },
+        ["Neck"] = { 30017, 29381 },
+        ["Shoulders"] = { 29100 },
+        ["Back"] = { 29994 },
+        ["Chest"] = { 29096 },
+        ["Wrist"] = { 29966 },
+        ["Hands"] = { 29947 },
+        ["Waist"] = { 30106 },
+        ["Legs"] = { 29995 },
+        ["Feet"] = { 28545 },
+        ["Rings"] = { 30052, 29997 },
+        ["Trinkets"] = { 29383, 30627 },
+        ["Main Hand"] = { 28658 },
+        ["Ranged"] = { 29390 },
+    }
+}
+
+BiSGearCheckDB_WowTBCgg_Phase2["DruidFeralTank"] = {
+    class = "DRUID",
+    spec = "Feral Tank",
+    slots = {
+        ["Head"] = { 30228 },
+        ["Neck"] = { 33066 },
+        ["Shoulders"] = { 30230 },
+        ["Back"] = { 28660 },
+        ["Chest"] = { 30222 },
+        ["Wrist"] = { 32810 },
+        ["Hands"] = { 29947 },
+        ["Waist"] = { 30106 },
+        ["Legs"] = { 30229 },
+        ["Feet"] = { 32790 },
+        ["Rings"] = { 29279, 30834 },
+        ["Trinkets"] = { 28579, 32658 },
+        ["Main Hand"] = { 30021 },
+        ["Ranged"] = { 32387 },
+    }
+}
+
+BiSGearCheckDB_WowTBCgg_Phase2["DruidRestoration"] = {
+    class = "DRUID",
+    spec = "Restoration",
+    slots = {
+        ["Head"] = { 30219 },
+        ["Neck"] = { 30018 },
+        ["Shoulders"] = { 30221 },
+        ["Back"] = { 29989 },
+        ["Chest"] = { 30216 },
+        ["Wrist"] = { 30062 },
+        ["Hands"] = { 28521 },
+        ["Waist"] = { 30036 },
+        ["Legs"] = { 28591 },
+        ["Feet"] = { 30092 },
+        ["Rings"] = { 30110, 28763 },
+        ["Trinkets"] = { 29376, 30841 },
+        ["Main Hand"] = { 30108 },
+        ["Offhand"] = { 29274 },
+        ["Ranged"] = { 27886 },
+    }
+}
+
+BiSGearCheckDB_WowTBCgg_Phase2["HunterBM"] = {
+    class = "HUNTER",
+    spec = "Beast Mastery",
+    slots = {
+        ["Head"] = { 30141 },
+        ["Neck"] = { 30017 },
+        ["Shoulders"] = { 30143 },
+        ["Back"] = { 29994 },
+        ["Chest"] = { 30139 },
+        ["Wrist"] = { 29966 },
+        ["Hands"] = { 30140 },
+        ["Waist"] = { 30040 },
+        ["Legs"] = { 29995 },
+        ["Feet"] = { 30104 },
+        ["Rings"] = { 29997, 30052, 28791 },
+        ["Trinkets"] = { 28830, 29383 },
+        ["Main Hand"] = { 29993 },
+        ["Offhand"] = { 2812 },
+        ["Ranged"] = { 30105 },
+    }
+}
+
+BiSGearCheckDB_WowTBCgg_Phase2["HunterMM"] = {
+    class = "HUNTER",
+    spec = "Marksmanship",
+    slots = {
+        ["Head"] = { 30141 },
+        ["Neck"] = { 30017 },
+        ["Shoulders"] = { 30143 },
+        ["Back"] = { 29994 },
+        ["Chest"] = { 30139 },
+        ["Wrist"] = { 29966 },
+        ["Hands"] = { 30140 },
+        ["Waist"] = { 30040 },
+        ["Legs"] = { 29995 },
+        ["Feet"] = { 30104 },
+        ["Rings"] = { 29997, 30052, 28791 },
+        ["Trinkets"] = { 28830, 29383 },
+        ["Main Hand"] = { 29993 },
+        ["Offhand"] = { 2812 },
+        ["Ranged"] = { 30105 },
+    }
+}
+
+BiSGearCheckDB_WowTBCgg_Phase2["HunterSV"] = {
+    class = "HUNTER",
+    spec = "Survival",
+    slots = {
+        ["Head"] = { 30141 },
+        ["Neck"] = { 30017 },
+        ["Shoulders"] = { 30143 },
+        ["Back"] = { 29994 },
+        ["Chest"] = { 30139 },
+        ["Wrist"] = { 29966 },
+        ["Hands"] = { 28506 },
+        ["Waist"] = { 30040 },
+        ["Legs"] = { 30142 },
+        ["Feet"] = { 30104 },
+        ["Rings"] = { 28791 },
+        ["Trinkets"] = { 28830, 29383 },
+        ["Main Hand"] = { 29993 },
+        ["Offhand"] = { 2812 },
+        ["Ranged"] = { 30105 },
+    }
+}
+
+BiSGearCheckDB_WowTBCgg_Phase2["MageArcane"] = {
+    class = "MAGE",
+    spec = "Arcane",
+    slots = {
+        ["Head"] = { 30206 },
+        ["Neck"] = { 30015 },
+        ["Shoulders"] = { 30210 },
+        ["Back"] = { 29992 },
+        ["Chest"] = { 30196 },
+        ["Wrist"] = { 29918 },
+        ["Hands"] = { 29987 },
+        ["Waist"] = { 30038 },
+        ["Legs"] = { 30207 },
+        ["Feet"] = { 30067 },
+        ["Rings"] = { 29287, 29302 },
+        ["Trinkets"] = { 29370, 30720 },
+        ["Main Hand"] = { 29988 },
+        ["Offhand"] = { 2812 },
+        ["Ranged"] = { 28783 },
+    }
+}
+
+BiSGearCheckDB_WowTBCgg_Phase2["MageFire"] = {
+    class = "MAGE",
+    spec = "Fire",
+    slots = {
+        ["Head"] = { 30206 },
+        ["Neck"] = { 30015 },
+        ["Shoulders"] = { 30210 },
+        ["Back"] = { 28797, 28766 },
+        ["Chest"] = { 30107 },
+        ["Wrist"] = { 29918 },
+        ["Hands"] = { 21847 },
+        ["Waist"] = { 30038 },
+        ["Legs"] = { 24262 },
+        ["Feet"] = { 30037 },
+        ["Rings"] = { 29302, 28753, 28793 },
+        ["Trinkets"] = { 29370, 30626 },
+        ["Main Hand"] = { 30095 },
+        ["Offhand"] = { 29270 },
+        ["Ranged"] = { 29982 },
+    }
+}
+
+BiSGearCheckDB_WowTBCgg_Phase2["MageFrost"] = {
+    class = "MAGE",
+    spec = "Frost",
+    slots = {
+        ["Head"] = { 30206 },
+        ["Neck"] = { 30015 },
+        ["Shoulders"] = { 30210 },
+        ["Back"] = { 28797, 28766 },
+        ["Chest"] = { 30107 },
+        ["Wrist"] = { 29918 },
+        ["Hands"] = { 28780 },
+        ["Waist"] = { 30038 },
+        ["Legs"] = { 24262 },
+        ["Feet"] = { 21870 },
+        ["Rings"] = { 29302, 28753, 28793 },
+        ["Trinkets"] = { 29370, 27683 },
+        ["Main Hand"] = { 30095 },
+        ["Offhand"] = { 29269 },
+        ["Ranged"] = { 29982 },
+    }
+}
+
+BiSGearCheckDB_WowTBCgg_Phase2["PaladinHoly"] = {
+    class = "PALADIN",
+    spec = "Holy",
+    slots = {
+        ["Head"] = { 30136 },
+        ["Neck"] = { 30018 },
+        ["Shoulders"] = { 30138 },
+        ["Back"] = { 29989 },
+        ["Chest"] = { 30134 },
+        ["Wrist"] = { 30047 },
+        ["Hands"] = { 30112 },
+        ["Waist"] = { 30030 },
+        ["Legs"] = { 29991 },
+        ["Feet"] = { 30027 },
+        ["Rings"] = { 30110, 29920 },
+        ["Trinkets"] = { 29376, 28590 },
+        ["Main Hand"] = { 30108 },
+        ["Offhand"] = { 29458 },
+        ["Ranged"] = { 25644 },
+    }
+}
+
+BiSGearCheckDB_WowTBCgg_Phase2["PaladinProtection"] = {
+    class = "PALADIN",
+    spec = "Protection",
+    slots = {
+        ["Head"] = { 30125 },
+        ["Neck"] = { 33065 },
+        ["Shoulders"] = { 29070 },
+        ["Back"] = { 29925 },
+        ["Chest"] = { 29066 },
+        ["Wrist"] = { 32515 },
+        ["Hands"] = { 30124 },
+        ["Waist"] = { 30096 },
+        ["Legs"] = { 30126 },
+        ["Feet"] = { 32267 },
+        ["Rings"] = { 33054, 29172 },
+        ["Trinkets"] = { 29370, 30447 },
+        ["Main Hand"] = { 30095 },
+        ["Offhand"] = { 28825 },
+        ["Ranged"] = { 27917 },
+    }
+}
+
+BiSGearCheckDB_WowTBCgg_Phase2["PaladinRetribution"] = {
+    class = "PALADIN",
+    spec = "Retribution",
+    slots = {
+        ["Head"] = { 32461 },
+        ["Neck"] = { 30022 },
+        ["Shoulders"] = { 30055 },
+        ["Back"] = { 30098 },
+        ["Chest"] = { 30129 },
+        ["Wrist"] = { 30057, 28795 },
+        ["Hands"] = { 29947 },
+        ["Waist"] = { 30106 },
+        ["Legs"] = { 30257 },
+        ["Feet"] = { 30081 },
+        ["Rings"] = { 30834, 30061 },
+        ["Trinkets"] = { 28830, 29383 },
+        ["Main Hand"] = { 28430 },
+        ["Ranged"] = { 27484 },
+    }
+}
+
+BiSGearCheckDB_WowTBCgg_Phase2["PriestHoly"] = {
+    class = "PRIEST",
+    spec = "Holy",
+    slots = {
+        ["Head"] = { 30152 },
+        ["Neck"] = { 30018 },
+        ["Shoulders"] = { 30154 },
+        ["Back"] = { 29989 },
+        ["Chest"] = { 30150 },
+        ["Wrist"] = { 32516 },
+        ["Hands"] = { 30151 },
+        ["Waist"] = { 30036 },
+        ["Legs"] = { 30153 },
+        ["Feet"] = { 30100 },
+        ["Rings"] = { 30110, 29290 },
+        ["Trinkets"] = { 29376, 30665 },
+        ["Main Hand"] = { 30108 },
+        ["Offhand"] = { 29170 },
+        ["Ranged"] = { 30080 },
+    }
+}
+
+BiSGearCheckDB_WowTBCgg_Phase2["PriestShadow"] = {
+    class = "PRIEST",
+    spec = "Shadow",
+    slots = {
+        ["Head"] = { 29986 },
+        ["Neck"] = { 30666 },
+        ["Shoulders"] = { 21869 },
+        ["Back"] = { 29992 },
+        ["Chest"] = { 30107 },
+        ["Wrist"] = { 29918 },
+        ["Hands"] = { 28780 },
+        ["Waist"] = { 30038 },
+        ["Legs"] = { 29972 },
+        ["Feet"] = { 21870 },
+        ["Rings"] = { 30109, 29922 },
+        ["Trinkets"] = { 29370, 28789 },
+        ["Main Hand"] = { 28770 },
+        ["Offhand"] = { 29272 },
+        ["Ranged"] = { 29982 },
+    }
+}
+
+BiSGearCheckDB_WowTBCgg_Phase2["RogueAssassination"] = {
+    class = "ROGUE",
+    spec = "Assassination",
+    slots = {
+        ["Head"] = { 30146 },
+        ["Neck"] = { 29381 },
+        ["Shoulders"] = { 30149 },
+        ["Back"] = { 28672 },
+        ["Chest"] = { 30101 },
+        ["Wrist"] = { 29966 },
+        ["Hands"] = { 30145 },
+        ["Waist"] = { 30106 },
+        ["Legs"] = { 30148 },
+        ["Feet"] = { 28545 },
+        ["Rings"] = { 29997, 30052 },
+        ["Trinkets"] = { 28830, 30450 },
+        ["Main Hand"] = { 30103 },
+        ["Offhand"] = { 29962 },
+        ["Ranged"] = { 29949 },
+    }
+}
+
+BiSGearCheckDB_WowTBCgg_Phase2["RogueCombat"] = {
+    class = "ROGUE",
+    spec = "Combat",
+    slots = {
+        ["Head"] = { 30146 },
+        ["Neck"] = { 29381 },
+        ["Shoulders"] = { 30149 },
+        ["Back"] = { 28672 },
+        ["Chest"] = { 30101 },
+        ["Wrist"] = { 29966 },
+        ["Hands"] = { 30145 },
+        ["Waist"] = { 30106 },
+        ["Legs"] = { 30148 },
+        ["Feet"] = { 28545 },
+        ["Rings"] = { 29997, 30052 },
+        ["Trinkets"] = { 28830, 30450 },
+        ["Main Hand"] = { 30082 },
+        ["Offhand"] = { 28189 },
+        ["Ranged"] = { 29949 },
+    }
+}
+
+BiSGearCheckDB_WowTBCgg_Phase2["RogueSubtlety"] = {
+    class = "ROGUE",
+    spec = "Subtlety",
+    slots = {
+        ["Head"] = { 30146 },
+        ["Neck"] = { 29381 },
+        ["Shoulders"] = { 30149 },
+        ["Back"] = { 28672 },
+        ["Chest"] = { 30101 },
+        ["Wrist"] = { 29966 },
+        ["Hands"] = { 30145 },
+        ["Waist"] = { 30106 },
+        ["Legs"] = { 30148 },
+        ["Feet"] = { 28545 },
+        ["Rings"] = { 29997, 30052 },
+        ["Trinkets"] = { 28830, 30450 },
+        ["Main Hand"] = { 30082 },
+        ["Offhand"] = { 28189 },
+        ["Ranged"] = { 29949 },
+    }
+}
+
+BiSGearCheckDB_WowTBCgg_Phase2["ShamanElemental"] = {
+    class = "SHAMAN",
+    spec = "Elemental",
+    slots = {
+        ["Head"] = { 29035 },
+        ["Neck"] = { 30015 },
+        ["Shoulders"] = { 29037 },
+        ["Back"] = { 28797 },
+        ["Chest"] = { 30169 },
+        ["Wrist"] = { 29918 },
+        ["Hands"] = { 28780 },
+        ["Waist"] = { 30038 },
+        ["Legs"] = { 30172 },
+        ["Feet"] = { 30067 },
+        ["Rings"] = { 30667, 30109 },
+        ["Trinkets"] = { 28785, 29370 },
+        ["Main Hand"] = { 29988 },
+        ["Offhand"] = { 2812 },
+        ["Ranged"] = { 28248 },
+    }
+}
+
+BiSGearCheckDB_WowTBCgg_Phase2["ShamanEnhancement"] = {
+    class = "SHAMAN",
+    spec = "Enhancement",
+    slots = {
+        ["Head"] = { 30190 },
+        ["Neck"] = { 30017 },
+        ["Shoulders"] = { 30055 },
+        ["Back"] = { 29994 },
+        ["Chest"] = { 30185 },
+        ["Wrist"] = { 30091 },
+        ["Hands"] = { 30189 },
+        ["Waist"] = { 30106 },
+        ["Legs"] = { 30192 },
+        ["Feet"] = { 30104 },
+        ["Rings"] = { 29997, 30052 },
+        ["Trinkets"] = { 28830, 29383 },
+        ["Main Hand"] = { 32944 },
+        ["Offhand"] = { 29996 },
+        ["Ranged"] = { 27815 },
+    }
+}
+
+BiSGearCheckDB_WowTBCgg_Phase2["ShamanRestoration"] = {
+    class = "SHAMAN",
+    spec = "Restoration",
+    slots = {
+        ["Head"] = { 30166 },
+        ["Neck"] = { 30018 },
+        ["Shoulders"] = { 30168 },
+        ["Back"] = { 29989 },
+        ["Chest"] = { 30164 },
+        ["Wrist"] = { 30047 },
+        ["Hands"] = { 29976 },
+        ["Waist"] = { 21873 },
+        ["Legs"] = { 29991 },
+        ["Feet"] = { 30092 },
+        ["Rings"] = { 28763, 29920 },
+        ["Trinkets"] = { 29376, 28190 },
+        ["Main Hand"] = { 30108 },
+        ["Offhand"] = { 29458 },
+        ["Ranged"] = { 28523 },
+    }
+}
+
+BiSGearCheckDB_WowTBCgg_Phase2["WarlockAffliction"] = {
+    class = "WARLOCK",
+    spec = "Affliction",
+    slots = {
+        ["Head"] = { 30212 },
+        ["Neck"] = { 30015 },
+        ["Shoulders"] = { 28967 },
+        ["Back"] = { 28766 },
+        ["Chest"] = { 30107 },
+        ["Wrist"] = { 29918 },
+        ["Hands"] = { 28968 },
+        ["Waist"] = { 30038 },
+        ["Legs"] = { 30213 },
+        ["Feet"] = { 30037 },
+        ["Rings"] = { 30109, 29302 },
+        ["Trinkets"] = { 27683, 29370 },
+        ["Main Hand"] = { 30095 },
+        ["Offhand"] = { 30049 },
+        ["Ranged"] = { 29982 },
+    }
+}
+
+BiSGearCheckDB_WowTBCgg_Phase2["WarlockDemonology"] = {
+    class = "WARLOCK",
+    spec = "Demonology",
+    slots = {
+        ["Head"] = { 30212 },
+        ["Neck"] = { 30015 },
+        ["Shoulders"] = { 28967 },
+        ["Back"] = { 28766 },
+        ["Chest"] = { 30107 },
+        ["Wrist"] = { 29918 },
+        ["Hands"] = { 28968 },
+        ["Waist"] = { 30038 },
+        ["Legs"] = { 30213 },
+        ["Feet"] = { 30037 },
+        ["Rings"] = { 30109, 29302 },
+        ["Trinkets"] = { 27683, 29370 },
+        ["Main Hand"] = { 30095 },
+        ["Offhand"] = { 30049 },
+        ["Ranged"] = { 29982 },
+    }
+}
+
+BiSGearCheckDB_WowTBCgg_Phase2["WarlockDestruction"] = {
+    class = "WARLOCK",
+    spec = "Destruction",
+    slots = {
+        ["Head"] = { 30212 },
+        ["Neck"] = { 30015 },
+        ["Shoulders"] = { 28967 },
+        ["Back"] = { 28766 },
+        ["Chest"] = { 30107 },
+        ["Wrist"] = { 29918 },
+        ["Hands"] = { 28968 },
+        ["Waist"] = { 30038 },
+        ["Legs"] = { 30213 },
+        ["Feet"] = { 30037 },
+        ["Rings"] = { 30109, 29302 },
+        ["Trinkets"] = { 27683, 29370 },
+        ["Main Hand"] = { 30095 },
+        ["Offhand"] = { 30049 },
+        ["Ranged"] = { 29982 },
+    }
+}
+
+BiSGearCheckDB_WowTBCgg_Phase2["WarriorArms"] = {
+    class = "WARRIOR",
+    spec = "Arms",
+    slots = {
+        ["Head"] = { 30120 },
+        ["Neck"] = { 30022 },
+        ["Shoulders"] = { 30055 },
+        ["Back"] = { 24259 },
+        ["Chest"] = { 30118 },
+        ["Wrist"] = { 28795 },
+        ["Hands"] = { 30119 },
+        ["Waist"] = { 30106 },
+        ["Legs"] = { 30121 },
+        ["Feet"] = { 30081 },
+        ["Rings"] = { 29997, 30061 },
+        ["Trinkets"] = { 28830, 29383 },
+        ["Main Hand"] = { 29993 },
+        ["Ranged"] = { 30105 },
+    }
+}
+
+BiSGearCheckDB_WowTBCgg_Phase2["WarriorFury"] = {
+    class = "WARRIOR",
+    spec = "Fury",
+    slots = {
+        ["Head"] = { 30120 },
+        ["Neck"] = { 30022 },
+        ["Shoulders"] = { 30122 },
+        ["Back"] = { 24259 },
+        ["Chest"] = { 30118 },
+        ["Wrist"] = { 30057 },
+        ["Hands"] = { 30119 },
+        ["Waist"] = { 30106 },
+        ["Legs"] = { 29995 },
+        ["Feet"] = { 30081 },
+        ["Rings"] = { 29997, 28757 },
+        ["Trinkets"] = { 28830, 30627 },
+        ["Main Hand"] = { 28439 },
+        ["Offhand"] = { 30082 },
+        ["Ranged"] = { 30105 },
+    }
+}
+
+BiSGearCheckDB_WowTBCgg_Phase2["WarriorProtection"] = {
+    class = "WARRIOR",
+    spec = "Protection",
+    slots = {
+        ["Head"] = { 30115 },
+        ["Neck"] = { 33066 },
+        ["Shoulders"] = { 30117 },
+        ["Back"] = { 29925 },
+        ["Chest"] = { 30113 },
+        ["Wrist"] = { 32818 },
+        ["Hands"] = { 29947 },
+        ["Waist"] = { 30106 },
+        ["Legs"] = { 30116 },
+        ["Feet"] = { 32793 },
+        ["Rings"] = { 30834, 30083 },
+        ["Trinkets"] = { 28121, 29383 },
+        ["Main Hand"] = { 30058 },
+        ["Offhand"] = { 28825 },
+        ["Ranged"] = { 32756 },
+    }
+}
+

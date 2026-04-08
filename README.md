@@ -103,14 +103,16 @@ Configure tooltip display, enable or disable individual data sources for the add
 
 ## Data Sources
 
-| Source | Database | Description |
-|--------|----------|-------------|
-| WowTBC.gg | `Data.lua` | BiS rankings sourced from wowtbc.gg |
-| BiS-Tooltip | `Data_Phase1.lua` | BiS rankings from BiS-Tooltip (boegi1) + WoWSims presets |
-| AtlasLoot | `Data_AtlasLoot.lua` | BiS rankings from AtlasLoot data |
-| WoWSims | `Data_WoWSims.lua` | Simulation-derived BiS from WoWSims TBC |
-| ThatsMyBis | `Data_TMB.lua` | Community wishlist aggregates from thatsmybis.com |
-| Wowhead | `Data_Wowhead.lua` | BiS rankings from Wowhead editorial guides |
+BiS data is available for Phase 1 (Karazhan/Gruul/Mag) and Phase 2 (SSC/TK). Switch phases via the dropdown in Settings or the BiS Lists tab.
+
+| Source | Phase 1 | Phase 2 | Description |
+|--------|---------|---------|-------------|
+| WowTBC.gg | 27 specs | 27 specs | Community-voted BiS lists from wowtbc.gg. Broad coverage, rankings reflect community opinion. |
+| BiS-Tooltip | 27 specs | 27 specs | BiS rankings from BiS-Tooltip (boegi1's TBC backport) combined with WoWSims presets. Most comprehensive source. |
+| AtlasLoot | 27 specs | 25 specs | BiS rankings from AtlasLoot loot tables. Missing Rogue Assassination and Rogue Subtlety for Phase 2. |
+| WoWSims | 22 specs | 5 specs | Simulation-optimized gear sets from WoWSims TBC. Most mathematically rigorous but limited spec coverage. |
+| ThatsMyBis | 27 specs | 27 specs | Community wishlist aggregates from thatsmybis.com. Phase 2 lists include SSC/TK items where wishlisted, with Phase 1 gear filling remaining slots. |
+| Wowhead | 27 specs | 24 specs | Editorial BiS guides from Wowhead. Missing Rogue Assassination, Rogue Subtlety, and Shaman Restoration in Phase 2. |
 
 Each source can be independently enabled for the addon UI and/or tooltips in Settings. Item drop sources (boss names, zones, quest names) are stored in `SourceDB.lua` covering 2,200+ items. Items can be tagged with a `faction` field ("Alliance" or "Horde") for faction-specific filtering; untagged items are available to both factions.
 

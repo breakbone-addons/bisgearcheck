@@ -16,10 +16,16 @@ libs\LibDBIcon-1.0\LibDBIcon-1.0.lua
 Util.lua
 Data.lua
 Data_Phase1.lua
+Data_Phase2.lua
 Data_AtlasLoot.lua
+Data_AtlasLoot_Phase2.lua
 Data_WoWSims.lua
+Data_WoWSims_Phase2.lua
 Data_TMB.lua
+Data_TMB_Phase2.lua
 Data_Wowhead.lua
+Data_Wowhead_Phase2.lua
+Data_WowTBCgg_Phase2.lua
 Data_GemsEnchants.lua
 Data_ItemPhases.lua
 SourceDB.lua
