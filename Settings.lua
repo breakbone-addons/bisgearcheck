@@ -183,8 +183,6 @@ UIDropDownMenu_Initialize(settingsPhaseDropdown, PhaseDropdownInit)
 -- Set initial text (BiSGearCheckSaved may not exist yet at load time; OnShow refreshes it)
 UIDropDownMenu_SetText(settingsPhaseDropdown, "Phase 1")
 
-local phaseSectionEnd = CreateSectionEnd(settingsPhaseDropdown, -8)
-
 -- ============================================================
 -- Helper: adaptive checkbox list (flat <=5, scrollable >5)
 -- ============================================================
@@ -264,7 +262,7 @@ end
 -- Section: Data Sources
 -- ============================================================
 
-local sourcesHeader, sourcesLine = CreateSectionHeader(phaseSectionEnd, "Data Sources")
+local sourcesHeader, sourcesLine = CreateSectionHeader(tooltipSectionEnd, "Data Sources")
 
 local sourcesDesc = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
 sourcesDesc:SetPoint("TOPLEFT", sourcesLine, "BOTTOMLEFT", 0, -6)
