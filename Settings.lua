@@ -142,48 +142,6 @@ end)
 local tooltipSectionEnd = CreateSectionEnd(classCheck, 0)
 
 -- ============================================================
--- Section: Content Phase
--- ============================================================
-local phaseHeader, phaseLine = CreateSectionHeader(classCheck, "Content Phase", 4, -16)
-
-local phaseDesc = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-phaseDesc:SetPoint("TOPLEFT", phaseLine, "BOTTOMLEFT", 0, -6)
-phaseDesc:SetWidth(CONTENT_WIDTH)
-phaseDesc:SetWordWrap(true)
-phaseDesc:SetText("|cff999999Select which phase's BiS lists to display. Available data sources change per phase.|r")
-
-local settingsPhaseDropdown = CreateFrame("Frame", "BiSGearCheckSettingsPhaseDropdown", scrollChild, "UIDropDownMenuTemplate")
-settingsPhaseDropdown:SetPoint("TOPLEFT", phaseDesc, "BOTTOMLEFT", -16, -4)
-UIDropDownMenu_SetWidth(settingsPhaseDropdown, 180)
-
-local function PhaseDropdownInit(self, level)
-    local currentPhase = BiSGearCheckSaved and BiSGearCheckSaved.phaseFilter or 1
-    for _, opt in ipairs(PHASE_OPTIONS) do
-        local info = UIDropDownMenu_CreateInfo()
-        info.text = opt.label
-        info.value = opt.value
-        info.func = function(self)
-            UIDropDownMenu_SetSelectedValue(settingsPhaseDropdown, self.value)
-            -- Find the label for the selected value
-            for _, o in ipairs(PHASE_OPTIONS) do
-                if o.value == self.value then
-                    UIDropDownMenu_SetText(settingsPhaseDropdown, o.label)
-                    break
-                end
-            end
-            BiSGearCheckSaved.phaseFilter = self.value
-            BiSGearCheck.phaseFilter = self.value
-            BiSGearCheck:OnPhaseChanged()
-        end
-        info.checked = (opt.value == currentPhase)
-        UIDropDownMenu_AddButton(info, level)
-    end
-end
-UIDropDownMenu_Initialize(settingsPhaseDropdown, PhaseDropdownInit)
--- Set initial text (BiSGearCheckSaved may not exist yet at load time; OnShow refreshes it)
-UIDropDownMenu_SetText(settingsPhaseDropdown, "Phase 1")
-
--- ============================================================
 -- Helper: adaptive checkbox list (flat <=5, scrollable >5)
 -- ============================================================
 
@@ -264,8 +222,13 @@ end
 
 local sourcesHeader, sourcesLine = CreateSectionHeader(tooltipSectionEnd, "Data Sources")
 
+-- Phase dropdown inside Data Sources section
+local settingsPhaseDropdown = CreateFrame("Frame", "BiSGearCheckSettingsPhaseDropdown", scrollChild, "UIDropDownMenuTemplate")
+settingsPhaseDropdown:SetPoint("TOPLEFT", sourcesLine, "BOTTOMLEFT", -16, -2)
+UIDropDownMenu_SetWidth(settingsPhaseDropdown, 110)
+
 local sourcesDesc = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-sourcesDesc:SetPoint("TOPLEFT", sourcesLine, "BOTTOMLEFT", 0, -6)
+sourcesDesc:SetPoint("TOPLEFT", settingsPhaseDropdown, "BOTTOMLEFT", 16, -2)
 sourcesDesc:SetTextColor(0.6, 0.6, 0.6)
 sourcesDesc:SetText("Uncheck both to skip loading a source entirely. Requires")
 
@@ -369,34 +332,73 @@ for i, srcInfo in ipairs(BiSGearCheck.DataSources) do
     local itemsLabel = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     itemsLabel:SetPoint("LEFT", row, "LEFT", COL_ITEMS_X, 0)
 
-    -- Count specs and unique items from the loaded DB
+    sourceTableRows[i] = { addonCB = addonCB, tooltipCB = tooltipCB, key = srcInfo.key,
+                           specsLabel = specsLabel, itemsLabel = itemsLabel, srcInfo = srcInfo }
+end
+
+-- Refresh spec/item counts for the current phase
+local function RefreshSourceStats()
     local phase = BiSGearCheck.phaseFilter or 1
-    local dbName = BiSGearCheck:GetSourceDBName(srcInfo, phase)
-    local db = dbName and _G[dbName]
-    local specCount, uniqueItems = 0, {}
-    if db then
-        for _, specData in pairs(db) do
-            if specData.slots then
-                local hasItems = false
-                for _, items in pairs(specData.slots) do
-                    for _, itemID in ipairs(items) do
-                        uniqueItems[itemID] = true
-                        hasItems = true
+    for _, rowData in ipairs(sourceTableRows) do
+        local dbName = BiSGearCheck:GetSourceDBName(rowData.srcInfo, phase)
+        local db = dbName and _G[dbName]
+        local specCount, uniqueItems = 0, {}
+        if db then
+            for _, specData in pairs(db) do
+                if specData.slots then
+                    local hasItems = false
+                    for _, items in pairs(specData.slots) do
+                        for _, itemID in ipairs(items) do
+                            uniqueItems[itemID] = true
+                            hasItems = true
+                        end
                     end
+                    if hasItems then specCount = specCount + 1 end
                 end
-                if hasItems then specCount = specCount + 1 end
             end
         end
+        local itemCount = 0
+        for _ in pairs(uniqueItems) do itemCount = itemCount + 1 end
+        rowData.specsLabel:SetText(specCount > 0 and tostring(specCount) or "-")
+        rowData.itemsLabel:SetText(itemCount > 0 and tostring(itemCount) or "-")
     end
-    local itemCount = 0
-    for _ in pairs(uniqueItems) do itemCount = itemCount + 1 end
-
-    specsLabel:SetText(specCount > 0 and tostring(specCount) or "-")
-    itemsLabel:SetText(itemCount > 0 and tostring(itemCount) or "-")
-
-    sourceTableRows[i] = { addonCB = addonCB, tooltipCB = tooltipCB, key = srcInfo.key,
-                           specsLabel = specsLabel, itemsLabel = itemsLabel }
 end
+
+-- Initialize phase dropdown
+local function PhaseDropdownInit(self, level)
+    local currentPhase = BiSGearCheckSaved and BiSGearCheckSaved.phaseFilter or 1
+    for _, opt in ipairs(PHASE_OPTIONS) do
+        local info = UIDropDownMenu_CreateInfo()
+        info.text = opt.label
+        info.value = opt.value
+        info.func = function(self)
+            UIDropDownMenu_SetSelectedValue(settingsPhaseDropdown, self.value)
+            for _, o in ipairs(PHASE_OPTIONS) do
+                if o.value == self.value then
+                    UIDropDownMenu_SetText(settingsPhaseDropdown, o.label)
+                    break
+                end
+            end
+            BiSGearCheckSaved.phaseFilter = self.value
+            BiSGearCheck.phaseFilter = self.value
+            RefreshSourceStats()
+            BiSGearCheck:OnPhaseChanged()
+        end
+        info.checked = (opt.value == currentPhase)
+        UIDropDownMenu_AddButton(info, level)
+    end
+end
+UIDropDownMenu_Initialize(settingsPhaseDropdown, PhaseDropdownInit)
+
+-- Set initial state
+local initPhase = BiSGearCheckSaved and BiSGearCheckSaved.phaseFilter or 1
+for _, opt in ipairs(PHASE_OPTIONS) do
+    if opt.value == initPhase then
+        UIDropDownMenu_SetText(settingsPhaseDropdown, opt.label)
+        break
+    end
+end
+RefreshSourceStats()
 
 local sourcesSectionEnd = CreateSectionEnd(sourceTableWrapper, 0)
 
