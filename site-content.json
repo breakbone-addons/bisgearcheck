@@ -90,6 +90,10 @@
     {
       "label": "CurseForge",
       "href": "https://www.curseforge.com/wow/addons/bisgearcheck"
+    },
+    {
+      "label": "WoWInterface",
+      "href": "https://www.wowinterface.com/downloads/info27109-BiSGearCheck.html"
     }
   ]
 }
