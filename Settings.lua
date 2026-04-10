@@ -776,9 +776,11 @@ panel:SetScript("OnShow", function(self)
     raidWorldBossCheck:SetChecked(BiSGearCheckSaved.raidIncludeWorldBoss)
 end)
 
+local inspectedRowPool = {}
+
 function BiSGearCheck:RefreshInspectedList()
     if not BiSGearCheckSaved then return end
-    for _, child in ipairs({inspectedSCH:GetChildren()}) do child:Hide() end
+    for _, row in ipairs(inspectedRowPool) do row:Hide() end
     local inspectedKeys = {}
     if BiSGearCheckSaved.characters then
         for key, data in pairs(BiSGearCheckSaved.characters) do
@@ -798,33 +800,39 @@ function BiSGearCheck:RefreshInspectedList()
         inspectedNoData:Hide()
         removeAllBtn:Show()
         local inspectY = 0
-        for _, charKey in ipairs(inspectedKeys) do
+        for i, charKey in ipairs(inspectedKeys) do
             local charData = BiSGearCheckSaved.characters[charKey]
-            local row = CreateFrame("Frame", nil, inspectedSCH)
+            local row = inspectedRowPool[i]
+            if not row then
+                row = CreateFrame("Frame", nil, inspectedSCH)
+                row.label = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+                row.label:SetPoint("LEFT", row, "LEFT", 4, 0)
+                row.removeBtn = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
+                row.removeBtn:SetSize(60, 18)
+                row.removeBtn:SetPoint("RIGHT", row, "RIGHT", 0, 0)
+                row.removeBtn:SetText("Remove")
+                row.removeBtn:SetScript("OnClick", function(self)
+                    BiSGearCheck:RemoveInspectedCharacter(self._charKey)
+                    panel:Hide()
+                    panel:Show()
+                end)
+                inspectedRowPool[i] = row
+            end
             row:SetSize(inspectedSCH:GetWidth(), ROW_HEIGHT)
+            row:ClearAllPoints()
             row:SetPoint("TOPLEFT", inspectedSCH, "TOPLEFT", 0, -inspectY)
 
             local classColor = charData and RAID_CLASS_COLORS[charData.class]
             local charName = charKey:match("^([^%-]+)") or charKey
             local realm = charKey:match("%-(.+)$") or ""
-            local label = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-            label:SetPoint("LEFT", row, "LEFT", 4, 0)
             if classColor then
-                label:SetText(string.format("|cff%02x%02x%02x%s|r |cff888888%s L%d|r", classColor.r * 255, classColor.g * 255, classColor.b * 255, charName, realm, charData.level or 0))
+                row.label:SetText(string.format("|cff%02x%02x%02x%s|r |cff888888%s L%d|r", classColor.r * 255, classColor.g * 255, classColor.b * 255, charName, realm, charData.level or 0))
             else
-                label:SetText(charName .. " " .. realm)
+                row.label:SetText(charName .. " " .. realm)
             end
 
-            local removeBtn = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
-            removeBtn:SetSize(60, 18)
-            removeBtn:SetPoint("RIGHT", row, "RIGHT", 0, 0)
-            removeBtn:SetText("Remove")
-            removeBtn._charKey = charKey
-            removeBtn:SetScript("OnClick", function(self)
-                BiSGearCheck:RemoveInspectedCharacter(self._charKey)
-                panel:Hide()
-                panel:Show()
-            end)
+            row.removeBtn._charKey = charKey
+            row:Show()
 
             inspectY = inspectY + ROW_HEIGHT
         end

@@ -5,6 +5,10 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
+## v3.7.2
+
+- Fixed settings panel crash triggered by accumulated inspect history over long sessions.
+
 ## v3.7.1
 
 - Fixed spurious inspections caused by other addons doing inspections
