@@ -18,6 +18,12 @@ BiSGearCheck.playerFaction = "Alliance" -- detected at init
 BiSGearCheck.playerKey = nil -- "Name-Realm" key for character registry
 BiSGearCheck.viewingCharKey = nil -- which character the UI is operating as (nil = current)
 
+-- Debug logging (toggle with /bgc debuginspect)
+function BiSGearCheck:DebugLog(msg)
+    if not BiSGearCheckSaved or not BiSGearCheckSaved.debugInspect then return end
+    DEFAULT_CHAT_FRAME:AddMessage("|cff888888[BGC Debug]|r " .. msg)
+end
+
 -- Event frame
 local eventFrame = CreateFrame("Frame", "BiSGearCheckEventFrame")
 eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -52,6 +58,7 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
             BiSGearCheck:Refresh()
         end
     elseif event == "INSPECT_READY" then
+        BiSGearCheck:DebugLog("INSPECT_READY fired — isRaidScanning=" .. tostring(BiSGearCheck.isRaidScanning) .. ", expectingInspect=" .. tostring(BiSGearCheck.expectingInspect))
         if BiSGearCheck.isRaidScanning then
             BiSGearCheck:OnRaidScanInspectReady()
         else
@@ -72,11 +79,17 @@ end)
 
 function BiSGearCheck:OnInspectReady()
     -- Ignore INSPECT_READY events we didn't initiate (other addons inspecting)
-    if not self.expectingInspect then return end
+    if not self.expectingInspect then
+        self:DebugLog("OnInspectReady — SKIPPED (expectingInspect=false, likely from another addon)")
+        return
+    end
     self.expectingInspect = false
+    local inspectUnit = self.expectingInspectUnit
+    self.expectingInspectUnit = nil
     eventFrame:UnregisterEvent("INSPECT_READY")
 
-    local charKey = self:SnapshotInspectedGear()
+    self:DebugLog("OnInspectReady — processing inspect (unit=" .. tostring(inspectUnit) .. ")")
+    local charKey = self:SnapshotInspectedGear(inspectUnit)
 
     -- Self-inspection: switch back to the player's own character
     if not charKey then
@@ -124,9 +137,17 @@ end
 -- Hook InspectUnit: register INSPECT_READY only when user initiates inspect
 if InspectUnit then
     hooksecurefunc("InspectUnit", function(unit)
-        if not BiSGearCheck.isRaidScanning then
-            BiSGearCheck.expectingInspect = true
+        local name = unit and UnitName(unit) or "nil"
+        local exists = UnitExists(unit or "")
+        local caller = debugstack(2, 1, 0) or "unknown"
+        caller = caller:match("([^\\/@]+%.lua:%d+)") or caller:match("([^\\/@]+:%d+)") or caller
+        BiSGearCheck:DebugLog("InspectUnit hooked — unit=" .. tostring(unit) .. ", name=" .. tostring(name) .. ", exists=" .. tostring(exists) .. ", caller=" .. caller)
+        if BiSGearCheck.isRaidScanning then
+            BiSGearCheck:DebugLog("InspectUnit hooked — IGNORED (raid scan owns INSPECT_READY)")
+            return
         end
+        BiSGearCheck.expectingInspect = true
+        BiSGearCheck.expectingInspectUnit = unit
         eventFrame:RegisterEvent("INSPECT_READY")
     end)
 end
@@ -134,9 +155,18 @@ end
 -- Hook NotifyInspect: addons like Examiner call this directly, bypassing InspectUnit
 if NotifyInspect then
     hooksecurefunc("NotifyInspect", function(unit)
-        if not BiSGearCheck.isRaidScanning then
-            BiSGearCheck.expectingInspect = true
+        local name = unit and UnitName(unit) or "nil"
+        local exists = UnitExists(unit or "")
+        local stack = debugstack(2, 5, 0) or "unknown"
+        -- Compact multi-line stack into a single log-friendly string
+        stack = stack:gsub("\n", " << ")
+        BiSGearCheck:DebugLog("NotifyInspect hooked — unit=" .. tostring(unit) .. ", name=" .. tostring(name) .. ", exists=" .. tostring(exists) .. ", stack=" .. stack)
+        if BiSGearCheck.isRaidScanning then
+            BiSGearCheck:DebugLog("NotifyInspect hooked — IGNORED (raid scan owns INSPECT_READY)")
+            return
         end
+        BiSGearCheck.expectingInspect = true
+        BiSGearCheck.expectingInspectUnit = unit
         eventFrame:RegisterEvent("INSPECT_READY")
     end)
 end
@@ -150,6 +180,7 @@ local function HookInspectFrame()
         inspectHooked = true
         frame:HookScript("OnShow", function()
             if not BiSGearCheck.expectingInspect and not BiSGearCheck.isRaidScanning then
+                BiSGearCheck:DebugLog("InspectFrame OnShow — registering INSPECT_READY (no prior expectation)")
                 BiSGearCheck.expectingInspect = true
                 eventFrame:RegisterEvent("INSPECT_READY")
             end
@@ -175,6 +206,15 @@ end
 -- ============================================================
 
 function BiSGearCheck:Initialize()
+    -- Reset raid scan state on load — a Lua error during a previous scan
+    -- can leave isRaidScanning stuck true, which blocks normal inspects
+    if self.isRaidScanning then
+        self:DebugLog("Initialize — clearing stuck isRaidScanning flag")
+        self.isRaidScanning = false
+        self.raidScanState = "idle"
+        self.raidScanUnit = nil
+    end
+
     -- Detect faction
     self.playerFaction = UnitFactionGroup("player") or "Alliance"
 
@@ -254,6 +294,12 @@ function BiSGearCheck:Initialize()
     SLASH_BISGEARCHECK1 = "/bisgear"
     SLASH_BISGEARCHECK2 = "/bgc"
     SlashCmdList["BISGEARCHECK"] = function(msg)
+        if msg == "debuginspect" then
+            BiSGearCheckSaved.debugInspect = not BiSGearCheckSaved.debugInspect
+            local state = BiSGearCheckSaved.debugInspect and "|cff00ff00ON|r" or "|cffff0000OFF|r"
+            DEFAULT_CHAT_FRAME:AddMessage("|cff00ccffBiSGearCheck:|r Inspect debug logging " .. state)
+            return
+        end
         if msg == "wishlist" or msg == "wl" then
             BiSGearCheck.viewMode = "wishlist"
         else

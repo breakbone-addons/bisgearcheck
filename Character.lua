@@ -182,19 +182,27 @@ end
 
 -- Capture gear from an inspected player and store as a snapshot character
 -- The inspected unit is "target" (you inspect your current target)
-function BiSGearCheck:SnapshotInspectedGear()
-    -- Find the inspected unit: check target first, then mouseover
+function BiSGearCheck:SnapshotInspectedGear(hintUnit)
+    -- Use the unit captured from the inspect hook if available and valid,
+    -- otherwise fall back to target/mouseover
     local unit
-    if UnitExists("target") and CanInspect("target") then
+    if hintUnit and UnitExists(hintUnit) and CanInspect(hintUnit) then
+        unit = hintUnit
+    elseif UnitExists("target") and CanInspect("target") then
         unit = "target"
     elseif UnitExists("mouseover") and CanInspect("mouseover") then
         unit = "mouseover"
     else
+        self:DebugLog("SnapshotInspectedGear — no valid unit found (hint=" .. tostring(hintUnit) .. ", target exists=" .. tostring(UnitExists("target")) .. ", mouseover exists=" .. tostring(UnitExists("mouseover")) .. ")")
         return nil
     end
+    self:DebugLog("SnapshotInspectedGear — using unit=" .. unit .. " (hint was " .. tostring(hintUnit) .. ")")
 
     -- Don't capture self-inspections
-    if UnitIsUnit(unit, "player") then return nil end
+    if UnitIsUnit(unit, "player") then
+        self:DebugLog("SnapshotInspectedGear — self-inspection via " .. unit)
+        return nil
+    end
 
     local name, realm = UnitName(unit)
     if not name then return nil end
@@ -270,7 +278,10 @@ end
 
 -- Snapshot gear for a specific unit (used by raid scan where we already know the unit)
 function BiSGearCheck:SnapshotInspectedGearFromUnit(unit)
-    if not unit or not UnitExists(unit) then return nil end
+    if not unit or not UnitExists(unit) then
+        self:DebugLog("SnapshotFromUnit — unit invalid (unit=" .. tostring(unit) .. ", exists=" .. tostring(unit and UnitExists(unit)) .. ")")
+        return nil
+    end
     if UnitIsUnit(unit, "player") then return nil end
 
     local name, realm = UnitName(unit)

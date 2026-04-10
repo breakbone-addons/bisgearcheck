@@ -175,19 +175,29 @@ function BiSGearCheck:ProcessNextScan()
     -- inspect path; the raid scan routes via isRaidScanning instead)
     self.raidScanUnit = unit
     self.raidScanInspectTime = GetTime()
+    local name = UnitName(unit) or "?"
+    self:DebugLog("RaidScan NotifyInspect — unit=" .. unit .. ", name=" .. name .. ", index=" .. self.raidScanIndex .. "/" .. #self.raidScanQueue)
     BiSGearCheckEventFrame:RegisterEvent("INSPECT_READY")
     NotifyInspect(unit)
 end
 
 function BiSGearCheck:OnRaidScanInspectReady()
-    if self.raidScanState ~= "scanning" then return end
+    if self.raidScanState ~= "scanning" then
+        self:DebugLog("OnRaidScanInspectReady — SKIPPED (state=" .. tostring(self.raidScanState) .. ")")
+        return
+    end
 
     local unit = self.raidScanUnit
     if unit then
+        local unitExists = UnitExists(unit)
+        local unitName = UnitName(unit) or "nil"
+        self:DebugLog("OnRaidScanInspectReady — unit=" .. unit .. ", name=" .. unitName .. ", exists=" .. tostring(unitExists))
         local charKey = self:SnapshotInspectedGearFromUnit(unit)
         if charKey then
+            self:DebugLog("OnRaidScanInspectReady — snapshot OK: " .. charKey)
             self:AnalyzeCharacter(charKey)
         else
+            self:DebugLog("OnRaidScanInspectReady — snapshot FAILED for " .. unitName)
             -- Snapshot failed (likely no item data returned)
             local entry = self.raidScanQueue[self.raidScanIndex]
             if entry then
@@ -198,6 +208,11 @@ function BiSGearCheck:OnRaidScanInspectReady()
                 }
             end
         end
+    else
+        -- No raidScanUnit — this INSPECT_READY was not initiated by us
+        -- (likely another addon called NotifyInspect). Ignore it entirely.
+        self:DebugLog("OnRaidScanInspectReady — no raidScanUnit set, ignoring stale INSPECT_READY")
+        return
     end
 
     BiSGearCheckEventFrame:UnregisterEvent("INSPECT_READY")
@@ -211,6 +226,8 @@ function BiSGearCheck:OnRaidScanTimeout()
     if self.raidScanState ~= "scanning" then return end
     if not self.raidScanUnit then return end
 
+    local unitName = UnitName(self.raidScanUnit) or "nil"
+    self:DebugLog("OnRaidScanTimeout — unit=" .. self.raidScanUnit .. ", name=" .. unitName .. ", elapsed=" .. string.format("%.1f", GetTime() - (self.raidScanInspectTime or 0)) .. "s")
     local entry = self.raidScanQueue[self.raidScanIndex]
     if entry then
         self.raidScanSkipped[#self.raidScanSkipped + 1] = {

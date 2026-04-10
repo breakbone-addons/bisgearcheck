@@ -5,6 +5,10 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
+## v3.7.1
+
+- Fixed spurious inspections caused by other addons doing inspections
+
 ## v3.7.0
 
 - Added Phase 2 BiS data from all six sources (SSC/TK, Season 2 PvP, engineering goggles, Ogri'la gear).
