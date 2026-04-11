@@ -1,15 +1,33 @@
 package-as: BiSGearCheck
 
 ignore:
-  - README.md
-  - LICENSE
-  - .github
+  # Repo meta — never ship
+  - .git
   - .gitignore
+  - .github
   - .pkgmeta
-  - art
-  - tests
+  - .DS_Store
+
+  # Dev-only docs (shipped via CHANGELOG below or not needed in-game)
+  - README.md
+  - CURSEFORGE.md
   - CLAUDE.md
+  - BREAKBONE_BRAND.md
   - .claude
+  - site-content.json
+
+  # Tooling output
+  - graphify-out
+
+  # Source artwork — website is the canonical location
+  - art
+
+  # Test code — run locally / in CI, never at runtime
+  - tests
+
+  # NOTE: LICENSE is intentionally NOT ignored — ships with the addon
+  # NOTE: minimap-icon.tga at repo root is the runtime asset (do not ignore)
+  # NOTE: CHANGELOG.md ships via manual-changelog below (do not ignore)
 
 externals:
   libs/LibStub:

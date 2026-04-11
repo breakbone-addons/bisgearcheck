@@ -1,5 +1,7 @@
 {
   "id": "bisgearcheck",
+  "version": "3.7.2",
+  "lastUpdated": "2026-04-10",
   "name": "BISGearCheck",
   "tagline": "Best-in-Slot gear tracking for TBC Anniversary",
   "description": "Compare your equipped gear against curated Best-in-Slot lists from six community data sources. See exactly which upgrades you need, where they drop, and track them on per-character wishlists — all without leaving the game.",
