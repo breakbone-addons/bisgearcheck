@@ -5,6 +5,11 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
+## v3.7.3
+
+- Release package trimmed: no longer ships developer-only files (`CURSEFORGE.md`, `site-content.json`, `.github/`, etc.)
+- `LICENSE` file now included in the release zip
+
 ## v3.7.2
 
 - Fixed settings panel crash triggered by accumulated inspect history over long sessions.
