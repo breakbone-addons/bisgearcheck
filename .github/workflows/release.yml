@@ -52,7 +52,7 @@ jobs:
       contents: write
     env:
       ADDON_NAME: BiSGearCheck
-      BUDGET_KB: 1800
+      BUDGET_KB: 270
       RELEASE_ZIP_SUFFIX: bcc
       PUBLISH: ${{ github.event_name == 'push' || github.event.inputs.publish == 'true' }}
     steps:
