@@ -1,13 +1,41 @@
 name: Release
+
+# Thin caller for the shared release pipeline at
+# breakbone-addons/release-workflows. That repo is public so this call works
+# from any other repo (private or public) in or outside the org.
+#
+# Two jobs:
+#   test     — runs this addon's own test suite (local reusable)
+#   release  — needs: test, calls the shared pipeline (cross-repo reusable)
+#
+# Triggers:
+#   push (tag)            -> publish=true (real release)
+#   workflow_dispatch     -> publish=false by default (dry-run), toggle in UI
+
 on:
+  push:
+    tags:
+      - '**'
   workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publish to CurseForge + GitHub Release + site rebuild (uncheck for dry-run)"
+        type: boolean
+        default: false
+
 jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+
   release:
+    needs: test
     uses: breakbone-addons/release-workflows/.github/workflows/breakbone-release.yml@v1
     with:
       addon_name: BiSGearCheck
       budget_kb: 270
-      publish: false
+      publish: ${{ github.event_name == 'push' || inputs.publish }}
     secrets:
+      # secrets: inherit doesn't work for cross-repo calls to public reusable
+      # workflows; each secret must be passed explicitly here.
       CF_API_KEY: ${{ secrets.CF_API_KEY }}
       SITE_DISPATCH_TOKEN: ${{ secrets.SITE_DISPATCH_TOKEN }}
