@@ -2,12 +2,13 @@
 ## Title: BiSGearCheck
 ## Notes: Compare equipped gear against Best in Slot lists with tooltip integration.
 ## Author: Breakbone - Dreamscythe
-## Version: 3.7.3
+## Version: 3.8.0
 ## X-License: All Rights Reserved
 ## X-Curse-Project-ID: 1492057
 ## X-WoWI-ID: 27109
 ## SavedVariables: BiSGearCheckSaved
 ## SavedVariablesPerCharacter: BiSGearCheckChar
+## OptionalDeps: LibSharedMedia-3.0
 
 libs\LibStub\LibStub.lua
 libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
@@ -31,6 +32,8 @@ Data_GemsEnchants.lua
 Data_ItemPhases.lua
 SourceDB.lua
 Tooltip.lua
+Theme.lua
+ElvUISkin.lua
 Settings.lua
 Character.lua
 Wishlist.lua

@@ -2,6 +2,7 @@
 -- Raid tab controls and rendering: scan button, progress, per-character issue/upgrade display
 
 BiSGearCheck = BiSGearCheck or {}
+local T = BiSGearCheck.Theme
 
 -- ============================================================
 -- RAID CHARACTER CONTEXT MENU
@@ -91,7 +92,8 @@ function BiSGearCheck:SetupRaidControls(f)
     collapseBtn:SetPoint("TOPLEFT", scanBtn, "BOTTOMLEFT", 3, -4)
     local collapseText = collapseBtn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     collapseText:SetPoint("LEFT")
-    collapseText:SetText("|cff00ccffCollapse All|r")
+    T.applyFont(collapseText, "small")
+    collapseText:SetText(T.hex("collapseLink") .. "Collapse All|r")
     collapseBtn:SetScript("OnClick", function()
         for charKey in pairs(BiSGearCheck.raidScanResults) do
             BiSGearCheck.raidCollapsedChars[charKey] = true
@@ -104,7 +106,8 @@ function BiSGearCheck:SetupRaidControls(f)
     expandBtn:SetPoint("LEFT", collapseBtn, "RIGHT", 8, 0)
     local expandText = expandBtn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     expandText:SetPoint("LEFT")
-    expandText:SetText("|cff00ccffExpand All|r")
+    T.applyFont(expandText, "small")
+    expandText:SetText(T.hex("collapseLink") .. "Expand All|r")
     expandBtn:SetScript("OnClick", function()
         wipe(BiSGearCheck.raidCollapsedChars)
         BiSGearCheck:RefreshView()
@@ -114,7 +117,8 @@ function BiSGearCheck:SetupRaidControls(f)
     progressText:SetPoint("LEFT", expandBtn, "RIGHT", 10, 0)
     progressText:SetPoint("RIGHT", bar, "RIGHT", -5, 0)
     progressText:SetJustifyH("LEFT")
-    progressText:SetTextColor(0.7, 0.7, 0.7)
+    T.applyFont(progressText, "small")
+    T.applyProgressText(progressText)
 
     bar.scanBtn = scanBtn
     bar.exportBtn = exportBtn
@@ -193,7 +197,7 @@ function BiSGearCheck:RenderRaid()
             msg = msg .. string.format(", %d skipped", skipped)
         end
         if self.raidScanRosterChanged then
-            msg = msg .. " |cffff6600(roster changed)|r"
+            msg = msg .. " " .. T.hex("rosterChanged") .. "(roster changed)|r"
         end
         progressText:SetText(msg .. timeStr)
     else
@@ -215,9 +219,9 @@ function BiSGearCheck:RenderRaid()
     if not next(self.raidScanResults) and self.raidScanState ~= "scanning" then
         local row = self:CreateRow(scrollChild, yOffset, contentWidth)
         if GetNumGroupMembers() == 0 then
-            row.text:SetText("|cff999999Join a raid or party and click Scan to check gear.|r")
+            row.text:SetText(T.hex("emptySlot") .. "Join a raid or party and click Scan to check gear.|r")
         else
-            row.text:SetText("|cff999999Click Scan to inspect group members.|r")
+            row.text:SetText(T.hex("emptySlot") .. "Click Scan to inspect group members.|r")
         end
         yOffset = yOffset - self.ITEM_ROW_HEIGHT
         scrollChild:SetHeight(math.abs(yOffset) + 20)
@@ -235,13 +239,13 @@ function BiSGearCheck:RenderRaid()
         yOffset = yOffset - self.SECTION_SPACING
 
         local header = self:CreateRow(scrollChild, yOffset, contentWidth)
-        header.text:SetText("|cff888888Skipped:|r")
+        header.text:SetText(T.hex("skippedLabel") .. "Skipped:|r")
         yOffset = yOffset - self.SLOT_HEADER_HEIGHT
 
         for _, skip in ipairs(self.raidScanSkipped) do
             local row = self:CreateRow(scrollChild, yOffset, contentWidth)
             local coloredName = self:ClassColor(skip.class, skip.name)
-            row.text:SetText("  " .. coloredName .. " |cff888888- " .. skip.reason .. "|r")
+            row.text:SetText("  " .. coloredName .. " " .. T.hex("sourceInfo") .. "- " .. skip.reason .. "|r")
             yOffset = yOffset - self.ITEM_ROW_HEIGHT
         end
     end
@@ -261,7 +265,7 @@ function BiSGearCheck:RenderRaidCharacter(parent, charKey, yOffset, width)
     if not charData then return yOffset end
 
     local isCollapsed = self.raidCollapsedChars[charKey]
-    local arrow = isCollapsed and "|cffffd100[+]|r " or "|cffffd100[-]|r "
+    local arrow = isCollapsed and (T.hex("slotHeader") .. "[+]|r ") or (T.hex("slotHeader") .. "[-]|r ")
 
     -- Spec label
     local specLabel = ""
@@ -286,15 +290,15 @@ function BiSGearCheck:RenderRaidCharacter(parent, charKey, yOffset, width)
     end
     local upgradeBadge = ""
     if upgradeCount > 0 then
-        upgradeBadge = string.format(" |cff00ccff[%d Upgrade%s]|r",
-            upgradeCount, upgradeCount == 1 and "" or "s")
+        upgradeBadge = string.format(" %s[%d Upgrade%s]|r",
+            T.hex("upgradesBadge"), upgradeCount, upgradeCount == 1 and "" or "s")
     end
 
     -- Header row
     local header = self:CreateRow(parent, yOffset, width)
     local headerText = arrow .. coloredName
     if specLabel ~= "" then
-        headerText = headerText .. " |cff888888(" .. specLabel .. ")|r"
+        headerText = headerText .. " " .. T.hex("specLabel") .. "(" .. specLabel .. ")|r"
     end
     header.text:SetText(headerText)
     header.text:SetPoint("RIGHT", header, "RIGHT", -120, 0)
@@ -302,10 +306,10 @@ function BiSGearCheck:RenderRaidCharacter(parent, charKey, yOffset, width)
     -- Issue badge (hoverable with tooltip showing specifics)
     local issueBadgeText
     if result.issueCount > 0 then
-        issueBadgeText = string.format("|cffff3333[%d Issue%s]|r",
-            result.issueCount, result.issueCount == 1 and "" or "s")
+        issueBadgeText = string.format("%s[%d Issue%s]|r",
+            T.hex("issuesBadge"), result.issueCount, result.issueCount == 1 and "" or "s")
     else
-        issueBadgeText = "|cff00ff00[OK]|r"
+        issueBadgeText = T.hex("okBadge") .. "[OK]|r"
     end
     local wf, wLabel = self:GetWarningLabel(header)
     wLabel:SetText(issueBadgeText .. upgradeBadge)
@@ -359,7 +363,7 @@ function BiSGearCheck:RenderRaidCharacter(parent, charKey, yOffset, width)
         -- Separator
         local sep = self:CreateRow(parent, yOffset, width)
         local line = self:GetSeparatorLine(sep)
-        line:SetColorTexture(0.3, 0.3, 0.3, 0.3)
+        T.applySeparator(line, true)
         yOffset = yOffset - 6
         return yOffset
     end
@@ -369,10 +373,10 @@ function BiSGearCheck:RenderRaidCharacter(parent, charKey, yOffset, width)
         for _, issue in ipairs(result.issues) do
             local row = self:CreateRow(parent, yOffset, width)
             local itemText = issue.itemLink or ("Item #" .. (issue.itemID or "?"))
-            local rankText = issue.bisRank and string.format(" |cff00ccff#%d|r", issue.bisRank) or ""
+            local rankText = issue.bisRank and string.format(" %s#%d|r", T.hex("rankNum"), issue.bisRank) or ""
             local warnText = table.concat(issue.warnings, " ")
-            row.text:SetText(string.format("  |cffffd100%s:|r %s%s %s",
-                issue.slotName, itemText, rankText, warnText))
+            row.text:SetText(string.format("  %s%s:|r %s%s %s",
+                T.hex("slotHeader"), issue.slotName, itemText, rankText, warnText))
 
             if issue.itemLink then
                 row._itemLink = issue.itemLink
@@ -408,7 +412,7 @@ function BiSGearCheck:RenderRaidCharacter(parent, charKey, yOffset, width)
             if #visibleUpgrades > 0 then
                 if not hasUpgrades then
                     local hdr = self:CreateRow(parent, yOffset, width)
-                    hdr.text:SetText("  |cff00ccffUpgrades:|r")
+                    hdr.text:SetText("  " .. T.hex("enchantLabel") .. "Upgrades:|r")
                     yOffset = yOffset - self.ITEM_ROW_HEIGHT
                     hasUpgrades = true
                 else
@@ -418,7 +422,7 @@ function BiSGearCheck:RenderRaidCharacter(parent, charKey, yOffset, width)
 
                 -- Slot label
                 local slotRow = self:CreateRow(parent, yOffset, width)
-                slotRow.text:SetText("    |cffffd100" .. slotName .. "|r")
+                slotRow.text:SetText("    " .. T.hex("slotHeader") .. slotName .. "|r")
                 yOffset = yOffset - self.ITEM_ROW_HEIGHT
 
                 for _, upgrade in ipairs(visibleUpgrades) do
@@ -429,14 +433,14 @@ function BiSGearCheck:RenderRaidCharacter(parent, charKey, yOffset, width)
                     local sourceText = ""
                     if upgrade.source and upgrade.source ~= "Unknown" then
                         if upgrade.sourceType and upgrade.sourceType ~= "" then
-                            sourceText = string.format("|cff888888%s (%s)|r", upgrade.source, upgrade.sourceType)
+                            sourceText = string.format("%s%s (%s)|r", T.hex("sourceInfo"), upgrade.source, upgrade.sourceType)
                         else
-                            sourceText = string.format("|cff888888%s|r", upgrade.source)
+                            sourceText = string.format("%s%s|r", T.hex("sourceInfo"), upgrade.source)
                         end
                     end
 
-                    row.text:SetText(string.format("      |cff00ccff#%d|r %s %s",
-                        upgrade.rank, itemText, sourceText))
+                    row.text:SetText(string.format("      %s#%d|r %s %s",
+                        T.hex("rankNum"), upgrade.rank, itemText, sourceText))
 
                     row._itemID = upgrade.id
                     row:EnableMouse(true)
@@ -452,7 +456,7 @@ function BiSGearCheck:RenderRaidCharacter(parent, charKey, yOffset, width)
     -- Separator
     local sep = self:CreateRow(parent, yOffset, width)
     local line = self:GetSeparatorLine(sep)
-    line:SetColorTexture(0.3, 0.3, 0.3, 0.3)
+    T.applySeparator(line, true)
     yOffset = yOffset - 6
 
     return yOffset

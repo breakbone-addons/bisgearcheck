@@ -2,14 +2,15 @@
 -- Tabs, character selector, data source/spec dropdowns, collapse controls, BiS Lists bar
 
 BiSGearCheck = BiSGearCheck or {}
+local T = BiSGearCheck.Theme
 
 -- ============================================================
 -- TABS: Compare + Wishlist + BiS Lists
 -- ============================================================
 
 function BiSGearCheck:SetupTabs(f)
-    local TAB_WIDTH = 80
-    local TAB_HEIGHT = 22
+    local TAB_WIDTH = 70
+    local TAB_HEIGHT = 20
 
     local function CreateTab(parent, text, index)
         local tab = CreateFrame("Button", "BiSGearCheckTab" .. index, parent)
@@ -22,6 +23,7 @@ function BiSGearCheck:SetupTabs(f)
         local label = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         label:SetPoint("CENTER", 0, 0)
         label:SetText(text)
+        T.applyFont(label, "small")
         tab.label = label
 
         return tab
@@ -40,12 +42,10 @@ function BiSGearCheck:SetupTabs(f)
     raidTab:SetPoint("LEFT", bisTab, "RIGHT", 2, 0)
 
     local function SetTabActive(tab)
-        tab.bg:SetColorTexture(0.2, 0.2, 0.2, 1)
-        tab.label:SetTextColor(1, 0.82, 0)
+        T.setTabActive(tab)
     end
     local function SetTabInactive(tab)
-        tab.bg:SetColorTexture(0.08, 0.08, 0.08, 0.8)
-        tab.label:SetTextColor(0.5, 0.5, 0.5)
+        T.setTabInactive(tab)
     end
 
     local function UpdateTabAppearance()
@@ -97,20 +97,20 @@ function BiSGearCheck:SetupTabs(f)
     local settingsIcon = settingsBtn:CreateTexture(nil, "ARTWORK")
     settingsIcon:SetAllPoints()
     settingsIcon:SetTexture("Interface\\Scenarios\\ScenarioIcon-Interact")
-    settingsIcon:SetVertexColor(0.8, 0.8, 0.8)
+    T.applySettingsIcon(settingsIcon, false)
     settingsBtn.icon = settingsIcon
 
     settingsBtn:SetScript("OnClick", function()
         BiSGearCheck:ShowSettings()
     end)
     settingsBtn:SetScript("OnEnter", function(self)
-        self.icon:SetVertexColor(1, 1, 1)
+        T.applySettingsIcon(self.icon, true)
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
         GameTooltip:AddLine("Settings")
         GameTooltip:Show()
     end)
     settingsBtn:SetScript("OnLeave", function(self)
-        self.icon:SetVertexColor(0.8, 0.8, 0.8)
+        T.applySettingsIcon(self.icon, false)
         GameTooltip:Hide()
     end)
 
@@ -141,7 +141,7 @@ function BiSGearCheck:SetupCharacterSelector(f)
             local charName = charKey:match("^([^-]+)") or charKey
             local suffix = ""
             if charData and charData.inspected then
-                suffix = " |cff888888(Inspected)|r"
+                suffix = " " .. T.hex("inspectedTag") .. "(Inspected)|r"
             end
             if classColor then
                 info.text = string.format("|cff%02x%02x%02x%s|r%s", classColor.r * 255, classColor.g * 255, classColor.b * 255, charName, suffix)
@@ -262,30 +262,32 @@ function BiSGearCheck:SetupCollapseControls(f)
     collapseAllBtn:SetPoint("TOPLEFT", f, "TOPLEFT", 12, -92)
     local collapseText = collapseAllBtn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     collapseText:SetPoint("LEFT")
-    collapseText:SetText("|cff00ccffCollapse All|r")
+    T.applyFont(collapseText, "small")
+    collapseText:SetText(T.hex("collapseLink") .. "Collapse All|r")
     collapseAllBtn:SetScript("OnClick", function()
         for _, slotName in ipairs(BiSGearCheck.SlotOrder) do
             BiSGearCheck.collapsedSlots[slotName] = true
         end
         BiSGearCheck:RefreshView()
     end)
-    collapseAllBtn:SetScript("OnEnter", function(self) collapseText:SetText("|cffffffffCollapse All|r") end)
-    collapseAllBtn:SetScript("OnLeave", function(self) collapseText:SetText("|cff00ccffCollapse All|r") end)
+    collapseAllBtn:SetScript("OnEnter", function(self) collapseText:SetText(T.hex("collapseLinkHi") .. "Collapse All|r") end)
+    collapseAllBtn:SetScript("OnLeave", function(self) collapseText:SetText(T.hex("collapseLink") .. "Collapse All|r") end)
 
     local expandAllBtn = CreateFrame("Button", nil, f)
     expandAllBtn:SetSize(65, 16)
     expandAllBtn:SetPoint("LEFT", collapseAllBtn, "RIGHT", 5, 0)
     local expandText = expandAllBtn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     expandText:SetPoint("LEFT")
-    expandText:SetText("|cff00ccffExpand All|r")
+    T.applyFont(expandText, "small")
+    expandText:SetText(T.hex("collapseLink") .. "Expand All|r")
     expandAllBtn:SetScript("OnClick", function()
         for _, slotName in ipairs(BiSGearCheck.SlotOrder) do
             BiSGearCheck.collapsedSlots[slotName] = false
         end
         BiSGearCheck:RefreshView()
     end)
-    expandAllBtn:SetScript("OnEnter", function(self) expandText:SetText("|cffffffffExpand All|r") end)
-    expandAllBtn:SetScript("OnLeave", function(self) expandText:SetText("|cff00ccffExpand All|r") end)
+    expandAllBtn:SetScript("OnEnter", function(self) expandText:SetText(T.hex("collapseLinkHi") .. "Expand All|r") end)
+    expandAllBtn:SetScript("OnLeave", function(self) expandText:SetText(T.hex("collapseLink") .. "Expand All|r") end)
 
     -- Wishlist picker (right-aligned, shown on Compare tab)
     local compareWLDropdown = CreateFrame("Frame", "BiSGearCheckCompareWLDropdown", f, "UIDropDownMenuTemplate")
@@ -314,7 +316,8 @@ function BiSGearCheck:SetupCollapseControls(f)
 
     local compareWLLabel = f:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     compareWLLabel:SetPoint("RIGHT", compareWLDropdown, "LEFT", 15, 2)
-    compareWLLabel:SetText("|cffffd100Wishlist:|r")
+    T.applyFont(compareWLLabel, "small")
+    compareWLLabel:SetText(T.hex("wishlistLabel") .. "Wishlist:|r")
     compareWLLabel:Hide()
 
     -- Zone filter dropdown (shown on Compare and BiS Lists tabs, positioned dynamically)
@@ -358,7 +361,7 @@ function BiSGearCheck:SetupCollapseControls(f)
             for _, zone in ipairs(category.zones) do
                 local zInfo = UIDropDownMenu_CreateInfo()
                 if zoneHasItems[zone] then
-                    zInfo.text = "  |cff00ff00" .. zone .. "|r"
+                    zInfo.text = "  " .. T.hex("zoneHighlight") .. zone .. "|r"
                 else
                     zInfo.text = "  " .. zone
                 end
@@ -391,8 +394,9 @@ end
 
 function BiSGearCheck:SetupBisListBar(f)
     local bislistBar = CreateFrame("Frame", nil, f)
-    bislistBar:SetSize(self.FRAME_WIDTH - 20, 26)
-    bislistBar:SetPoint("TOPLEFT", f, "TOPLEFT", 0, -60)
+    bislistBar:SetHeight(26)
+    bislistBar:SetPoint("TOPLEFT", f, "TOPLEFT", 10, -60)
+    bislistBar:SetPoint("RIGHT", f, "RIGHT", -10, 0)
     bislistBar:Hide()
 
     local bislistSourceDropdown = CreateFrame("Frame", "BiSGearCheckBislistSourceDropdown", bislistBar, "UIDropDownMenuTemplate")

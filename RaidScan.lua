@@ -299,7 +299,7 @@ function BiSGearCheck:UpdateRaidScanTimer(elapsed)
 end
 
 function BiSGearCheck:PrintRaidScanMessage(msg)
-    DEFAULT_CHAT_FRAME:AddMessage("|cff00ccffBiSGearCheck:|r " .. msg)
+    DEFAULT_CHAT_FRAME:AddMessage(BiSGearCheck.Theme.hex("chatPrefix") .. "BiSGearCheck:|r " .. msg)
 end
 
 -- ============================================================
@@ -690,12 +690,7 @@ function BiSGearCheck:ShowRaidScanExport()
         ef:SetScript("OnDragStart", ef.StartMoving)
         ef:SetScript("OnDragStop", ef.StopMovingOrSizing)
         ef:SetClampedToScreen(true)
-        ef:SetBackdrop({
-            bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
-            edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-            tile = true, tileSize = 32, edgeSize = 32,
-            insets = { left = 8, right = 8, top = 8, bottom = 8 },
-        })
+        BiSGearCheck.Theme.applyBackdrop(ef)
         ef:SetFrameStrata("DIALOG")
 
         local title = ef:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -725,6 +720,9 @@ function BiSGearCheck:ShowRaidScanExport()
         ef.editBox = editBox
         self.exportFrame = ef
         table.insert(UISpecialFrames, "BiSGearCheckExportFrame")
+
+        -- Apply ElvUI skin to the lazily-created export frame
+        self:ApplyElvUISkinToExport()
     end
 
     self.exportFrame.editBox:SetText(csv)
@@ -775,9 +773,9 @@ function BiSGearCheck:PrintRaidIssueReport()
 
             -- Print character header
             DEFAULT_CHAT_FRAME:AddMessage(string.format(
-                "  %s%s |cffff3333[%d issue%s]|r",
+                "  %s%s %s[%d issue%s]|r",
                 coloredName, specLabel,
-                result.issueCount, result.issueCount == 1 and "" or "s"
+                BiSGearCheck.Theme.hex("issuesBadge"), result.issueCount, result.issueCount == 1 and "" or "s"
             ))
 
             -- Print each issue
@@ -794,15 +792,15 @@ function BiSGearCheck:PrintRaidIssueReport()
                 -- Strip color codes from warnings for readability
                 local warnText = table.concat(issue.warnings, " ")
                 DEFAULT_CHAT_FRAME:AddMessage(string.format(
-                    "    |cffffd100%s:|r %s %s",
-                    issue.slotName, itemName, warnText
+                    "    %s%s:|r %s %s",
+                    BiSGearCheck.Theme.hex("slotHeader"), issue.slotName, itemName, warnText
                 ))
             end
         end
     end
 
     if charsWithIssues == 0 then
-        DEFAULT_CHAT_FRAME:AddMessage("  |cff00ff00No issues found!|r")
+        DEFAULT_CHAT_FRAME:AddMessage("  " .. BiSGearCheck.Theme.hex("okBadge") .. "No issues found!|r")
     else
         self:PrintRaidScanMessage(string.format(
             "Total: %d issue%s across %d character%s.",

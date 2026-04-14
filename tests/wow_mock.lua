@@ -87,7 +87,8 @@ function MockWoW.reset()
 
     -- Reload addon source files
     dofile("Util.lua")
-
+    dofile("Theme.lua")
+    dofile("ElvUISkin.lua")
     dofile("Comparison.lua")
     dofile("Wishlist.lua")
     dofile("Character.lua")
@@ -553,6 +554,8 @@ end
 
 -- Load source files in TOC order (excluding data files and UI files)
 dofile("Util.lua")
+dofile("Theme.lua")
+dofile("ElvUISkin.lua")
 dofile("Comparison.lua")
 dofile("Wishlist.lua")
 dofile("Character.lua")

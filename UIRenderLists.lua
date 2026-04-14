@@ -2,6 +2,7 @@
 -- RenderWishlist and RenderBisList for the Wishlists and BiS Lists tabs
 
 BiSGearCheck = BiSGearCheck or {}
+local T = BiSGearCheck.Theme
 
 -- Reusable buffer for wishlist zone filtering
 local _wlFilterBuf = {}
@@ -46,7 +47,7 @@ function BiSGearCheck:RenderWishlist()
     self:ClearScrollContent(scrollChild)
 
     -- Show character name in title if viewing another character's wishlist
-    local titleSuffix = "|cff00ccff" .. self.activeWishlist .. "|r"
+    local titleSuffix = T.hex("wishlistTitle") .. self.activeWishlist .. "|r"
     if self.viewingCharKey and self.viewingCharKey ~= self.playerKey then
         local vcd = self:GetCharacterData(self.viewingCharKey)
         local vcc = vcd and RAID_CLASS_COLORS[vcd.class]
@@ -75,9 +76,9 @@ function BiSGearCheck:RenderWishlist()
     if #filteredItems == 0 then
         local row = self:CreateRow(scrollChild, yOffset, contentWidth)
         if self.wishlistZoneFilter then
-            row.text:SetText("|cff999999No wishlist items for " .. self.wishlistZoneFilter .. "|r")
+            row.text:SetText(T.hex("emptySlot") .. "No wishlist items for " .. self.wishlistZoneFilter .. "|r")
         else
-            row.text:SetText("|cff999999Your wishlist is empty. Add items from the comparison view.|r")
+            row.text:SetText(T.hex("emptySlot") .. "Your wishlist is empty. Add items from the comparison view.|r")
         end
         yOffset = yOffset - self.ITEM_ROW_HEIGHT
     else
@@ -86,7 +87,7 @@ function BiSGearCheck:RenderWishlist()
             if item.slotName ~= currentSlot then
                 currentSlot = item.slotName
                 local header = self:CreateRow(scrollChild, yOffset, contentWidth)
-                header.text:SetText("|cffffd100" .. (currentSlot or "Unknown") .. "|r")
+                header.text:SetText(T.hex("slotHeader") .. (currentSlot or "Unknown") .. "|r")
                 yOffset = yOffset - self.SLOT_HEADER_HEIGHT
             end
 
@@ -96,15 +97,15 @@ function BiSGearCheck:RenderWishlist()
             local sourceText = ""
             if item.source and item.source ~= "" and item.source ~= "Unknown" then
                 if item.sourceType and item.sourceType ~= "" then
-                    sourceText = string.format("|cff888888- %s (%s)|r", item.source, item.sourceType)
+                    sourceText = string.format("%s- %s (%s)|r", T.hex("sourceInfo"), item.source, item.sourceType)
                 else
-                    sourceText = string.format("|cff888888- %s|r", item.source)
+                    sourceText = string.format("%s- %s|r", T.hex("sourceInfo"), item.source)
                 end
             end
 
             local prefix = ""
             if item.isEquipped then
-                prefix = "|cff00ff00[Equipped]|r "
+                prefix = T.hex("equipped") .. "[Equipped]|r "
             end
 
             row.text:SetText(string.format("  %s%s %s", prefix, itemName, sourceText))
@@ -115,8 +116,8 @@ function BiSGearCheck:RenderWishlist()
 
             -- Remove button (reused from pool, shared handlers)
             local removeBtn, removeBg, btnText = self:GetActionButton(row)
-            removeBg:SetColorTexture(0.5, 0.0, 0.0, 0.8)
-            btnText:SetText("|cffffffffx|r")
+            T.applyRemoveBtn(removeBg)
+            btnText:SetText(T.hex("btnText") .. "x|r")
 
             removeBtn:SetScript("OnClick", self.OnWishlistRemoveClick)
             removeBtn:SetScript("OnEnter", self.OnWishlistRemoveEnter)
@@ -196,7 +197,7 @@ function BiSGearCheck:RenderBisList()
         local yOffset = -5
         local contentWidth = self.FRAME_WIDTH - 45
         local row = self:CreateRow(scrollChild, yOffset, contentWidth)
-        row.text:SetText("|cff999999Select a spec from the dropdown above.|r")
+        row.text:SetText(T.hex("emptySlot") .. "Select a spec from the dropdown above.|r")
         scrollChild:SetHeight(40)
         return
     end
@@ -231,11 +232,11 @@ function BiSGearCheck:RenderBisList()
 
         if #items > 0 then
             local isCollapsed = self.collapsedSlots[slotName]
-            local arrow = isCollapsed and "|cffffd100[+]|r " or "|cffffd100[-]|r "
+            local arrow = isCollapsed and (T.hex("slotHeader") .. "[+]|r ") or (T.hex("slotHeader") .. "[-]|r ")
 
             -- Slot header (shared handler)
             local header = self:CreateRow(scrollChild, yOffset, contentWidth)
-            header.text:SetText(arrow .. "|cffffd100" .. slotName .. "|r")
+            header.text:SetText(arrow .. T.hex("slotHeader") .. slotName .. "|r")
             header._slotName = slotName
             header:EnableMouse(true)
             header:SetScript("OnMouseDown", self.OnSlotHeaderClick)
@@ -258,13 +259,13 @@ function BiSGearCheck:RenderBisList()
                     local sourceText = ""
                     if sourceInfo and sourceInfo.source and sourceInfo.source ~= "Unknown" then
                         if sourceInfo.sourceType and sourceInfo.sourceType ~= "" then
-                            sourceText = string.format("|cff888888- %s (%s)|r", sourceInfo.source, sourceInfo.sourceType)
+                            sourceText = string.format("%s- %s (%s)|r", T.hex("sourceInfo"), sourceInfo.source, sourceInfo.sourceType)
                         else
-                            sourceText = string.format("|cff888888- %s|r", sourceInfo.source)
+                            sourceText = string.format("%s- %s|r", T.hex("sourceInfo"), sourceInfo.source)
                         end
                     end
 
-                    row.text:SetText(string.format("  |cff00ccff#%d|r %s %s", rank, itemText, sourceText))
+                    row.text:SetText(string.format("  %s#%d|r %s %s", T.hex("rankNum"), rank, itemText, sourceText))
 
                     -- Item tooltip on hover (shared handler)
                     row._itemID = itemID
@@ -292,13 +293,13 @@ function BiSGearCheck:RenderBisList()
 
                     if hasVisible then
                         local enchHeader = self:CreateRow(scrollChild, yOffset, contentWidth)
-                        enchHeader.text:SetText("  |cff00ccffEnchants:|r")
+                        enchHeader.text:SetText("  " .. T.hex("enchantLabel") .. "Enchants:|r")
                         yOffset = yOffset - self.ITEM_ROW_HEIGHT
 
                         for _, enchant in ipairs(slotEnchants) do
                             if not self:IsWrongShattFaction(enchant[1]) then
                                 local row = self:CreateRow(scrollChild, yOffset, contentWidth)
-                                row.text:SetText(string.format("    |cffa335ee%s|r", enchant[2]))
+                                row.text:SetText(string.format("    %s%s|r", T.hex("enchantName"), enchant[2]))
                                 local lf = self:GetLinkFrame(row)
                                 lf._enchantID = enchant[1]
                                 lf._enchantSpellOverride = enchant[3]
@@ -314,7 +315,7 @@ function BiSGearCheck:RenderBisList()
             -- Separator (reused from pool)
             local sep = self:CreateRow(scrollChild, yOffset, contentWidth)
             local line = self:GetSeparatorLine(sep)
-            line:SetColorTexture(0.3, 0.3, 0.3, 0.5)
+            T.applySeparator(line)
             yOffset = yOffset - 6
             yOffset = yOffset - self.SECTION_SPACING
         end
@@ -324,12 +325,12 @@ function BiSGearCheck:RenderBisList()
     local gemsData = specKey and BiSGearCheckGemsDB and BiSGearCheckGemsDB[specKey]
     if gemsData then
         local gemHeader = self:CreateRow(scrollChild, yOffset, contentWidth)
-        gemHeader.text:SetText("|cffffd100Recommended Gems|r")
+        gemHeader.text:SetText(T.hex("gemsHeader") .. "Recommended Gems|r")
         yOffset = yOffset - self.SLOT_HEADER_HEIGHT
 
         if gemsData.meta then
             local row = self:CreateRow(scrollChild, yOffset, contentWidth)
-            row.text:SetText(string.format("  |cff888888Meta:|r |cffa335ee%s|r", gemsData.meta[2]))
+            row.text:SetText(string.format("  %sMeta:|r %s%s|r", T.hex("gemLabel"), T.hex("gemName"), gemsData.meta[2]))
             row._itemID = gemsData.meta[1]
             row:EnableMouse(true)
             row:SetScript("OnEnter", self.OnItemIDEnter)
@@ -343,7 +344,7 @@ function BiSGearCheck:RenderBisList()
                 local label = color:sub(1,1):upper() .. color:sub(2)
                 for _, gem in ipairs(gems) do
                     local row = self:CreateRow(scrollChild, yOffset, contentWidth)
-                    row.text:SetText(string.format("  |cff888888%s:|r |cffa335ee%s|r", label, gem[2]))
+                    row.text:SetText(string.format("  %s%s:|r %s%s|r", T.hex("gemLabel"), label, T.hex("gemName"), gem[2]))
                     row._itemID = gem[1]
                     row:EnableMouse(true)
                     row:SetScript("OnEnter", self.OnItemIDEnter)
@@ -355,7 +356,7 @@ function BiSGearCheck:RenderBisList()
 
         local sep = self:CreateRow(scrollChild, yOffset, contentWidth)
         local line = self:GetSeparatorLine(sep)
-        line:SetColorTexture(0.3, 0.3, 0.3, 0.5)
+        T.applySeparator(line)
         yOffset = yOffset - 6
     end
 

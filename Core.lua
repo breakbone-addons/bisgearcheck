@@ -21,7 +21,7 @@ BiSGearCheck.viewingCharKey = nil -- which character the UI is operating as (nil
 -- Debug logging (toggle with /bgc debuginspect)
 function BiSGearCheck:DebugLog(msg)
     if not BiSGearCheckSaved or not BiSGearCheckSaved.debugInspect then return end
-    DEFAULT_CHAT_FRAME:AddMessage("|cff888888[BGC Debug]|r " .. msg)
+    DEFAULT_CHAT_FRAME:AddMessage((self.Theme and self.Theme.hex("sourceInfo") or "|cff888888") .. "[BGC Debug]|r " .. msg)
 end
 
 -- Event frame
@@ -215,6 +215,9 @@ function BiSGearCheck:Initialize()
         self.raidScanUnit = nil
     end
 
+    -- Initialize theme warning colors
+    self:InitWarningColors()
+
     -- Detect faction
     self.playerFaction = UnitFactionGroup("player") or "Alliance"
 
@@ -224,6 +227,28 @@ function BiSGearCheck:Initialize()
     -- Migrate and initialize saved variables
     self:MigrateSavedVars()
     self:RegisterCharacter()
+
+    -- Apply LSM overrides from saved vars to active theme.
+    -- Skipped entirely when ElvUI skin is enabled — ElvUI owns the look.
+    if BiSGearCheckSaved and not (BiSGearCheckSaved.elvuiSkin == true) then
+        local theme = self.BreakboneTheme
+        if BiSGearCheckSaved.lsmFont and theme.fonts then
+            theme.fonts.name = BiSGearCheckSaved.lsmFont
+        end
+        if BiSGearCheckSaved.lsmFontSize and theme.fonts then
+            -- Apply as offset from defaults (size 11 is baseline)
+            local delta = BiSGearCheckSaved.lsmFontSize - 11
+            theme.fonts.size = 11 + delta
+            theme.fonts.sizeSmall = 10 + delta
+            theme.fonts.sizeLarge = 13 + delta
+        end
+        if BiSGearCheckSaved.lsmBorder then
+            theme.lsmBorder = BiSGearCheckSaved.lsmBorder
+        end
+        if BiSGearCheckSaved.lsmBackground then
+            theme.lsmBackground = BiSGearCheckSaved.lsmBackground
+        end
+    end
 
     -- Restore per-character settings
     if BiSGearCheckChar then
@@ -297,7 +322,7 @@ function BiSGearCheck:Initialize()
         if msg == "debuginspect" then
             BiSGearCheckSaved.debugInspect = not BiSGearCheckSaved.debugInspect
             local state = BiSGearCheckSaved.debugInspect and "|cff00ff00ON|r" or "|cffff0000OFF|r"
-            DEFAULT_CHAT_FRAME:AddMessage("|cff00ccffBiSGearCheck:|r Inspect debug logging " .. state)
+            DEFAULT_CHAT_FRAME:AddMessage((self.Theme and self.Theme.hex("chatPrefix") or "|cff00ccff") .. "BiSGearCheck:|r Inspect debug logging " .. state)
             return
         end
         if msg == "wishlist" or msg == "wl" then

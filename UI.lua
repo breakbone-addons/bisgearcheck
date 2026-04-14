@@ -2,6 +2,7 @@
 -- UI constants, main frame creation, scroll frame, CreateRow, ClearScrollContent
 
 BiSGearCheck = BiSGearCheck or {}
+local T = BiSGearCheck.Theme
 
 -- UI Constants (accessible across all UI files via namespace)
 BiSGearCheck.FRAME_WIDTH = 480
@@ -10,13 +11,6 @@ BiSGearCheck.CONTENT_PADDING = 10
 BiSGearCheck.SLOT_HEADER_HEIGHT = 20
 BiSGearCheck.ITEM_ROW_HEIGHT = 18
 BiSGearCheck.SECTION_SPACING = 8
-
-BiSGearCheck.COLOR_GOLD = { r = 1.0, g = 0.82, b = 0.0 }
-BiSGearCheck.COLOR_GREEN = { r = 0.0, g = 1.0, b = 0.0 }
-BiSGearCheck.COLOR_GRAY = { r = 0.5, g = 0.5, b = 0.5 }
-BiSGearCheck.COLOR_WHITE = { r = 1.0, g = 1.0, b = 1.0 }
-BiSGearCheck.COLOR_RED = { r = 1.0, g = 0.3, b = 0.3 }
-BiSGearCheck.COLOR_CYAN = { r = 0.0, g = 0.82, b = 1.0 }
 
 -- Track collapsed state per slot (persists within session)
 BiSGearCheck.collapsedSlots = BiSGearCheck.collapsedSlots or {}
@@ -101,6 +95,7 @@ function BiSGearCheck:CreateRow(parent, yOffset, width)
         row.text:SetPoint("RIGHT", row, "RIGHT", -5, 0)
         row.text:SetJustifyH("LEFT")
         row.text:SetWordWrap(false)
+        T.applyFont(row.text, "small")
     end
 
     if not parent.rows then parent.rows = {} end
@@ -129,6 +124,7 @@ function BiSGearCheck:GetActionButton(row)
 
     local label = btn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     label:SetPoint("CENTER", 0, 0)
+    T.applyFont(label, "normal")
     btn.label = label
 
     row.actionBtn = btn
@@ -152,6 +148,7 @@ function BiSGearCheck:GetWarningLabel(row)
 
     local label = wf:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     label:SetPoint("CENTER", 0, 0)
+    T.applyFont(label, "small")
     wf.label = label
 
     row._warnFrame = wf
@@ -298,10 +295,10 @@ BiSGearCheck.OnWishlistToggleClick = function(btn)
     local upgrade = row._upgrade
     if BiSGearCheck:IsOnWishlist(upgrade.id) then
         BiSGearCheck:RemoveFromWishlist(upgrade.id)
-        btn.bg:SetColorTexture(0.2, 0.2, 0.2, 0.6)
+        T.applyWishlistBtn(btn.bg, false)
     else
         BiSGearCheck:AddToWishlist(upgrade.id, upgrade.slotName, upgrade.rank, upgrade.source, upgrade.sourceType)
-        btn.bg:SetColorTexture(0.0, 0.5, 0.0, 0.8)
+        T.applyWishlistBtn(btn.bg, true)
     end
 end
 
@@ -339,27 +336,70 @@ function BiSGearCheck:CreateUI()
     if self.mainFrame then return end
 
     local f = CreateFrame("Frame", "BiSGearCheckFrame", UIParent, "BackdropTemplate")
+
+    -- Restore saved size or fall back to defaults
+    local savedW = BiSGearCheckSaved and BiSGearCheckSaved.frameWidth
+    local savedH = BiSGearCheckSaved and BiSGearCheckSaved.frameHeight
+    self.FRAME_WIDTH = savedW or self.FRAME_WIDTH
+    self.FRAME_HEIGHT = savedH or self.FRAME_HEIGHT
+
     f:SetSize(self.FRAME_WIDTH, self.FRAME_HEIGHT)
     f:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
     f:SetMovable(true)
+    f:SetResizable(true)
+    if f.SetResizeBounds then
+        f:SetResizeBounds(420, 400, 900, 900)
+    else
+        f:SetMinResize(420, 400)
+        f:SetMaxResize(900, 900)
+    end
     f:EnableMouse(true)
     f:RegisterForDrag("LeftButton")
     f:SetScript("OnDragStart", f.StartMoving)
-    f:SetScript("OnDragStop", f.StopMovingOrSizing)
+    f:SetScript("OnDragStop", function(self)
+        self:StopMovingOrSizing()
+    end)
     f:SetClampedToScreen(true)
-    f:SetBackdrop({
-        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
-        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-        tile = true, tileSize = 32, edgeSize = 32,
-        insets = { left = 8, right = 8, top = 8, bottom = 8 },
-    })
+    T.applyBackdrop(f)
     f:Hide()
+
+    -- Resize grip (bottom-right corner)
+    local resizeGrip = CreateFrame("Button", nil, f)
+    resizeGrip:SetSize(16, 16)
+    resizeGrip:SetPoint("BOTTOMRIGHT", -4, 4)
+    resizeGrip:SetNormalTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up")
+    resizeGrip:SetHighlightTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Highlight")
+    resizeGrip:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
+    resizeGrip:SetScript("OnMouseDown", function(self)
+        f:StartSizing("BOTTOMRIGHT")
+    end)
+    resizeGrip:SetScript("OnMouseUp", function(self)
+        f:StopMovingOrSizing()
+        -- Persist size after resize completes
+        if BiSGearCheckSaved then
+            BiSGearCheckSaved.frameWidth = math.floor(f:GetWidth() + 0.5)
+            BiSGearCheckSaved.frameHeight = math.floor(f:GetHeight() + 0.5)
+        end
+    end)
+    f.resizeGrip = resizeGrip
+
+    -- Track size changes: update FRAME_WIDTH/HEIGHT and re-render content
+    f:SetScript("OnSizeChanged", function(self, w, h)
+        BiSGearCheck.FRAME_WIDTH = math.floor(w + 0.5)
+        BiSGearCheck.FRAME_HEIGHT = math.floor(h + 0.5)
+        if self.scrollChild then
+            self.scrollChild:SetWidth(BiSGearCheck.FRAME_WIDTH - 40)
+        end
+        -- Defer the refresh so rapid resizing doesn't thrash render
+        BiSGearCheck.needsRefresh = true
+    end)
 
     table.insert(UISpecialFrames, "BiSGearCheckFrame")
 
     -- Title bar
     f.title = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     f.title:SetText("BiSGearCheck")
+    T.applyFont(f.title, "normal")
 
     local titleBar = f:CreateTexture(nil, "ARTWORK")
     titleBar:SetTexture("Interface\\DialogFrame\\UI-DialogBox-Header")
@@ -414,4 +454,21 @@ function BiSGearCheck:CreateUI()
     end)
 
     self.mainFrame = f
+
+    -- Apply theme font to dropdown display text (internal <name>Text FontStrings)
+    local dropdownNames = {
+        "BiSGearCheckCharDropdown", "BiSGearCheckSourceDropdown", "BiSGearCheckSpecDropdown",
+        "BiSGearCheckCompareWLDropdown", "BiSGearCheckZoneFilterDropdown",
+        "BiSGearCheckBislistSourceDropdown", "BiSGearCheckBislistSpecDropdown",
+        "BiSGearCheckZoneDropdown", "BiSGearCheckWLNameDropdown",
+    }
+    for _, name in ipairs(dropdownNames) do
+        local txt = _G[name .. "Text"]
+        if txt then T.applyFont(txt, "small") end
+    end
+
+    -- Apply ElvUI skin if enabled
+    if self:IsElvUILoaded() and self:IsElvUISkinEnabled() then
+        self:ApplyElvUISkin()
+    end
 end

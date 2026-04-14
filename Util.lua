@@ -951,9 +951,17 @@ function BiSGearCheck:CountItemSockets(itemLink)
     return count
 end
 
--- Warning color codes
+-- Warning color codes (initialized with defaults, updated from theme in InitWarningColors)
 local WARN_RED    = "|cffff4d4d"
 local WARN_YELLOW = "|cffffcc00"
+
+function BiSGearCheck:InitWarningColors()
+    local T = self.Theme
+    if T then
+        WARN_RED    = T.warnHex("red")
+        WARN_YELLOW = T.warnHex("yellow")
+    end
+end
 
 -- Build warning list for an equipped item's enchant and gems
 -- Returns: warnings (table of color-coded strings), wrongEnchantID (number or nil)

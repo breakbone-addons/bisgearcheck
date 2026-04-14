@@ -2,6 +2,7 @@
 -- Standalone settings window + Interface Options proxy
 
 BiSGearCheck = BiSGearCheck or {}
+local T = BiSGearCheck.Theme
 
 -- Current content phase on Anniversary servers (update when new phases launch)
 local CURRENT_CONTENT_PHASE = 1
@@ -35,12 +36,7 @@ panel:EnableMouse(true)
 panel:RegisterForDrag("LeftButton")
 panel:SetScript("OnDragStart", panel.StartMoving)
 panel:SetScript("OnDragStop", panel.StopMovingOrSizing)
-panel:SetBackdrop({
-    bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
-    edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-    tile = true, tileSize = 32, edgeSize = 32,
-    insets = { left = 8, right = 8, top = 8, bottom = 8 },
-})
+T.applyBackdrop(panel)
 panel:Hide()
 tinsert(UISpecialFrames, "BiSGearCheckSettingsPanel")
 
@@ -75,13 +71,13 @@ local SECTION_GAP = 16   -- vertical space between the end of one section and th
 local function CreateSectionHeader(prevEnd, text)
     local header = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     header:SetPoint("TOPLEFT", prevEnd, "BOTTOMLEFT", 0, -SECTION_GAP)
-    header:SetText("|cffffd100" .. text .. "|r")
+    header:SetText(T.hex("slotHeader") .. text .. "|r")
 
     local line = scrollChild:CreateTexture(nil, "ARTWORK")
     line:SetHeight(1)
     line:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -4)
     line:SetWidth(CONTENT_WIDTH)
-    line:SetColorTexture(0.4, 0.4, 0.4, 0.6)
+    T.applySectionLine(line)
 
     return header, line
 end
@@ -166,7 +162,7 @@ local function CreateCheckboxList(parent, anchorFrame, globalNamePrefix)
 
     local scBg = sc:CreateTexture(nil, "BACKGROUND")
     scBg:SetAllPoints()
-    scBg:SetColorTexture(0.05, 0.05, 0.05, 0.5)
+    T.applyScrollBg(scBg)
 
     local sf = CreateFrame("ScrollFrame", globalNamePrefix .. "Scroll", sc, "UIPanelScrollFrameTemplate")
     sf:SetPoint("TOPLEFT", 4, -4)
@@ -253,23 +249,23 @@ sourceTableHeader:SetSize(CONTENT_WIDTH, 16)
 
 local hdrLabel = sourceTableHeader:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 hdrLabel:SetPoint("LEFT", sourceTableHeader, "LEFT", COL_LABEL_X, 0)
-hdrLabel:SetText("|cffffd100Data Source|r")
+hdrLabel:SetText(T.hex("slotHeader") .. "Data Source|r")
 
 local hdrAddon = sourceTableHeader:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 hdrAddon:SetPoint("LEFT", sourceTableHeader, "LEFT", COL_ADDON_X, 0)
-hdrAddon:SetText("|cffffd100Addon|r")
+hdrAddon:SetText(T.hex("slotHeader") .. "Addon|r")
 
 local hdrTooltip = sourceTableHeader:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 hdrTooltip:SetPoint("LEFT", sourceTableHeader, "LEFT", COL_TOOLTIP_X, 0)
-hdrTooltip:SetText("|cffffd100Tooltip|r")
+hdrTooltip:SetText(T.hex("slotHeader") .. "Tooltip|r")
 
 local hdrSpecs = sourceTableHeader:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 hdrSpecs:SetPoint("LEFT", sourceTableHeader, "LEFT", COL_SPECS_X, 0)
-hdrSpecs:SetText("|cffffd100Specs|r")
+hdrSpecs:SetText(T.hex("slotHeader") .. "Specs|r")
 
 local hdrItems = sourceTableHeader:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 hdrItems:SetPoint("LEFT", sourceTableHeader, "LEFT", COL_ITEMS_X, 0)
-hdrItems:SetText("|cffffd100Items|r")
+hdrItems:SetText(T.hex("slotHeader") .. "Items|r")
 
 -- Table rows
 local sourceTableRows = {}
@@ -466,7 +462,7 @@ local sliderBg = levelSlider:CreateTexture(nil, "BACKGROUND")
 sliderBg:SetPoint("LEFT", 4, 0)
 sliderBg:SetPoint("RIGHT", -4, 0)
 sliderBg:SetHeight(6)
-sliderBg:SetColorTexture(0.15, 0.15, 0.15, 0.8)
+T.applySliderTrack(sliderBg)
 
 local levelValueText = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 levelValueText:SetPoint("LEFT", levelSlider, "RIGHT", 10, 0)
@@ -560,7 +556,7 @@ inspectedScOuter:SetSize(CONTENT_WIDTH, SCROLL_VISIBLE_ROWS * ROW_HEIGHT + 8)
 
 local inspectedScBg = inspectedScOuter:CreateTexture(nil, "BACKGROUND")
 inspectedScBg:SetAllPoints()
-inspectedScBg:SetColorTexture(0.05, 0.05, 0.05, 0.5)
+T.applyScrollBg(inspectedScBg)
 
 local inspectedSF = CreateFrame("ScrollFrame", "BiSGearCheckInspectedScroll", inspectedScOuter, "UIPanelScrollFrameTemplate")
 inspectedSF:SetPoint("TOPLEFT", 4, -4)
@@ -595,7 +591,7 @@ local raidFilterNote = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontHig
 raidFilterNote:SetPoint("TOPLEFT", raidLine, "BOTTOMLEFT", 0, -6)
 raidFilterNote:SetWidth(CONTENT_WIDTH)
 raidFilterNote:SetJustifyH("LEFT")
-raidFilterNote:SetText("|cff888888These filters apply to upgrade suggestions in the Raid tab.|r")
+raidFilterNote:SetText(T.hex("settingsNote") .. "These filters apply to upgrade suggestions in the Raid tab.|r")
 
 local raidClassicCheck = CreateFrame("CheckButton", "BiSGearCheckSettingsRaidClassicZones", scrollChild, "UICheckButtonTemplate")
 raidClassicCheck:SetPoint("TOPLEFT", raidFilterNote, "BOTTOMLEFT", 0, -4)
@@ -624,25 +620,265 @@ end)
 local raidSectionEnd = CreateSectionEnd(raidWorldBossCheck, 0)
 
 -- ============================================================
+-- Section: Fonts & Textures (only if LibSharedMedia is available)
+-- ============================================================
+
+local lsmSectionAnchor = raidSectionEnd  -- chains to next section
+
+if BiSGearCheck.LSM then
+    local lsmLib = BiSGearCheck.LSM
+    local lsmHeader, lsmLine = CreateSectionHeader(raidSectionEnd, "Fonts & Textures")
+
+    local lsmDesc = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    lsmDesc:SetPoint("TOPLEFT", lsmLine, "BOTTOMLEFT", 0, -6)
+    lsmDesc:SetTextColor(0.6, 0.6, 0.6)
+    lsmDesc:SetText("Customize using installed media packs. Requires")
+
+    local lsmReloadBtn = CreateFrame("Button", nil, scrollChild, "UIPanelButtonTemplate")
+    lsmReloadBtn:SetSize(60, 18)
+    lsmReloadBtn:SetPoint("LEFT", lsmDesc, "RIGHT", 4, 0)
+    lsmReloadBtn:SetText("Reload")
+    lsmReloadBtn:SetScript("OnClick", function() ReloadUI() end)
+
+    -- Font dropdown
+    local fontLabel = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+    fontLabel:SetPoint("TOPLEFT", lsmDesc, "BOTTOMLEFT", 0, -10)
+    fontLabel:SetText("Font:")
+
+    local fontDropdown = CreateFrame("Frame", "BiSGearCheckSettingsFontDropdown", scrollChild, "UIDropDownMenuTemplate")
+    fontDropdown:SetPoint("TOPLEFT", fontLabel, "BOTTOMLEFT", -16, -2)
+    UIDropDownMenu_SetWidth(fontDropdown, 180)
+
+    -- Lazy-cache font objects so each menu item renders in its own font
+    local fontObjectCache = {}
+    local function GetPreviewFontObject(fontName)
+        local cached = fontObjectCache[fontName]
+        if cached then return cached end
+        local path = lsmLib:Fetch("font", fontName)
+        if not path then return nil end
+        local fo = CreateFont("BiSGearCheckFontPreview_" .. fontName:gsub("%W", "_"))
+        fo:SetFont(path, 12, "")
+        fo:SetTextColor(1, 1, 1)
+        fontObjectCache[fontName] = fo
+        return fo
+    end
+
+    local function FontDropdownInit(self, level)
+        local info = UIDropDownMenu_CreateInfo()
+        info.text = "Default (Game Font)"
+        info.value = ""
+        info.func = function()
+            BiSGearCheckSaved.lsmFont = nil
+            UIDropDownMenu_SetText(fontDropdown, "Default (Game Font)")
+        end
+        info.notCheckable = true
+        UIDropDownMenu_AddButton(info, level)
+
+        local fonts = lsmLib:List("font")
+        for _, fontName in ipairs(fonts) do
+            local fInfo = UIDropDownMenu_CreateInfo()
+            fInfo.text = fontName
+            fInfo.value = fontName
+            fInfo.fontObject = GetPreviewFontObject(fontName)
+            fInfo.func = function(self)
+                BiSGearCheckSaved.lsmFont = self.value
+                UIDropDownMenu_SetText(fontDropdown, self.value)
+            end
+            fInfo.notCheckable = true
+            UIDropDownMenu_AddButton(fInfo, level)
+        end
+    end
+    UIDropDownMenu_Initialize(fontDropdown, FontDropdownInit)
+
+    -- Font size slider
+    local fontSizeLabel = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+    fontSizeLabel:SetPoint("TOPLEFT", fontDropdown, "BOTTOMLEFT", 16, -6)
+    fontSizeLabel:SetText("Font Size:")
+
+    local fontSizeSlider = CreateFrame("Slider", "BiSGearCheckSettingsFontSizeSlider", scrollChild, "OptionsSliderTemplate")
+    fontSizeSlider:SetPoint("TOPLEFT", fontSizeLabel, "BOTTOMLEFT", 4, -12)
+    fontSizeSlider:SetWidth(200)
+    fontSizeSlider:SetMinMaxValues(8, 18)
+    fontSizeSlider:SetValueStep(1)
+    fontSizeSlider:SetObeyStepOnDrag(true)
+    _G["BiSGearCheckSettingsFontSizeSliderLow"]:SetText("8")
+    _G["BiSGearCheckSettingsFontSizeSliderHigh"]:SetText("18")
+
+    local fontSizeBg = fontSizeSlider:CreateTexture(nil, "BACKGROUND")
+    fontSizeBg:SetPoint("LEFT", 4, 0)
+    fontSizeBg:SetPoint("RIGHT", -4, 0)
+    fontSizeBg:SetHeight(6)
+    T.applySliderTrack(fontSizeBg)
+
+    local fontSizeValue = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+    fontSizeValue:SetPoint("LEFT", fontSizeSlider, "RIGHT", 10, 0)
+
+    fontSizeSlider:SetScript("OnValueChanged", function(self, value)
+        value = math.floor(value + 0.5)
+        fontSizeValue:SetText(tostring(value))
+        if BiSGearCheckSaved then
+            BiSGearCheckSaved.lsmFontSize = value
+        end
+    end)
+
+    -- Border dropdown
+    local borderLabel = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+    borderLabel:SetPoint("TOPLEFT", fontSizeSlider, "BOTTOMLEFT", -4, -14)
+    borderLabel:SetText("Border:")
+
+    local borderDropdown = CreateFrame("Frame", "BiSGearCheckSettingsBorderDropdown", scrollChild, "UIDropDownMenuTemplate")
+    borderDropdown:SetPoint("TOPLEFT", borderLabel, "BOTTOMLEFT", -16, -2)
+    UIDropDownMenu_SetWidth(borderDropdown, 180)
+
+    local function BorderDropdownInit(self, level)
+        local info = UIDropDownMenu_CreateInfo()
+        info.text = "Default"
+        info.value = ""
+        info.func = function()
+            BiSGearCheckSaved.lsmBorder = nil
+            UIDropDownMenu_SetText(borderDropdown, "Default")
+        end
+        info.notCheckable = true
+        UIDropDownMenu_AddButton(info, level)
+
+        local borders = lsmLib:List("border")
+        for _, borderName in ipairs(borders) do
+            local bInfo = UIDropDownMenu_CreateInfo()
+            bInfo.text = borderName
+            bInfo.value = borderName
+            bInfo.func = function(self)
+                BiSGearCheckSaved.lsmBorder = self.value
+                UIDropDownMenu_SetText(borderDropdown, self.value)
+            end
+            bInfo.notCheckable = true
+            UIDropDownMenu_AddButton(bInfo, level)
+        end
+    end
+    UIDropDownMenu_Initialize(borderDropdown, BorderDropdownInit)
+
+    -- Background dropdown
+    local bgLabel = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+    bgLabel:SetPoint("TOPLEFT", borderDropdown, "BOTTOMLEFT", 16, -6)
+    bgLabel:SetText("Background:")
+
+    local bgDropdown = CreateFrame("Frame", "BiSGearCheckSettingsBgDropdown", scrollChild, "UIDropDownMenuTemplate")
+    bgDropdown:SetPoint("TOPLEFT", bgLabel, "BOTTOMLEFT", -16, -2)
+    UIDropDownMenu_SetWidth(bgDropdown, 180)
+
+    local function BgDropdownInit(self, level)
+        local info = UIDropDownMenu_CreateInfo()
+        info.text = "Default"
+        info.value = ""
+        info.func = function()
+            BiSGearCheckSaved.lsmBackground = nil
+            UIDropDownMenu_SetText(bgDropdown, "Default")
+        end
+        info.notCheckable = true
+        UIDropDownMenu_AddButton(info, level)
+
+        local backgrounds = lsmLib:List("background")
+        for _, bgName in ipairs(backgrounds) do
+            local bgInfo = UIDropDownMenu_CreateInfo()
+            bgInfo.text = bgName
+            bgInfo.value = bgName
+            bgInfo.func = function(self)
+                BiSGearCheckSaved.lsmBackground = self.value
+                UIDropDownMenu_SetText(bgDropdown, self.value)
+            end
+            bgInfo.notCheckable = true
+            UIDropDownMenu_AddButton(bgInfo, level)
+        end
+    end
+    UIDropDownMenu_Initialize(bgDropdown, BgDropdownInit)
+
+    -- Override note: shown when ElvUI skin is active (overrides border/bg)
+    local lsmOverrideNote = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+    lsmOverrideNote:SetPoint("TOPLEFT", bgLabel, "BOTTOMLEFT", 0, -28)
+    lsmOverrideNote:SetWidth(CONTENT_WIDTH)
+    lsmOverrideNote:SetWordWrap(true)
+    lsmOverrideNote:SetJustifyH("LEFT")
+    lsmOverrideNote:SetTextColor(0.6, 0.6, 0.6)
+    lsmOverrideNote:SetText("Font and texture choices are overridden by the ElvUI skin.")
+    lsmOverrideNote:Hide()
+
+    -- Exposed for OnShow to toggle enabled state based on ElvUI setting
+    BiSGearCheck._lsmFontDropdown = fontDropdown
+    BiSGearCheck._lsmFontSizeSlider = fontSizeSlider
+    BiSGearCheck._lsmBorderDropdown = borderDropdown
+    BiSGearCheck._lsmBgDropdown = bgDropdown
+    BiSGearCheck._lsmOverrideNote = lsmOverrideNote
+    BiSGearCheck._lsmFontLabel = fontLabel
+    BiSGearCheck._lsmFontSizeLabel = fontSizeLabel
+    BiSGearCheck._lsmBorderLabel = borderLabel
+    BiSGearCheck._lsmBgLabel = bgLabel
+
+    -- Anchor marker below the last element
+    local lsmBottomSpacer = CreateFrame("Frame", nil, scrollChild)
+    lsmBottomSpacer:SetSize(1, 1)
+    lsmBottomSpacer:SetPoint("TOPLEFT", lsmOverrideNote, "BOTTOMLEFT", 0, -6)
+    lsmSectionAnchor = CreateSectionEnd(lsmBottomSpacer, 0)
+end
+
+-- ============================================================
+-- Section: ElvUI Integration (only if ElvUI is installed)
+-- ============================================================
+
+local aboutAnchor = lsmSectionAnchor  -- default: chains from LSM or Raid section
+
+if BiSGearCheck:IsElvUILoaded() then
+    local elvuiHeader, elvuiLine = CreateSectionHeader(lsmSectionAnchor, "ElvUI Integration")
+
+    local elvuiCheck = CreateFrame("CheckButton", "BiSGearCheckSettingsElvUI", scrollChild, "InterfaceOptionsCheckButtonTemplate")
+    elvuiCheck:SetPoint("TOPLEFT", elvuiLine, "BOTTOMLEFT", -4, -8)
+    elvuiCheck.Text = _G["BiSGearCheckSettingsElvUIText"] or elvuiCheck:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    elvuiCheck.Text:SetPoint("LEFT", elvuiCheck, "RIGHT", 4, 0)
+    elvuiCheck.Text:SetText("Use ElvUI skin")
+    elvuiCheck:SetScript("OnClick", function(self)
+        BiSGearCheckSaved.elvuiSkin = self:GetChecked() and true or false
+        BiSGearCheck:UpdateLSMOverrideState()
+    end)
+
+    local elvuiReloadNote = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+    elvuiReloadNote:SetPoint("LEFT", elvuiCheck.Text, "RIGHT", 8, 0)
+    elvuiReloadNote:SetTextColor(0.6, 0.6, 0.6)
+    elvuiReloadNote:SetText("Requires")
+
+    local elvuiReloadBtn = CreateFrame("Button", nil, scrollChild, "UIPanelButtonTemplate")
+    elvuiReloadBtn:SetSize(60, 18)
+    elvuiReloadBtn:SetPoint("LEFT", elvuiReloadNote, "RIGHT", 4, 0)
+    elvuiReloadBtn:SetText("Reload")
+    elvuiReloadBtn:SetScript("OnClick", function() ReloadUI() end)
+
+    local elvuiDesc = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+    elvuiDesc:SetPoint("TOPLEFT", elvuiCheck, "BOTTOMLEFT", 4, -4)
+    elvuiDesc:SetTextColor(0.5, 0.5, 0.5)
+    elvuiDesc:SetWidth(CONTENT_WIDTH)
+    elvuiDesc:SetWordWrap(true)
+    elvuiDesc:SetText("Applies ElvUI styling to all BiSGearCheck frames.")
+
+    aboutAnchor = CreateSectionEnd(elvuiDesc, 0)
+end
+
+-- ============================================================
 -- Section: About
 -- ============================================================
 
-local aboutHeader, aboutLine = CreateSectionHeader(raidSectionEnd, "About")
+local aboutHeader, aboutLine = CreateSectionHeader(aboutAnchor, "About")
 
 local getMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
 local version = getMetadata("BiSGearCheck", "Version") or "?"
 local aboutVersion = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 aboutVersion:SetPoint("TOPLEFT", aboutLine, "BOTTOMLEFT", 0, -8)
-aboutVersion:SetText("Version: |cffffd100" .. version .. "|r  March 23, 2026")
+aboutVersion:SetText("Version: " .. T.hex("slotHeader") .. version .. "|r  March 23, 2026")
 
 local aboutAuthor = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 aboutAuthor:SetPoint("TOPLEFT", aboutVersion, "BOTTOMLEFT", 0, -6)
-aboutAuthor:SetText("Author: |cffffd100Breakbone - Dreamscythe|r")
+aboutAuthor:SetText("Author: " .. T.hex("slotHeader") .. "Breakbone - Dreamscythe|r")
 
 local function CreateLinkRow(anchor, label, url)
     local row = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
     row:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -10)
-    row:SetText(label .. "  |cff69ccf0" .. url .. "|r")
+    row:SetText(label .. "  " .. T.hex("linkUrl") .. url .. "|r")
     local btn = CreateFrame("Button", nil, scrollChild, "UIPanelButtonTemplate")
     btn:SetSize(50, 18)
     btn:SetPoint("LEFT", row, "RIGHT", 6, 0)
@@ -699,11 +935,11 @@ local function RefreshIgnoreList()
         local levelStr = charData and charData.level and (" L" .. charData.level) or ""
 
         if classColor then
-            cb.text:SetText(string.format("|cff%02x%02x%02x%s|r|cff888888-%s%s|r",
+            cb.text:SetText(string.format("|cff%02x%02x%02x%s|r%s-%s%s|r",
                 classColor.r * 255, classColor.g * 255, classColor.b * 255,
-                charName, realm, levelStr))
+                charName, T.hex("sourceInfo"), realm, levelStr))
         else
-            cb.text:SetText(charName .. "|cff888888-" .. realm .. levelStr .. "|r")
+            cb.text:SetText(charName .. T.hex("sourceInfo") .. "-" .. realm .. levelStr .. "|r")
         end
 
         cb:SetChecked(BiSGearCheck:IsCharacterIgnored(charKey))
@@ -718,6 +954,36 @@ local function RefreshIgnoreList()
     end
 
     LayoutCheckboxList(ignoreList, #charKeys)
+end
+
+-- ============================================================
+-- LSM override state (ElvUI skin overrides border/background)
+-- ============================================================
+
+function BiSGearCheck:UpdateLSMOverrideState()
+    if not self._lsmBorderDropdown then return end
+    local elvuiActive = BiSGearCheckSaved and BiSGearCheckSaved.elvuiSkin == true
+    if elvuiActive then
+        UIDropDownMenu_DisableDropDown(self._lsmFontDropdown)
+        UIDropDownMenu_DisableDropDown(self._lsmBorderDropdown)
+        UIDropDownMenu_DisableDropDown(self._lsmBgDropdown)
+        self._lsmFontSizeSlider:Disable()
+        self._lsmFontLabel:SetTextColor(0.5, 0.5, 0.5)
+        self._lsmFontSizeLabel:SetTextColor(0.5, 0.5, 0.5)
+        self._lsmBorderLabel:SetTextColor(0.5, 0.5, 0.5)
+        self._lsmBgLabel:SetTextColor(0.5, 0.5, 0.5)
+        self._lsmOverrideNote:Show()
+    else
+        UIDropDownMenu_EnableDropDown(self._lsmFontDropdown)
+        UIDropDownMenu_EnableDropDown(self._lsmBorderDropdown)
+        UIDropDownMenu_EnableDropDown(self._lsmBgDropdown)
+        self._lsmFontSizeSlider:Enable()
+        self._lsmFontLabel:SetTextColor(1, 0.82, 0)
+        self._lsmFontSizeLabel:SetTextColor(1, 0.82, 0)
+        self._lsmBorderLabel:SetTextColor(1, 0.82, 0)
+        self._lsmBgLabel:SetTextColor(1, 0.82, 0)
+        self._lsmOverrideNote:Hide()
+    end
 end
 
 -- ============================================================
@@ -774,6 +1040,33 @@ panel:SetScript("OnShow", function(self)
     raidClassicCheck:SetChecked(BiSGearCheckSaved.raidIncludeClassicZones)
     raidPvpCheck:SetChecked(BiSGearCheckSaved.raidIncludePvP)
     raidWorldBossCheck:SetChecked(BiSGearCheckSaved.raidIncludeWorldBoss)
+
+    -- LSM dropdowns
+    local fontDd = _G["BiSGearCheckSettingsFontDropdown"]
+    if fontDd then
+        UIDropDownMenu_SetText(fontDd, BiSGearCheckSaved.lsmFont or "Default (Game Font)")
+    end
+    local fontSizeSl = _G["BiSGearCheckSettingsFontSizeSlider"]
+    if fontSizeSl then
+        local size = BiSGearCheckSaved.lsmFontSize or 11
+        fontSizeSl:SetValue(size)
+    end
+    local borderDd = _G["BiSGearCheckSettingsBorderDropdown"]
+    if borderDd then
+        UIDropDownMenu_SetText(borderDd, BiSGearCheckSaved.lsmBorder or "Default")
+    end
+    local bgDd = _G["BiSGearCheckSettingsBgDropdown"]
+    if bgDd then
+        UIDropDownMenu_SetText(bgDd, BiSGearCheckSaved.lsmBackground or "Default")
+    end
+    BiSGearCheck:UpdateLSMOverrideState()
+
+    -- ElvUI toggle
+    local elvuiCB = _G["BiSGearCheckSettingsElvUI"]
+    if elvuiCB then
+        if BiSGearCheckSaved.elvuiSkin == nil then BiSGearCheckSaved.elvuiSkin = false end
+        elvuiCB:SetChecked(BiSGearCheckSaved.elvuiSkin)
+    end
 end)
 
 local inspectedRowPool = {}
@@ -826,7 +1119,7 @@ function BiSGearCheck:RefreshInspectedList()
             local charName = charKey:match("^([^%-]+)") or charKey
             local realm = charKey:match("%-(.+)$") or ""
             if classColor then
-                row.label:SetText(string.format("|cff%02x%02x%02x%s|r |cff888888%s L%d|r", classColor.r * 255, classColor.g * 255, classColor.b * 255, charName, realm, charData.level or 0))
+                row.label:SetText(string.format("|cff%02x%02x%02x%s|r %s%s L%d|r", classColor.r * 255, classColor.g * 255, classColor.b * 255, charName, T.hex("sourceInfo"), realm, charData.level or 0))
             else
                 row.label:SetText(charName .. " " .. realm)
             end

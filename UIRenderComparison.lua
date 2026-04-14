@@ -2,17 +2,18 @@
 -- RenderResults and RenderSlotSection for the Compare tab
 
 BiSGearCheck = BiSGearCheck or {}
+local T = BiSGearCheck.Theme
 
 -- Rank text helper (module-level, not per-call)
 local function rankStr(eq)
     if eq.rank then
         if eq.rank == 1 then
-            return "|cff00ff00BiS!|r"
+            return T.hex("rankBis") .. "BiS!|r"
         else
-            return string.format("|cffffffffRank %d|r", eq.rank)
+            return string.format(T.hex("rankText") .. "Rank %d|r", eq.rank)
         end
     end
-    return "|cff999999Not on list|r"
+    return T.hex("notOnList") .. "Not on list|r"
 end
 
 -- ============================================================
@@ -105,12 +106,12 @@ function BiSGearCheck:RenderResults()
     local gemsData = specKey and BiSGearCheckGemsDB and BiSGearCheckGemsDB[specKey]
     if gemsData then
         local gemHeader = self:CreateRow(scrollChild, yOffset, contentWidth)
-        gemHeader.text:SetText("|cffffd100Recommended Gems|r")
+        gemHeader.text:SetText(T.hex("gemsHeader") .. "Recommended Gems|r")
         yOffset = yOffset - self.SLOT_HEADER_HEIGHT
 
         if gemsData.meta then
             local row = self:CreateRow(scrollChild, yOffset, contentWidth)
-            row.text:SetText(string.format("  |cff888888Meta:|r |cffa335ee%s|r", gemsData.meta[2]))
+            row.text:SetText(string.format("  %sMeta:|r %s%s|r", T.hex("gemLabel"), T.hex("gemName"), gemsData.meta[2]))
             row._itemID = gemsData.meta[1]
             row:EnableMouse(true)
             row:SetScript("OnEnter", self.OnItemIDEnter)
@@ -124,7 +125,7 @@ function BiSGearCheck:RenderResults()
                 local label = color:sub(1,1):upper() .. color:sub(2)
                 for _, gem in ipairs(gems) do
                     local row = self:CreateRow(scrollChild, yOffset, contentWidth)
-                    row.text:SetText(string.format("  |cff888888%s:|r |cffa335ee%s|r", label, gem[2]))
+                    row.text:SetText(string.format("  %s%s:|r %s%s|r", T.hex("gemLabel"), label, T.hex("gemName"), gem[2]))
                     row._itemID = gem[1]
                     row:EnableMouse(true)
                     row:SetScript("OnEnter", self.OnItemIDEnter)
@@ -136,7 +137,7 @@ function BiSGearCheck:RenderResults()
 
         local sep = self:CreateRow(scrollChild, yOffset, contentWidth)
         local line = self:GetSeparatorLine(sep)
-        line:SetColorTexture(0.3, 0.3, 0.3, 0.5)
+        T.applySeparator(line)
         yOffset = yOffset - 6
     end
 
@@ -153,7 +154,7 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
     local isDualSlot = (slotName == "Rings" or slotName == "Trinkets")
     local specKey = self.selectedSpec
 
-    local arrow = isCollapsed and "|cffffd100[+]|r " or "|cffffd100[-]|r "
+    local arrow = isCollapsed and (T.hex("slotHeader") .. "[+]|r ") or (T.hex("slotHeader") .. "[-]|r ")
 
     if not isDualSlot and #slotResult.equipped == 1 then
         -- Single-slot: combine header + equipped on one line
@@ -165,7 +166,7 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
         if eqLink then
             warnings, wrongEnchantID = self:GetEquipWarnings(eqLink, slotName, specKey)
         end
-        header.text:SetText(arrow .. "|cffffd100" .. slotName .. ":|r " .. eqText .. " - " .. rankStr(eq))
+        header.text:SetText(arrow .. T.hex("slotHeader") .. slotName .. ":|r " .. eqText .. " - " .. rankStr(eq))
         header._slotName = slotName
         header:EnableMouse(true)
         header:SetScript("OnMouseDown", self.OnSlotHeaderClick)
@@ -194,7 +195,7 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
     elseif not isDualSlot and #slotResult.equipped == 0 then
         -- Single-slot empty: combine header + empty
         local header = self:CreateRow(parent, yOffset, width)
-        header.text:SetText(arrow .. "|cffffd100" .. slotName .. ":|r |cff999999(empty)|r")
+        header.text:SetText(arrow .. T.hex("slotHeader") .. slotName .. ":|r " .. T.hex("emptySlot") .. "(empty)|r")
         header._slotName = slotName
         header:EnableMouse(true)
         header:SetScript("OnMouseDown", self.OnSlotHeaderClick)
@@ -202,7 +203,7 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
     else
         -- Dual-slot: header then equipped items
         local header = self:CreateRow(parent, yOffset, width)
-        header.text:SetText(arrow .. "|cffffd100" .. slotName .. "|r")
+        header.text:SetText(arrow .. T.hex("slotHeader") .. slotName .. "|r")
         header._slotName = slotName
         header:EnableMouse(true)
         header:SetScript("OnMouseDown", self.OnSlotHeaderClick)
@@ -245,7 +246,7 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
 
             if #slotResult.equipped == 0 then
                 local row = self:CreateRow(parent, yOffset, width)
-                row.text:SetText("  |cff999999(empty slots)|r")
+                row.text:SetText("  " .. T.hex("emptySlot") .. "(empty slots)|r")
                 yOffset = yOffset - self.ITEM_ROW_HEIGHT
             end
         end
@@ -268,13 +269,13 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
             local sourceText = ""
             if upgrade.source and upgrade.source ~= "" and upgrade.source ~= "Unknown" then
                 if upgrade.sourceType and upgrade.sourceType ~= "" then
-                    sourceText = string.format("|cff888888- %s (%s)|r", upgrade.source, upgrade.sourceType)
+                    sourceText = string.format("%s- %s (%s)|r", T.hex("sourceInfo"), upgrade.source, upgrade.sourceType)
                 else
-                    sourceText = string.format("|cff888888- %s|r", upgrade.source)
+                    sourceText = string.format("%s- %s|r", T.hex("sourceInfo"), upgrade.source)
                 end
             end
 
-            row.text:SetText(string.format("  |cff00ccff#%d|r %s %s", upgrade.rank, itemName, sourceText))
+            row.text:SetText(string.format("  %s#%d|r %s %s", T.hex("rankNum"), upgrade.rank, itemName, sourceText))
             row.text:SetPoint("RIGHT", row, "RIGHT", -30, 0)
 
             -- Store data on the row for shared handlers
@@ -285,12 +286,8 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
             local onWL = self:IsOnWishlist(upgrade.id)
             local addBtn, btnBg, btnText = self:GetActionButton(row)
 
-            if onWL then
-                btnBg:SetColorTexture(0.0, 0.5, 0.0, 0.8)
-            else
-                btnBg:SetColorTexture(0.2, 0.2, 0.2, 0.6)
-            end
-            btnText:SetText("|cffffffff+|r")
+            T.applyWishlistBtn(btnBg, onWL)
+            btnText:SetText(T.hex("btnText") .. "+|r")
 
             addBtn:SetScript("OnClick", self.OnWishlistToggleClick)
             addBtn:SetScript("OnEnter", self.OnWishlistToggleEnter)
@@ -309,7 +306,7 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
         for _, count in pairs(hiddenCounts) do totalHidden = totalHidden + count end
         if totalHidden > 0 then
             local row = self:CreateRow(parent, yOffset, width)
-            row.text:SetText(string.format("  |cff999999%d item%s filtered|r", totalHidden, totalHidden == 1 and "" or "s"))
+            row.text:SetText(string.format("  %s%d item%s filtered|r", T.hex("filtered"), totalHidden, totalHidden == 1 and "" or "s"))
             row._hiddenCounts = hiddenCounts
             row:EnableMouse(true)
             row:SetScript("OnEnter", self.OnFilteredRowEnter)
@@ -333,13 +330,13 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
 
             if hasVisible then
                 local enchHeader = self:CreateRow(parent, yOffset, width)
-                enchHeader.text:SetText("  |cff00ccffEnchants:|r")
+                enchHeader.text:SetText("  " .. T.hex("enchantLabel") .. "Enchants:|r")
                 yOffset = yOffset - self.ITEM_ROW_HEIGHT
 
                 for _, enchant in ipairs(slotEnchants) do
                     if not self:IsWrongShattFaction(enchant[1]) then
                         local row = self:CreateRow(parent, yOffset, width)
-                        row.text:SetText(string.format("    |cffa335ee%s|r", enchant[2]))
+                        row.text:SetText(string.format("    %s%s|r", T.hex("enchantName"), enchant[2]))
                         local lf = self:GetLinkFrame(row)
                         lf._enchantID = enchant[1]
                         lf._enchantSpellOverride = enchant[3]  -- optional spell ID for tooltip
@@ -355,7 +352,7 @@ function BiSGearCheck:RenderSlotSection(parent, slotResult, yOffset, width)
     -- Separator (reused from pool)
     local sep = self:CreateRow(parent, yOffset, width)
     local line = self:GetSeparatorLine(sep)
-    line:SetColorTexture(0.3, 0.3, 0.3, 0.5)
+    T.applySeparator(line)
     yOffset = yOffset - 6
 
     return yOffset

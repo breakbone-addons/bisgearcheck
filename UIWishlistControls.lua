@@ -2,6 +2,7 @@
 -- Wishlist filter bar (zone dropdown, auto-filter), wishlist selector bar, static popup dialogs
 
 BiSGearCheck = BiSGearCheck or {}
+local T = BiSGearCheck.Theme
 
 -- ============================================================
 -- STATIC POPUP DIALOGS (defined at file scope)
@@ -24,7 +25,7 @@ StaticPopupDialogs["BISGEARCHECK_NEW_WISHLIST"] = {
             if BiSGearCheck:CreateWishlist(name) then
                 BiSGearCheck:RefreshView()
             else
-                print("|cffff6666BiSGearCheck:|r A wishlist named '" .. name .. "' already exists.")
+                print(T.hex("chatError") .. "BiSGearCheck:|r A wishlist named '" .. name .. "' already exists.")
             end
         end
     end,
@@ -35,7 +36,7 @@ StaticPopupDialogs["BISGEARCHECK_NEW_WISHLIST"] = {
             if BiSGearCheck:CreateWishlist(name) then
                 BiSGearCheck:RefreshView()
             else
-                print("|cffff6666BiSGearCheck:|r A wishlist named '" .. name .. "' already exists.")
+                print(T.hex("chatError") .. "BiSGearCheck:|r A wishlist named '" .. name .. "' already exists.")
             end
         end
         parent:Hide()
@@ -65,7 +66,7 @@ StaticPopupDialogs["BISGEARCHECK_RENAME_WISHLIST"] = {
             if BiSGearCheck:RenameWishlist(name) then
                 BiSGearCheck:RefreshView()
             else
-                print("|cffff6666BiSGearCheck:|r A wishlist named '" .. name .. "' already exists.")
+                print(T.hex("chatError") .. "BiSGearCheck:|r A wishlist named '" .. name .. "' already exists.")
             end
         end
     end,
@@ -76,7 +77,7 @@ StaticPopupDialogs["BISGEARCHECK_RENAME_WISHLIST"] = {
             if BiSGearCheck:RenameWishlist(name) then
                 BiSGearCheck:RefreshView()
             else
-                print("|cffff6666BiSGearCheck:|r A wishlist named '" .. name .. "' already exists.")
+                print(T.hex("chatError") .. "BiSGearCheck:|r A wishlist named '" .. name .. "' already exists.")
             end
         end
         parent:Hide()
@@ -107,8 +108,9 @@ StaticPopupDialogs["BISGEARCHECK_DELETE_WISHLIST"] = {
 
 function BiSGearCheck:SetupWishlistFilterBar(f)
     local filterBar = CreateFrame("Frame", nil, f)
-    filterBar:SetSize(self.FRAME_WIDTH - 20, 52)
-    filterBar:SetPoint("TOPLEFT", f, "TOPLEFT", 0, -60)
+    filterBar:SetHeight(52)
+    filterBar:SetPoint("TOPLEFT", f, "TOPLEFT", 10, -60)
+    filterBar:SetPoint("RIGHT", f, "RIGHT", -10, 0)
     filterBar:Hide()
 
     -- Zone dropdown (right-aligned, same row as wishlist name dropdown)
@@ -144,7 +146,7 @@ function BiSGearCheck:SetupWishlistFilterBar(f)
                 local hasItems = BiSGearCheck:ZoneHasWishlistItems(zone)
                 local zInfo = UIDropDownMenu_CreateInfo()
                 if hasItems then
-                    zInfo.text = "  |cff00ff00" .. zone .. "|r"
+                    zInfo.text = "  " .. T.hex("zoneHighlight") .. zone .. "|r"
                 else
                     zInfo.text = "  " .. zone
                 end
@@ -170,6 +172,7 @@ function BiSGearCheck:SetupWishlistFilterBar(f)
     autoCheck:SetChecked(self.wishlistAutoFilter)
     autoCheck.text = autoCheck:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     autoCheck.text:SetPoint("RIGHT", autoCheck, "LEFT", -2, 0)
+    T.applyFont(autoCheck.text, "small")
     autoCheck.text:SetText("Auto")
     autoCheck:SetScript("OnClick", function(self)
         BiSGearCheck:SetWishlistAutoFilter(self:GetChecked())
@@ -194,8 +197,9 @@ end
 
 function BiSGearCheck:SetupWishlistSelectorBar(f)
     local wlSelectorBar = CreateFrame("Frame", nil, f)
-    wlSelectorBar:SetSize(self.FRAME_WIDTH - 20, 52)
-    wlSelectorBar:SetPoint("TOPLEFT", f, "TOPLEFT", 0, -60)
+    wlSelectorBar:SetHeight(52)
+    wlSelectorBar:SetPoint("TOPLEFT", f, "TOPLEFT", 10, -60)
+    wlSelectorBar:SetPoint("RIGHT", f, "RIGHT", -10, 0)
     wlSelectorBar:Hide()
 
     -- Wishlist name dropdown (left side, row 2)
