@@ -1,0 +1,83 @@
+[size=5][color=#c0a050]BiS Gear Check compares your equipped gear against ranked Best in Slot lists and shows you exactly what upgrades you still need. Built for TBC Anniversary.[/color][/size]
+
+[size=5][color=#c0a050]Features[/color][/size]
+
+[size=4][color=#d4b86a][b]Gear Comparison[/b][/color][/size]
+
+See every upgrade available for your spec, ranked by slot. Your currently equipped item is shown with its rank, and every item ranked higher is listed with its source -- boss name, dungeon, quest, or vendor. Automatically refreshes when you swap gear.
+
+[img]https://breakbone-addons.com/images/bisgearcheck-screenshot-compare.png[/img]
+
+[size=4][color=#d4b86a][b]BiS Lists Browser[/b][/color][/size]
+
+Browse the full BiS list for any spec across all classes. Switch between data sources to compare rankings. Filter by zone to focus on a specific dungeon or raid. Class-colored headers make it easy to find what you're looking for.
+
+[img]https://breakbone-addons.com/images/bisgearcheck-screenshot-bis-lists.png[/img]
+
+[size=4][color=#d4b86a][b]Wishlists[/b][/color][/size]
+
+Track the items you're chasing. Create multiple named wishlists, add upgrades directly from the comparison view, and filter by dungeon or raid zone. Auto-filter mode automatically shows items for your current zone when you enter a dungeon or raid.
+
+[img]https://breakbone-addons.com/images/bisgearcheck-screenshot-wishlist.png[/img]
+
+[size=4][color=#d4b86a][b]Tooltip Integration[/b][/color][/size]
+
+BiS rankings appear directly in item tooltips, grouped by data source. Hover over any item in your bags, in chat, or on a vendor and see which specs rank it and at what position, with class-colored spec names. Each enabled source gets its own section so you can compare rankings across sources at a glance.
+
+[img]https://breakbone-addons.com/images/bisgearcheck-screenshot-tooltip.png[/img]
+
+[size=4][color=#d4b86a][b]Multi-Character Support[/b][/color][/size]
+
+Switch between all characters on your account without logging out. View another character's gear on the Compare tab, edit their wishlists, and plan upgrades across your roster. Gear snapshots are saved automatically. Set a minimum level threshold or ignore specific characters to keep the dropdown clean.
+
+[size=4][color=#d4b86a][b]Enchant & Gem Warnings[/b][/color][/size]
+
+Equipped gear is checked for missing enchants, wrong enchants, empty sockets, and low-quality gems. Warnings appear pinned to the right of each equipped item row. Hover [Wrong Enchant] to see exactly what's applied. Recommended enchants and gems are shown per slot and per spec, with Aldor/Scryer filtering based on your reputation.
+
+Budget alternatives are recognized: lesser shoulder inscriptions, lesser spellthreads, and lesser leg armors show as [Lesser Enchant] in yellow instead of red. Green-quality gems show as [Lesser Gems] in yellow.
+
+[size=4][color=#d4b86a][b]Raid Scan[/b][/color][/size]
+
+Inspect your entire raid at once. Scan all members to check for missing enchants, wrong gems, empty sockets, and mount-speed items left equipped. Each issue shows the item's BiS list position. Right-click any character to whisper their issues directly. Export results as CSV or print a summary to chat.
+
+[img]https://breakbone-addons.com/images/bisgearcheck-screenshot-raid-scan.png[/img]
+[img]https://breakbone-addons.com/images/bisgearcheck-screenshot-raid-scan-csv.png[/img]
+[img]https://breakbone-addons.com/images/bisgearcheck-screenshot-raid-scan-report.png[/img]
+[img]https://breakbone-addons.com/images/bisgearcheck-screenshot-raid-scan-whisper.png[/img]
+
+[size=4][color=#d4b86a][b]Faction-Aware[/b][/color][/size]
+
+Alliance and Horde characters see only the items available to their faction. Faction-specific quest rewards, reputation items, and Aldor/Scryer enchants are filtered automatically.
+
+[size=5][color=#c0a050]Data Sources[/color][/size]
+
+BiS data is available for Phase 1 (Karazhan/Gruul/Mag) and Phase 2 (SSC/TK). Switch phases via the dropdown in Settings or the BiS Lists tab.
+
+[list]
+[*] [b]WowTBC.gg[/b] -- Community-voted BiS lists. Full Phase 1 and Phase 2 coverage across all 27 specs.
+[*] [b]BiS-Tooltip[/b] -- BiS rankings from BiS-Tooltip (boegi1's TBC backport) combined with WoWSims presets. Full Phase 1 and Phase 2 coverage across all 27 specs.
+[*] [b]AtlasLoot[/b] -- BiS rankings from AtlasLoot loot tables. Phase 2 covers 25 specs (missing Rogue Assassination, Rogue Subtlety for Phase 2).
+[*] [b]WoWSims[/b] -- Simulation-optimized gear sets from WoWSims TBC. Most mathematically rigorous but limited Phase 2 coverage (5 specs with explicit presets).
+[*] [b]ThatsMyBis[/b] -- Community wishlist aggregates from thatsmybis.com. Phase 2 lists include SSC/TK items where wishlisted, with Phase 1 gear filling remaining slots.
+[*] [b]Wowhead[/b] -- Editorial BiS guides from Wowhead. Phase 2 covers 24 specs (missing Rogue Assassination, Rogue Subtlety, Shaman Restoration).
+[/list]
+
+Each source can be independently enabled for the main addon UI and/or tooltips in the Settings panel. Switch between sources at any time to compare rankings.
+
+[img]https://breakbone-addons.com/images/bisgearcheck-screenshot-settings.png[/img]
+
+[size=5][color=#c0a050]Usage[/color][/size]
+
+[list]
+[*] [b]Minimap button[/b]: Left-click for Compare, right-click for Wishlists, alt-click for Settings
+[*] [color=orange]/bisgear[/color] or [color=orange]/bgc[/color] -- Toggle the comparison view
+[*] [color=orange]/bisgear wishlist[/color] or [color=orange]/bgc wl[/color] -- Toggle the wishlist view
+[/list]
+
+[size=5][color=#c0a050]Installation[/color][/size]
+
+Extract the [color=orange]BiSGearCheck[/color] folder into your WoW AddOns directory:
+
+[code]
+World of Warcraft/_anniversary_/Interface/AddOns/BiSGearCheck/
+[/code]
