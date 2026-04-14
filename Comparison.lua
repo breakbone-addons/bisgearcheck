@@ -150,8 +150,9 @@ function BiSGearCheck:CompareSlot(slotName, bisItems)
 
     local cutoff
     if isDualSlot then
+        -- worstEquippedRank starts at 0; 0 means no equipped item was found in BiS.
         cutoff = result.worstEquippedRank
-        if cutoff == 999 then cutoff = #bisItems + 1 end
+        if cutoff == 0 then cutoff = #bisItems + 1 end
     else
         cutoff = result.bestEquippedRank
         if cutoff == 999 then cutoff = #bisItems + 1 end

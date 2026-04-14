@@ -5,14 +5,14 @@ Versioning: **MAJOR.MINOR.PATCH**
 - **MINOR** — New features or significant improvements
 - **PATCH** — Bug fixes, data corrections, small tweaks
 
+## v3.8.1
+
+- Ring and trinket upgrades now appear correctly
+
 ## v3.8.0
 
-- Added centralized theme system: all colors, fonts, and backdrops now live in `Theme.lua`.
-- Added optional ElvUI skin integration (opt-in via Settings > ElvUI Integration). When enabled, BiSGearCheck frames adopt ElvUI styling.
-- Added LibSharedMedia-3.0 support: pick custom fonts, borders, and backgrounds from any installed media pack in Settings > Fonts & Textures.
-- Added font size slider (8-18) for customizing text size across the addon.
-- Font names in the dropdown preview render in their own font.
-- Main window is now resizable (drag the bottom-right corner). Size persists across sessions.
+- Added centralized theme system, including optional ElvUI support.
+- Main window is now resizable.
 
 ## v3.7.3
 

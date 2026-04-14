@@ -175,6 +175,36 @@ function T.test_compare_slot_dual_slot_uses_worst_rank()
     assert_equal(303, result.upgrades[2].id)
 end
 
+function T.test_compare_slot_dual_slot_neither_equipped_in_bis()
+    -- Regression: when neither equipped ring/trinket is in the BiS list,
+    -- we should still show all BiS items as upgrades. Previously the cutoff
+    -- check compared to 999 (the single-slot sentinel), but dual-slot uses
+    -- 0 as its "no match" sentinel, so cutoff was left at 0 and no upgrades
+    -- were rendered.
+    setupBasicState()
+    BiSGearCheckSources = {
+        [301] = { source = "Karazhan", sourceType = "Boss" },
+        [302] = { source = "Karazhan", sourceType = "Boss" },
+        [303] = { source = "Karazhan", sourceType = "Boss" },
+    }
+    -- Two rings equipped, neither on the BiS list
+    MockWoW.SetInventory({
+        [11] = { id = 900, link = "|Hitem:900:0:0:0:0:0|h[Violet Signet]|h" },
+        [12] = { id = 901, link = "|Hitem:901:0:0:0:0:0|h[Keeper's Ring]|h" },
+    })
+    MockWoW.SetItemInfo(301, { name = "BiS Ring", quality = 4 })
+    MockWoW.SetItemInfo(302, { name = "Second Ring", quality = 4 })
+    MockWoW.SetItemInfo(303, { name = "Third Ring", quality = 4 })
+
+    local result = BiSGearCheck:CompareSlot("Rings", { 301, 302, 303 })
+    assert_equal(0, result.worstEquippedRank, "no equipped ring in BiS → worst stays 0")
+    -- All 3 BiS items should be shown as upgrades
+    assert_equal(3, #result.upgrades, "all BiS items should be shown when none equipped")
+    assert_equal(301, result.upgrades[1].id)
+    assert_equal(302, result.upgrades[2].id)
+    assert_equal(303, result.upgrades[3].id)
+end
+
 function T.test_compare_slot_inspected_character()
     setupBasicState()
     -- Set up an inspected character
